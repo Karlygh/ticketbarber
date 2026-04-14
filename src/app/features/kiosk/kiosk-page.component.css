@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 15% 20%, #f1e0c9 0, #f1e0c900 40%),
+    radial-gradient(circle at 85% 10%, #c7e8ff 0, #c7e8ff00 45%),
+    linear-gradient(145deg, #1f1914 0%, #2b231d 45%, #1a1816 100%);
+  color: #f7efe5;
+}
+
+.kiosk-shell {
+  width: min(760px, 92vw);
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+}
+
+.kiosk-card {
+  background: #111111d9;
+  border: 1px solid #ffffff17;
+  border-radius: 1.4rem;
+  padding: 2rem;
+  box-shadow: 0 18px 60px #00000059;
+  backdrop-filter: blur(6px);
+}
+
+.kiosk-head h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 6vw, 2.9rem);
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: #f3bb71;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+}
+
+.subtitle {
+  margin-top: 0.65rem;
+  color: #d6cabc;
+}
+
+.ticket-form {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+}
+
+label span {
+  color: #ecd7c1;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  border-radius: 0.8rem;
+  border: 1px solid #ffffff2b;
+  padding: 0.9rem 1rem;
+  font: inherit;
+}
+
+input,
+select {
+  background: #f9f5ef;
+  color: #2e251d;
+}
+
+button {
+  margin-top: 0.3rem;
+  background: linear-gradient(120deg, #fd8f47, #ff6f38);
+  border: 0;
+  color: #1f1209;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.1);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.notice {
+  margin-top: 1.2rem;
+  border-radius: 0.8rem;
+  padding: 0.95rem 1rem;
+}
+
+.notice h2 {
+  margin: 0 0 0.45rem;
+}
+
+.ok {
+  background: #153f32;
+  border: 1px solid #2ec09366;
+}
+
+.error {
+  background: #4e1818;
+  border: 1px solid #ff8f8f66;
+}
+
+.closed {
+  background: #4a310d;
+  border: 1px solid #e9a94f88;
+}
+
+.quick-links {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.quick-links a {
+  color: #f5cf9e;
+}

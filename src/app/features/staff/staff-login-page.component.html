@@ -1,0 +1,17 @@
+<main class="login-shell">
+  <section class="login-card">
+    <p class="eyebrow">Area Staff</p>
+    <h1>Iniciar sesion de barbero</h1>
+    <p>Solo el personal puede gestionar la cola. El cliente no necesita login.</p>
+
+    <button (click)="signIn()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Conectando...' : 'Entrar con Google' }}
+    </button>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+
+  </section>
+</main>

@@ -1,27 +1,35 @@
-# Ticketbarberproject
+# TicketBarber
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+Aplicacion Angular 20 para gestionar cola de barberia en tres pantallas:
 
-## Development server
+- `kiosk` publico para que el cliente se apunte sin login.
+- `tv` publica con turno actual y proximos turnos.
+- `staff` privada para barberos con login Google.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Stack
 
-## Code scaffolding
+- Angular `20.x` + standalone components
+- Signals para estado de UI
+- Firebase Auth (Google)
+- Firestore en tiempo real
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Configuracion
 
-## Build
+1. Crea un proyecto en Firebase.
+2. Habilita `Authentication > Google`.
+3. Habilita `Firestore Database`.
+4. Edita [environment.ts](C:\Users\carlo\Desktop\PROGRAMACION\PROYECTOS REALES\ticketbarber\ticketbarberproject\src\environments\environment.ts) con tus claves reales.
+5. Publica reglas desde [firestore.rules](C:\Users\carlo\Desktop\PROGRAMACION\PROYECTOS REALES\ticketbarber\ticketbarberproject\firestore.rules).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Scripts
 
-## Running unit tests
+- `npm start` inicia entorno local
+- `npm run build` genera build de produccion
+- `npm test` ejecuta tests unitarios
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Rutas
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- `/kiosk`
+- `/tv`
+- `/staff/login`
+- `/staff` (protegida)

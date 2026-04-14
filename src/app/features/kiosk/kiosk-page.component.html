@@ -1,0 +1,54 @@
+<main class="kiosk-shell">
+  <section class="kiosk-card">
+    <header class="kiosk-head">
+      <p class="eyebrow">TicketBarber</p>
+      <h1>Apuntate a la lista</h1>
+      <p class="subtitle">Deja tu nombre, elige servicio y te avisamos en pantalla.</p>
+    </header>
+
+    @if (!queueStore.settings().isOpen) {
+      <div class="notice closed">
+        <h2>Jornada cerrada</h2>
+        <p>Ahora mismo no se aceptan nuevos tickets.</p>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submitTicket()" class="ticket-form">
+        <label>
+          <span>Nombre</span>
+          <input formControlName="customerName" type="text" autocomplete="off" placeholder="Ej: Carlos" />
+        </label>
+
+        <label>
+          <span>Servicio</span>
+          <select formControlName="serviceId">
+            <option value="" disabled selected>Selecciona un servicio</option>
+            @for (service of queueStore.services(); track service.id) {
+              <option [value]="service.id">{{ service.name }} ({{ service.durationMin }} min)</option>
+            }
+          </select>
+        </label>
+
+        <button type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Generando ticket...' : 'Coger turno' }}
+        </button>
+      </form>
+    }
+
+    @if (receipt(); as lastTicket) {
+      <div class="notice ok">
+        <h2>Turno confirmado</h2>
+        <p><strong>Numero en cola:</strong> {{ lastTicket.position }}</p>
+        <p><strong>Espera estimada:</strong> {{ lastTicket.estimatedWaitMin }} min</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="notice error">{{ errorMessage() }}</div>
+    }
+  </section>
+
+  <nav class="quick-links">
+    <a routerLink="/tv">Ver pantalla TV</a>
+    <a routerLink="/staff">Panel barberos</a>
+  </nav>
+</main>

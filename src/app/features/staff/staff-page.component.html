@@ -1,0 +1,61 @@
+<main class="staff-shell">
+  <header class="staff-head">
+    <div>
+      <p class="eyebrow">Control de cola</p>
+      <h1>Panel barberos</h1>
+      <p class="user">{{ authStore.user()?.displayName || authStore.user()?.email }}</p>
+    </div>
+    <button class="secondary" (click)="logout()" [disabled]="isBusy()">Salir</button>
+  </header>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <section class="status">
+    <div>
+      <p>Jornada</p>
+      <strong>{{ queueStore.settings().isOpen ? 'Abierta' : 'Cerrada' }}</strong>
+    </div>
+    <div>
+      <p>Turno actual</p>
+      <strong>{{ queueStore.currentTicket()?.displayName || 'Sin turno activo' }}</strong>
+    </div>
+    <div>
+      <p>En espera</p>
+      <strong>{{ queueStore.waitingTickets().length }}</strong>
+    </div>
+  </section>
+
+  <section class="actions">
+    <button (click)="movePrevious()" [disabled]="isBusy() || !queueStore.canMovePrevious()">Anterior</button>
+    <button class="primary" (click)="moveNext()" [disabled]="isBusy()">Siguiente</button>
+    <button class="danger" (click)="closeDay()" [disabled]="isBusy() || !queueStore.settings().isOpen">
+      Cerrar jornada
+    </button>
+    <button class="secondary" (click)="openDay()" [disabled]="isBusy() || queueStore.settings().isOpen">
+      Abrir jornada
+    </button>
+  </section>
+
+  <section class="queue">
+    <h2>Cola activa</h2>
+    <ul>
+      @for (ticket of queueStore.activeQueue(); track ticket.id) {
+        <li [class.current]="ticket.status === 'current'">
+          <span class="position">{{ ticket.position }}</span>
+          <span class="name">{{ ticket.displayName }}</span>
+          <span class="service">{{ ticket.serviceNameSnapshot }}</span>
+          <span class="badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
+        </li>
+      } @empty {
+        <li class="empty">No hay tickets activos.</li>
+      }
+    </ul>
+  </section>
+
+  <nav class="quick-links">
+    <a routerLink="/kiosk">Ver kiosk</a>
+    <a routerLink="/tv">Ver TV</a>
+  </nav>
+</main>

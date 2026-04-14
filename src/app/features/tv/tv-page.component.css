@@ -1,0 +1,165 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  color: #f6f9ff;
+  background:
+    radial-gradient(circle at 10% 10%, #38f3ff26 0, #38f3ff00 35%),
+    radial-gradient(circle at 90% 20%, #f5db5a24 0, #f5db5a00 40%),
+    linear-gradient(135deg, #07111f 0%, #0f1f36 50%, #09192e 100%);
+}
+
+.tv-shell {
+  width: min(1400px, 95vw);
+  margin: 0 auto;
+  padding: 1.4rem 0 2.4rem;
+}
+
+.tv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.brand {
+  margin: 0;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #92d9ff;
+}
+
+.clock {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.6vw, 3.2rem);
+  font-weight: 700;
+  color: #fff3d4;
+}
+
+.current-ticket {
+  background: #0f2b48;
+  border: 1px solid #5fc0ff5d;
+  border-radius: 1.2rem;
+  padding: 1.3rem 1.4rem;
+  box-shadow: 0 12px 40px #00152d66;
+}
+
+.current-ticket h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6.7vw, 5rem);
+  line-height: 1.03;
+}
+
+.label {
+  margin: 0 0 0.2rem;
+  color: #b7daff;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+}
+
+.service {
+  margin-top: 0.45rem;
+  color: #d8e9ff;
+}
+
+.remaining {
+  margin-top: 0.6rem;
+  font-size: 1.15rem;
+  color: #ffd181;
+}
+
+.idle {
+  text-align: center;
+}
+
+.queue-board {
+  margin-top: 1rem;
+  background: #091b2fba;
+  border: 1px solid #ffffff1b;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.active-ticket-board {
+  margin-bottom: 0.5rem;
+  background: #091b2fba;
+  border: 1px solid #ffffff1b;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.active-ticket-board h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.active-name {
+  color: #ffd181;
+}
+
+.no-active {
+  color: #6b8aaa;
+}
+
+.queue-board h2 {
+  margin: 0 0 0.7rem;
+  font-size: 1.35rem;
+}
+
+.queue-board ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.queue-board li {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr auto;
+  align-items: center;
+  gap: 0.8rem;
+  background: #122b46;
+  border: 1px solid #ffffff1c;
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.queue-board li.current {
+  border-color: #ffb34f;
+  background: #2e2b1b;
+}
+
+.position {
+  font-weight: 700;
+  color: #9dcaff;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.eta {
+  color: #ffc477;
+  font-weight: 600;
+}
+
+.tv-foot {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.tv-foot a {
+  color: #9ee6ff;
+}
+
+@media (max-width: 880px) {
+  .queue-board li {
+    grid-template-columns: 36px 1fr auto;
+  }
+
+  .queue-board li .service {
+    display: none;
+  }
+}

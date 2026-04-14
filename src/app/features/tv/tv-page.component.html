@@ -1,0 +1,33 @@
+<main class="tv-shell">
+  <header class="tv-head">
+    <p class="brand">TicketBarber Live Queue</p>
+    <p class="clock">{{ now() | date: 'HH:mm:ss' }}</p>
+  </header>
+
+  <section class="active-ticket-board">
+    @if (queueStore.currentTicket(); as current) {
+      <h2>Turno activo de: <span class="active-name">{{ current.displayName }}</span></h2>
+    } @else {
+      <h2 class="no-active">Sin turno activo</h2>
+    }
+  </section>
+
+  <section class="queue-board">
+    <h2>Próximos turnos</h2>
+    <ul>
+      @for (row of upcomingRows(); track row.ticket.id) {
+        <li>
+          <span class="position">{{ row.ticket.position }}</span>
+          <span class="name">{{ row.ticket.displayName }}</span>
+          <span class="service">{{ row.ticket.serviceNameSnapshot }}</span>
+          <span class="eta">En {{ formatWait(row.waitMin) }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <footer class="tv-foot">
+    <a routerLink="/kiosk">Modo kiosk</a>
+    <a routerLink="/staff">Panel staff</a>
+  </footer>
+</main>
