@@ -9,9 +9,19 @@
 
 .login-shell {
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
   padding: 1rem;
+}
+
+.brand-logo {
+  width: min(230px, 60vw);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
 
 .login-card {
@@ -21,6 +31,7 @@
   background: #14161acf;
   padding: 1.8rem;
   box-shadow: 0 16px 44px #00000061;
+  animation: rise 0.5s cubic-bezier(.22,.68,0,1.2) both;
 }
 
 .eyebrow {
@@ -36,7 +47,7 @@ h1 {
 }
 
 button {
-  margin-top: 0.8rem;
+  margin-top: 0;
   border: 0;
   border-radius: 0.8rem;
   padding: 0.8rem 1rem;
@@ -45,6 +56,11 @@ button {
   background: linear-gradient(120deg, #ffc26a, #ff8f53);
   color: #27190a;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
 }
 
 button:disabled {
@@ -52,9 +68,48 @@ button:disabled {
   cursor: wait;
 }
 
+.icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: #ffc26a12;
+  border: 1px solid #ffc26a33;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #ffffff10;
+  margin: 0 0 1.4rem;
+}
+
 .error {
   margin-top: 0.8rem;
   color: #ffb2b2;
+}
+
+.security-note {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: #5e5a54;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 nav {

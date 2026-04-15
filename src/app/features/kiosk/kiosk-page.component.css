@@ -1,14 +1,26 @@
 :host {
   display: block;
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 15% 20%, #f1e0c9 0, #f1e0c900 40%),
-    radial-gradient(circle at 85% 10%, #c7e8ff 0, #c7e8ff00 45%),
-    linear-gradient(145deg, #1f1914 0%, #2b231d 45%, #1a1816 100%);
+  position: relative;
+  background-image: url('/assets/54.png');
+  background-size: contain;
+  background-position: center;
+  background-attachment: fixed;
   color: #f7efe5;
 }
 
+:host::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .kiosk-shell {
+  position: relative;
+  z-index: 1;
   width: min(760px, 92vw);
   margin: 0 auto;
   padding: 2rem 0 3rem;

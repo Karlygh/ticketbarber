@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -23,6 +23,7 @@ type TicketRecord = Omit<Ticket, 'id'>;
 @Injectable({ providedIn: 'root' })
 export class QueueRepository {
   private readonly firestore = inject(Firestore);
+  private readonly injector = inject(EnvironmentInjector);
   private readonly shopId = environment.shopId;
 
   private settingsDocPath(): string {
@@ -38,22 +39,21 @@ export class QueueRepository {
   }
 
   private servicesCollectionRef() {
-    return collection(this.firestore, this.servicesColPath());
+    return this.runInInjectionContext(() => collection(this.firestore, this.servicesColPath()));
   }
 
   private ticketsCollectionRef() {
-    return collection(this.firestore, this.ticketsColPath());
+    return this.runInInjectionContext(() => collection(this.firestore, this.ticketsColPath()));
   }
 
   private settingsDocRef() {
-    return doc(this.firestore, this.settingsDocPath());
+    return this.runInInjectionContext(() => doc(this.firestore, this.settingsDocPath()));
   }
 
   observeServices(): Observable<BarberService[]> {
-    return collectionData(this.servicesCollectionRef(), { idField: 'id' }).pipe(
-      map((rows) => {
-        console.log('[QueueRepository] Raw services from Firestore:', rows);
-        const result = rows
+    return this.runInInjectionContext(() => collectionData(this.servicesCollectionRef(), { idField: 'id' })).pipe(
+      map((rows) =>
+        rows
           .map((row) => {
             const service = row as BarberService;
             return {
@@ -62,20 +62,14 @@ export class QueueRepository {
               active: Boolean(service.active)
             };
           })
-          .filter((s) => s.active && s.name)
-          .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
-        console.log('[QueueRepository] Filtered & sorted services:', result);
-        return result;
-      }),
-      catchError((err) => {
-        console.error('[QueueRepository] observeServices error:', err);
-        return of([]);
-      })
+          .sort((a, b) => a.name.localeCompare(b.name))
+      ),
+      catchError(() => of([]))
     );
   }
 
   observeTickets(): Observable<Ticket[]> {
-    return collectionData(query(this.ticketsCollectionRef()), { idField: 'id' }).pipe(
+    return this.runInInjectionContext(() => collectionData(query(this.ticketsCollectionRef()), { idField: 'id' })).pipe(
       map((rows) =>
         rows
           .map((row) => this.toTicket(row as Ticket))
@@ -89,15 +83,12 @@ export class QueueRepository {
             return a.position - b.position || a.createdAtMs - b.createdAtMs;
           })
       ),
-      catchError((err) => {
-        console.error('[QueueRepository] observeTickets error:', err);
-        return of([]);
-      })
+      catchError(() => of([]))
     );
   }
 
   observeSettings(): Observable<QueueSettings> {
-    return docData(this.settingsDocRef(), { idField: 'id' }).pipe(
+    return this.runInInjectionContext(() => docData(this.settingsDocRef(), { idField: 'id' })).pipe(
       map((row) => {
         const raw = row as Partial<QueueSettings> | undefined;
         if (!raw) {
@@ -110,48 +101,47 @@ export class QueueRepository {
           lastAdvance: raw.lastAdvance ?? null
         };
       }),
-      catchError((err) => {
-        console.error('[QueueRepository] observeSettings error:', err);
-        return of(DEFAULT_QUEUE_SETTINGS);
-      })
+      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
     );
   }
 
   async bootstrapDefaults(): Promise<void> {
     const settingsRef = this.settingsDocRef();
     const servicesRef = this.servicesCollectionRef();
-    const servicesSnap = await getDocs(query(servicesRef));
+    const servicesSnap = await this.runInInjectionContext(() => getDocs(query(servicesRef)));
 
     if (servicesSnap.empty) {
-      const batch = writeBatch(this.firestore);
+      const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
       for (const service of DEFAULT_SERVICES) {
-        const ref = doc(servicesRef);
+        const ref = this.runInInjectionContext(() => doc(servicesRef));
         batch.set(ref, service);
       }
       await batch.commit();
     }
 
-    await setDoc(
+    await this.runInInjectionContext(() =>
+      setDoc(
       settingsRef,
       {
         ...DEFAULT_QUEUE_SETTINGS,
         updatedAtMs: Date.now()
       },
       { merge: true }
+      )
     );
   }
 
   async createTicket(input: CreateTicketInput): Promise<TicketReceipt> {
     const nowMs = Date.now();
     const settingsRef = this.settingsDocRef();
-    const settingsSnap = await getDoc(settingsRef);
+    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
     const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
     if (!settings.isOpen) {
       throw new Error('La jornada esta cerrada');
     }
 
-    const serviceRef = doc(this.firestore, `${this.servicesColPath()}/${input.serviceId}`);
-    const serviceSnap = await getDoc(serviceRef);
+    const serviceRef = this.runInInjectionContext(() => doc(this.firestore, `${this.servicesColPath()}/${input.serviceId}`));
+    const serviceSnap = await this.runInInjectionContext(() => getDoc(serviceRef));
     if (!serviceSnap.exists()) {
       throw new Error('Servicio no valido');
     }
@@ -162,7 +152,7 @@ export class QueueRepository {
     const hasCurrent = active.some((ticket) => ticket.status === 'current');
     const estimatedWaitMin = this.estimateWaitForNewTicket(active, nowMs);
     const position = active.length + 1;
-    const newTicketRef = doc(this.ticketsCollectionRef());
+    const newTicketRef = this.runInInjectionContext(() => doc(this.ticketsCollectionRef()));
 
     const payload: TicketRecord = {
       customerName: input.customerName.trim(),
@@ -177,7 +167,7 @@ export class QueueRepository {
       completedAtMs: null
     };
 
-    const batch = writeBatch(this.firestore);
+    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
     batch.set(newTicketRef, payload);
     if (!hasCurrent) {
       batch.set(
@@ -202,7 +192,7 @@ export class QueueRepository {
   async moveNext(): Promise<void> {
     const nowMs = Date.now();
     const settingsRef = this.settingsDocRef();
-    const settingsSnap = await getDoc(settingsRef);
+    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
     const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
     const tickets = await this.fetchTickets();
     const active = this.activeQueue(tickets);
@@ -215,10 +205,10 @@ export class QueueRepository {
     const promoted = waiting[0] ?? null;
     const hadCurrent = Boolean(current);
 
-    const batch = writeBatch(this.firestore);
+    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
 
     if (current) {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${current.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${current.id}`)), {
         status: 'done',
         position: -1,
         completedAtMs: nowMs
@@ -226,7 +216,7 @@ export class QueueRepository {
     }
 
     if (promoted) {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
         status: 'current',
         position: 1,
         startedAtMs: promoted.startedAtMs ?? nowMs,
@@ -236,7 +226,7 @@ export class QueueRepository {
 
     const restWaiting = waiting.filter((ticket) => ticket.id !== promoted?.id);
     restWaiting.forEach((ticket, index) => {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
         position: index + 2
       });
     });
@@ -265,7 +255,7 @@ export class QueueRepository {
   async movePrevious(): Promise<void> {
     const nowMs = Date.now();
     const settingsRef = this.settingsDocRef();
-    const settingsSnap = await getDoc(settingsRef);
+    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
     const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
     const last = settings.lastAdvance;
     if (!last) {
@@ -283,10 +273,10 @@ export class QueueRepository {
       .sort((a, b) => a.position - b.position);
 
     let currentTicketId: string | null = null;
-    const batch = writeBatch(this.firestore);
+    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
 
     if (last.hadCurrent && previousCurrent) {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${previousCurrent.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${previousCurrent.id}`)), {
         status: 'current',
         position: 1,
         completedAtMs: null
@@ -296,7 +286,7 @@ export class QueueRepository {
 
     let nextWaitingPosition = currentTicketId ? 2 : 1;
     if (promoted) {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
         status: 'waiting',
         position: nextWaitingPosition,
         startedAtMs: null
@@ -305,7 +295,7 @@ export class QueueRepository {
     }
 
     waiting.forEach((ticket, index) => {
-      batch.update(doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`), {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
         position: nextWaitingPosition + index
       });
     });
@@ -324,8 +314,8 @@ export class QueueRepository {
   }
 
   async closeDay(): Promise<void> {
-    const batch = writeBatch(this.firestore);
-    const ticketsSnap = await getDocs(query(this.ticketsCollectionRef()));
+    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
+    const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
     ticketsSnap.forEach((ticket) => batch.delete(ticket.ref));
     batch.set(
       this.settingsDocRef(),
@@ -341,20 +331,26 @@ export class QueueRepository {
   }
 
   async openDay(): Promise<void> {
-    await setDoc(
-      this.settingsDocRef(),
-      {
-        isOpen: true,
-        lastAdvance: null,
-        updatedAtMs: Date.now()
-      },
-      { merge: true }
+    await this.runInInjectionContext(() =>
+      setDoc(
+        this.settingsDocRef(),
+        {
+          isOpen: true,
+          lastAdvance: null,
+          updatedAtMs: Date.now()
+        },
+        { merge: true }
+      )
     );
   }
 
   private async fetchTickets(): Promise<Ticket[]> {
-    const ticketsSnap = await getDocs(query(this.ticketsCollectionRef()));
+    const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
     return ticketsSnap.docs.map((ticketDoc) => this.toTicket({ id: ticketDoc.id, ...ticketDoc.data() } as Ticket));
+  }
+
+  private runInInjectionContext<T>(callback: () => T): T {
+    return runInInjectionContext(this.injector, callback);
   }
 
   private toSettings(value: Partial<QueueSettings> | undefined): QueueSettings {

@@ -31,6 +31,12 @@ export class StaffPageComponent {
   }
 
   async closeDay(): Promise<void> {
+    const confirmed = window.confirm(
+      'Si cierras jornada, se perderan los datos de tus clientes en el dia de hoy.'
+    );
+    if (!confirmed) {
+      return;
+    }
     await this.runAction(() => this.queueStore.closeDay());
   }
 
