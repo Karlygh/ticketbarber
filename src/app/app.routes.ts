@@ -4,8 +4,7 @@ import { staffAuthGuard } from './core/auth/staff-auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'staff/login'
+    loadComponent: () => import('./features/home/home-page.component').then((m) => m.HomePageComponent)
   },
   {
     path: 'kiosk',
@@ -31,6 +30,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'kiosk'
+    redirectTo: ''
   }
 ];

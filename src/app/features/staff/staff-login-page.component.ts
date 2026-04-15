@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth.store';
 
 @Component({
   selector: 'app-staff-login-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './staff-login-page.component.html',
   styleUrl: './staff-login-page.component.css'
 })

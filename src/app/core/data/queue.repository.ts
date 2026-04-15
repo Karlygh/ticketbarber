@@ -13,10 +13,10 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 import { DEFAULT_QUEUE_SETTINGS, LastAdvanceAction, QueueSettings } from '../models/settings.model';
 import { DEFAULT_SERVICES, BarberService } from '../models/service.model';
 import { CreateTicketInput, Ticket, TicketReceipt } from '../models/ticket.model';
+import { AuthStore } from '../stores/auth.store';
 
 type TicketRecord = Omit<Ticket, 'id'>;
 
@@ -24,7 +24,13 @@ type TicketRecord = Omit<Ticket, 'id'>;
 export class QueueRepository {
   private readonly firestore = inject(Firestore);
   private readonly injector = inject(EnvironmentInjector);
-  private readonly shopId = environment.shopId;
+  private readonly authStore = inject(AuthStore);
+
+  private get shopId(): string {
+    const uid = this.authStore.user()?.uid;
+    if (!uid) throw new Error('No hay sesion activa');
+    return uid;
+  }
 
   private settingsDocPath(): string {
     return `shops/${this.shopId}/settings/queue`;

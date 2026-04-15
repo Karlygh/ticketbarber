@@ -1,0 +1,152 @@
+<main class="home-shell" id="inicio">
+  <div class="bg-blur blur-a"></div>
+  <div class="bg-blur blur-b"></div>
+  <div class="bg-grid"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="/assets/logoticketpeq.png" alt="Ticketbarber" />
+      <span>Ticketbarber</span>
+    </div>
+    <nav class="top-nav">
+      <a href="#beneficios">Beneficios</a>
+      <a href="#flujo">Flujo</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="top-login" routerLink="/staff/login">Iniciar sesion</a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy-block">
+      <p class="eyebrow">Sistema de turnos para barberias</p>
+      <h1>La forma elegante de organizar tu cola diaria</h1>
+      <p class="hero-copy">
+        Ticketbarber convierte la gestion de turnos en una experiencia clara para clientes y staff.
+        Menos friccion en recepcion, mas foco en el servicio.
+      </p>
+
+      <div class="hero-actions">
+        <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+        <a class="secondary-cta" href="#beneficios">Ver como funciona</a>
+      </div>
+
+      <div class="hero-chips">
+        <span>Sin esperas confusas</span>
+        <span>Panel para staff</span>
+        <span>Pantalla TV en vivo</span>
+      </div>
+    </div>
+
+    <div class="hero-preview">
+      <article class="preview-card">
+        <header>
+          <p class="eyebrow">Vista de cola</p>
+          <span>En directo</span>
+        </header>
+        <ul>
+          <li>
+            <strong>Turno actual</strong>
+            <span>Corte clasico · 6 min restantes</span>
+          </li>
+          <li>
+            <strong>Siguiente</strong>
+            <span>Arreglo de barba · 12 min aprox.</span>
+          </li>
+          <li>
+            <strong>En espera</strong>
+            <span>5 clientes activos</span>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="section benefits" id="beneficios">
+    <div class="section-head">
+      <p class="eyebrow">Beneficios</p>
+      <h2>Disenado para una tienda real</h2>
+    </div>
+
+    <div class="benefits-grid">
+      @for (benefit of benefits; track benefit.title) {
+        <article class="benefit-card">
+          <h3>{{ benefit.title }}</h3>
+          <p>{{ benefit.description }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="section flow" id="flujo">
+    <div class="section-head">
+      <p class="eyebrow">Como funciona</p>
+      <h2>Un proceso simple para el equipo</h2>
+    </div>
+
+    <div class="flow-grid">
+      @for (step of flow; track step.title) {
+        <article class="flow-step">
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="section final-cta">
+    <div>
+      <p class="eyebrow">Empieza hoy</p>
+      <h2>Entra al panel y configura tu jornada en minutos</h2>
+      <p>
+        Si es tu primera vez, al iniciar sesion con Google se preparara tu acceso para gestionar
+        Ticketbarber.
+      </p>
+    </div>
+    <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+  </section>
+
+  <footer class="site-footer" id="contacto">
+    <div class="footer-grid">
+      <section class="footer-brand">
+        <img src="/assets/logoticketg.png" alt="Ticketbarber logo" />
+        <p>
+          Plataforma para organizar turnos de barberia con una experiencia moderna para clientes y
+          personal.
+        </p>
+      </section>
+
+      <section>
+        <h3>Contacto</h3>
+        <p>Email: hola@ticketbarber.app</p>
+        <p>Ciudad: Madrid, Espana</p>
+        <p>Horario: Lun-Sab 09:00 - 21:00</p>
+      </section>
+
+      <section>
+        <h3>Legal</h3>
+        <p><a href="#terminos">Terminos</a></p>
+        <p><a href="#privacidad">Privacidad</a></p>
+        <p><a href="#cookies">Cookies</a></p>
+      </section>
+    </div>
+
+    <div class="legal-placeholders">
+      <article id="terminos">
+        <h4>Terminos</h4>
+        <p>Placeholder legal: actualiza este texto con tus terminos oficiales antes de publicar.</p>
+      </article>
+      <article id="privacidad">
+        <h4>Privacidad</h4>
+        <p>Placeholder legal: describe aqui como tratas y proteges los datos de clientes.</p>
+      </article>
+      <article id="cookies">
+        <h4>Cookies</h4>
+        <p>Placeholder legal: detalla el uso de cookies y opciones de consentimiento.</p>
+      </article>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {{ currentYear }} Ticketbarber. Todos los derechos reservados.</span>
+    </div>
+  </footer>
+</main>

@@ -2,7 +2,6 @@
 // NUNCA commitees environment.ts con credenciales reales.
 export const environment = {
   production: false,
-  shopId: 'main-shop',
   firebase: {
     apiKey: 'YOUR_API_KEY',
     authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
