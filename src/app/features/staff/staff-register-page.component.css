@@ -2,8 +2,8 @@
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 12% 20%, #ffbf5f2b 0, #ffbf5f00 42%),
-    linear-gradient(130deg, #1f2124 0%, #121315 40%, #0d0d0e 100%);
+    radial-gradient(circle at 88% 20%, #5b8fff2b 0, #5b8fff00 42%),
+    linear-gradient(130deg, #141824 0%, #0e1120 40%, #090b10 100%);
   color: #f0ebe5;
 }
 
@@ -102,23 +102,6 @@ button:disabled {
   color: #5e5a54;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-nav {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
-}
-
 .back-btn {
   position: absolute;
   top: 1.2rem;
@@ -152,62 +135,132 @@ nav {
   text-decoration: underline;
 }
 
-a {
-  color: #ffcf8a;
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ── Toast (login) ── */
-.toast {
+/* ── Modal overlay ── */
+.modal-backdrop {
   position: fixed;
-  bottom: 1.8rem;
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.85rem 1.4rem;
-  border-radius: 0.9rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  justify-content: center;
   z-index: 100;
-  white-space: nowrap;
-  animation: toast-in 0.25s cubic-bezier(.22,.68,0,1.2) both;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.18s ease;
 }
 
-.toast--loading {
-  background: #1e1b14;
-  border: 1px solid #ffc26a44;
-  color: #ffc26a;
+.modal-box {
+  background: #1a1c22;
+  border: 1px solid #ffffff20;
+  border-radius: 1.2rem;
+  padding: 2.4rem 2rem;
+  width: min(400px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  text-align: center;
+  animation: rise 0.3s cubic-bezier(.22,.68,0,1.2) both;
 }
 
-.toast--success {
-  background: #14532d;
-  border: 1px solid #4ade8055;
-  color: #4ade80;
-}
-
-.toast--error {
-  background: #450a0a;
-  border: 1px solid #f8717155;
-  color: #f87171;
-}
-
-.toast-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ffc26a44;
+/* Spinner giratorio */
+.modal-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #ffffff18;
   border-top-color: #ffc26a;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 0.4rem;
 }
 
-@keyframes toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Icono redondo éxito / error */
+.modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.4rem;
+}
+
+.modal-icon--ok {
+  background: #14532d;
+  color: #4ade80;
+  border: 1.5px solid #4ade8055;
+}
+
+.modal-icon--err {
+  background: #450a0a;
+  color: #f87171;
+  border: 1.5px solid #f8717155;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f0ebe5;
+}
+
+.modal-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #9c8e7e;
+  max-width: 28ch;
+  line-height: 1.5;
+}
+
+/* Barra de progreso que se vacía en 2.5 s */
+.modal-progress {
+  width: 100%;
+  height: 3px;
+  border-radius: 99px;
+  background: #4ade80;
+  transform-origin: left;
+  animation: shrink 2.5s linear forwards;
+  margin-top: 0.6rem;
+}
+
+.modal-close-btn {
+  margin-top: 0.8rem;
+  padding: 0.55rem 1.6rem;
+  border: 1px solid #f8717155;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #f87171;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: auto;
+}
+
+.modal-close-btn:hover {
+  background: #f8717118;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shrink {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
 }

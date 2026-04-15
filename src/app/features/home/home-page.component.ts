@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 interface HomeBenefit {
   title: string;
@@ -15,7 +16,7 @@ interface HomeStep {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FooterComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })

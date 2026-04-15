@@ -1,0 +1,107 @@
+/* ─────────────────────────────────────────────
+   CSS Variables — fácil override desde :root
+   ───────────────────────────────────────────── */
+:host {
+  /* Color de fondo claramente distinto al home (#0f1012 con gradiente naranja)
+     y a las páginas de login (#1f2124 / #141824).
+     WCAG AA: ratio de contraste > 4.5:1 entre --footer-text y --footer-bg */
+  --footer-bg:          #130e09;
+  --footer-bg-card:     #1d1610;
+  --footer-text:        #f0ebe5;
+  --footer-text-muted:  #9c8e7e;
+  --footer-accent:      #ffc26a;
+  --footer-border:      rgba(255, 194, 106, 0.15);
+
+  display: block;
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+}
+
+/* ─────────────────────────────────────────────
+   Contenedor con ancho máximo centrado
+   ───────────────────────────────────────────── */
+.site-footer {
+  border-top: 2px solid var(--footer-accent);
+}
+
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 3vw, 2rem);
+}
+
+/* ─────────────────────────────────────────────
+   Grid principal — mobile-first (1 columna)
+   ───────────────────────────────────────────── */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.8rem;
+}
+
+.footer-grid h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--footer-accent);
+}
+
+.footer-grid p {
+  margin: 0.35rem 0;
+  color: var(--footer-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.footer-brand img {
+  width: 72px;
+  height: auto;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.footer-brand p {
+  max-width: 28ch;
+}
+
+.footer-grid a {
+  color: var(--footer-accent);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Copyright bar
+   ───────────────────────────────────────────── */
+.footer-bottom {
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--footer-border);
+  color: var(--footer-text-muted);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+/* ─────────────────────────────────────────────
+   Responsive — tablet/desktop (≥ 760 px)
+   ───────────────────────────────────────────── */
+@media (min-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1.4fr 1fr 0.8fr;
+    align-items: start;
+  }
+
+  .legal-placeholders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .footer-bottom {
+    text-align: left;
+  }
+}

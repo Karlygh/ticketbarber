@@ -105,48 +105,5 @@
     <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
   </section>
 
-  <footer class="site-footer" id="contacto">
-    <div class="footer-grid">
-      <section class="footer-brand">
-        <img src="/assets/logoticketg.png" alt="Ticketbarber logo" />
-        <p>
-          Plataforma para organizar turnos de barberia con una experiencia moderna para clientes y
-          personal.
-        </p>
-      </section>
-
-      <section>
-        <h3>Contacto</h3>
-        <p>Email: hola@ticketbarber.app</p>
-        <p>Ciudad: Madrid, Espana</p>
-        <p>Horario: Lun-Sab 09:00 - 21:00</p>
-      </section>
-
-      <section>
-        <h3>Legal</h3>
-        <p><a href="#terminos">Terminos</a></p>
-        <p><a href="#privacidad">Privacidad</a></p>
-        <p><a href="#cookies">Cookies</a></p>
-      </section>
-    </div>
-
-    <div class="legal-placeholders">
-      <article id="terminos">
-        <h4>Terminos</h4>
-        <p>Placeholder legal: actualiza este texto con tus terminos oficiales antes de publicar.</p>
-      </article>
-      <article id="privacidad">
-        <h4>Privacidad</h4>
-        <p>Placeholder legal: describe aqui como tratas y proteges los datos de clientes.</p>
-      </article>
-      <article id="cookies">
-        <h4>Cookies</h4>
-        <p>Placeholder legal: detalla el uso de cookies y opciones de consentimiento.</p>
-      </article>
-    </div>
-
-    <div class="footer-bottom">
-      <span>© {{ currentYear }} Ticketbarber. Todos los derechos reservados.</span>
-    </div>
-  </footer>
 </main>
+<app-footer [currentYear]="currentYear" />

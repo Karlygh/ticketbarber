@@ -17,6 +17,7 @@ export class StaffPageComponent {
   readonly queueStore = inject(QueueStore);
   readonly isBusy = signal(false);
   readonly error = signal('');
+  readonly logoutState = signal<'idle' | 'confirm' | 'loading' | 'success'>('idle');
 
   constructor() {
     void this.queueStore.bootstrap();
@@ -44,13 +45,22 @@ export class StaffPageComponent {
     await this.runAction(() => this.queueStore.openDay());
   }
 
-  async logout(): Promise<void> {
-    this.isBusy.set(true);
+  requestLogout(): void {
+    this.logoutState.set('confirm');
+  }
+
+  cancelLogout(): void {
+    this.logoutState.set('idle');
+  }
+
+  async confirmLogout(): Promise<void> {
+    this.logoutState.set('loading');
     try {
       await this.authStore.signOut();
-      await this.router.navigateByUrl('/staff/login');
-    } finally {
-      this.isBusy.set(false);
+      this.logoutState.set('success');
+      setTimeout(() => this.router.navigateByUrl('/staff/login'), 1800);
+    } catch {
+      this.logoutState.set('idle');
     }
   }
 

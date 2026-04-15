@@ -49,8 +49,7 @@
 
 .topbar,
 .hero,
-.section,
-.site-footer {
+.section {
   width: min(1120px, 100%);
   margin: 0 auto;
   position: relative;
@@ -315,68 +314,7 @@ h1 {
   color: #d4c8b8;
 }
 
-.site-footer {
-  margin-top: clamp(2rem, 6vw, 4rem);
-  border-top: 1px solid #ffffff1e;
-  padding-block: 1.5rem 2rem;
-}
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.2rem;
-}
-
-.footer-grid h3 {
-  margin: 0 0 0.45rem;
-  font-size: 1rem;
-}
-
-.footer-grid p {
-  margin: 0.3rem 0;
-  color: #cfbfab;
-}
-
-.footer-brand img {
-  width: 140px;
-  height: auto;
-  margin-bottom: 0.5rem;
-}
-
-.footer-grid a {
-  color: #ffcd91;
-}
-
-.legal-placeholders {
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.7rem;
-}
-
-.legal-placeholders article {
-  border: 1px solid #ffffff1f;
-  border-radius: 0.8rem;
-  background: #121316;
-  padding: 0.8rem;
-}
-
-.legal-placeholders h4 {
-  margin: 0;
-}
-
-.legal-placeholders p {
-  margin: 0.5rem 0 0;
-  color: #cfc0ad;
-}
-
-.footer-bottom {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #ffffff17;
-  color: #9f9485;
-  font-size: 0.86rem;
-}
 
 @media (min-width: 760px) {
   .top-nav {
@@ -401,13 +339,5 @@ h1 {
   .final-cta {
     grid-template-columns: 1fr auto;
     align-items: center;
-  }
-
-  .footer-grid {
-    grid-template-columns: 1.3fr 1fr 0.8fr;
-  }
-
-  .legal-placeholders {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
