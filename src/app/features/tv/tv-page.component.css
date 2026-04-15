@@ -116,7 +116,7 @@
 
 .queue-board li {
   display: grid;
-  grid-template-columns: 50px 1fr 1fr auto;
+  grid-template-columns: 50px 1fr 1fr 10rem;
   align-items: center;
   gap: 0.8rem;
   background: #122b46;

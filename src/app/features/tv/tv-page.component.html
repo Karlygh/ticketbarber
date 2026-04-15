@@ -7,6 +7,7 @@
   <section class="active-ticket-board">
     @if (queueStore.currentTicket(); as current) {
       <h2>Turno activo de: <span class="active-name">{{ current.displayName }}</span></h2>
+      <p class="service">{{ current.serviceNameSnapshot }}</p>
     } @else {
       <h2 class="no-active">Sin turno activo</h2>
     }
