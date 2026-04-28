@@ -1,0 +1,53 @@
+<header class="topbar">
+  <a class="brand" routerLink="/">
+    <img src="/assets/logoticketpeq.png" alt="Ticketbarber" />
+    <span>Ticketbarber</span>
+  </a>
+
+  <button
+    class="menu-toggle"
+    [class.menu-toggle--open]="mobileMenuOpen()"
+    type="button"
+    [attr.aria-expanded]="mobileMenuOpen()"
+    aria-label="Abrir menú de navegación"
+    (click)="toggleMobileMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav class="top-nav" [class.top-nav--open]="mobileMenuOpen()">
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeMobileMenu()">Inicio</a>
+    <a routerLink="/guia-tv" routerLinkActive="active" (click)="closeMobileMenu()">Guía TV</a>
+    <a routerLink="/pricing" routerLinkActive="active" (click)="closeMobileMenu()">Precios</a>
+    @if (authStore.isAuthenticated()) {
+      <a routerLink="/staff" routerLinkActive="active" (click)="closeMobileMenu()">Panel</a>
+    }
+
+    <div class="top-actions">
+      @if (authStore.isAuthenticated()) {
+        @if (subscriptionStore.isPro()) {
+          <span class="badge-pro">PRO</span>
+        }
+        <a class="top-account" routerLink="/account" (click)="closeMobileMenu()">
+          {{ accountLabel }}
+        </a>
+        <button class="top-logout" type="button" (click)="signOut()">Salir</button>
+      } @else {
+        <a class="top-login" routerLink="/staff/login" (click)="closeMobileMenu()">Iniciar sesión</a>
+      }
+    </div>
+  </nav>
+</header>
+
+@if (mobileMenuOpen()) {
+  <button
+    class="menu-backdrop"
+    type="button"
+    aria-label="Cerrar menú"
+    (click)="closeMobileMenu()"></button>
+}

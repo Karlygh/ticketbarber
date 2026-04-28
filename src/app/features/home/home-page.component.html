@@ -1,32 +1,25 @@
+<app-header></app-header>
+
 <main class="home-shell" id="inicio">
   <div class="bg-blur blur-a"></div>
   <div class="bg-blur blur-b"></div>
   <div class="bg-grid"></div>
 
-  <header class="topbar">
-    <div class="brand">
-      <img src="/assets/logoticketpeq.png" alt="Ticketbarber" />
-      <span>Ticketbarber</span>
-    </div>
-    <nav class="top-nav">
-      <a href="#beneficios">Beneficios</a>
-      <a href="#flujo">Flujo</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
-    <a class="top-login" routerLink="/staff/login">Iniciar sesion</a>
-  </header>
-
   <section class="hero">
     <div class="hero-copy-block">
       <p class="eyebrow">Sistema de turnos para barberias</p>
-      <h1>La forma elegante de organizar tu cola diaria</h1>
+      <h1>La forma elegante de organizar tu agenda diaria</h1>
       <p class="hero-copy">
         Ticketbarber convierte la gestion de turnos en una experiencia clara para clientes y staff.
         Menos friccion en recepcion, mas foco en el servicio.
       </p>
 
       <div class="hero-actions">
-        <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+        @if (authStore.isAuthenticated()) {
+          <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
+        } @else {
+          <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+        }
         <a class="secondary-cta" href="#beneficios">Ver como funciona</a>
       </div>
 
@@ -102,7 +95,11 @@
         Ticketbarber.
       </p>
     </div>
-    <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+    @if (authStore.isAuthenticated()) {
+      <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
+    } @else {
+      <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+    }
   </section>
 
 </main>

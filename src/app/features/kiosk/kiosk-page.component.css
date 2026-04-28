@@ -1,3 +1,6 @@
+/* ═══════════════════════════════════════════════════════
+   KIOSK PAGE — Section accent: Cyan (público)
+   ═══════════════════════════════════════════════════════ */
 :host {
   display: block;
   min-height: 100dvh;
@@ -6,14 +9,14 @@
   background-size: contain;
   background-position: center;
   background-attachment: fixed;
-  color: #f7efe5;
+  color: var(--text-primary);
 }
 
 :host::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(2, 10, 22, 0.78);
   z-index: 0;
   pointer-events: none;
 }
@@ -24,34 +27,38 @@
   width: min(760px, 92vw);
   margin: 0 auto;
   padding: 2rem 0 3rem;
+  animation: fade-up 0.3s ease both;
 }
 
 .kiosk-card {
-  background: #111111d9;
-  border: 1px solid #ffffff17;
-  border-radius: 1.4rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--section-kiosk-border);
+  border-radius: var(--r-xl);
   padding: 2rem;
-  box-shadow: 0 18px 60px #00000059;
-  backdrop-filter: blur(6px);
+  box-shadow: var(--glass-shadow), 0 0 40px var(--section-kiosk-glow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .kiosk-head h1 {
   margin: 0;
   font-size: clamp(1.8rem, 6vw, 2.9rem);
   letter-spacing: 0.02em;
+  color: var(--text-primary);
 }
 
 .eyebrow {
   margin: 0 0 0.35rem;
-  color: #f3bb71;
+  color: var(--section-kiosk);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .subtitle {
   margin-top: 0.65rem;
-  color: #d6cabc;
+  color: var(--text-copy);
 }
 
 .ticket-form {
@@ -66,76 +73,107 @@ label {
 }
 
 label span {
-  color: #ecd7c1;
+  color: var(--text-primary);
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 input,
 select,
 button {
-  border-radius: 0.8rem;
-  border: 1px solid #ffffff2b;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
   padding: 0.9rem 1rem;
   font: inherit;
+  font-size: 1rem;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 input,
 select {
-  background: #f9f5ef;
-  color: #2e251d;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--section-kiosk);
+  box-shadow: 0 0 0 3px var(--section-kiosk-subtle);
 }
 
 button {
   margin-top: 0.3rem;
-  background: linear-gradient(120deg, #fd8f47, #ff6f38);
-  border: 0;
-  color: #1f1209;
+  background: linear-gradient(135deg, var(--cyan-600), var(--cyan-500));
+  border: 1px solid var(--section-kiosk-border);
+  color: #ffffff;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 120ms ease, filter 120ms ease;
+  box-shadow: 0 6px 22px var(--section-kiosk-glow);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   transform: translateY(-1px);
-  filter: saturate(1.1);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 30px var(--section-kiosk-glow);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 button:disabled {
-  opacity: 0.55;
+  opacity: 0.50;
   cursor: wait;
+  transform: none;
 }
 
 .notice {
   margin-top: 1.2rem;
-  border-radius: 0.8rem;
+  border-radius: var(--r-md);
   padding: 0.95rem 1rem;
 }
 
 .notice h2 {
   margin: 0 0 0.45rem;
+  font-size: 1rem;
 }
 
 .ok {
-  background: #153f32;
-  border: 1px solid #2ec09366;
+  background: var(--state-success-bg);
+  border: 1px solid var(--state-success-border);
+  color: var(--state-success);
 }
 
 .error {
-  background: #4e1818;
-  border: 1px solid #ff8f8f66;
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+  color: var(--state-error);
 }
 
 .closed {
-  background: #4a310d;
-  border: 1px solid #e9a94f88;
+  background: var(--state-warning-bg);
+  border: 1px solid var(--state-warning-border);
+  color: var(--state-warning);
 }
 
 .quick-links {
   margin-top: 1rem;
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.2rem;
 }
 
 .quick-links a {
-  color: #f5cf9e;
+  color: var(--section-kiosk-light);
+  text-decoration: none;
+  font-size: 0.87rem;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.quick-links a:hover {
+  color: var(--cyan-300);
+  text-decoration: underline;
 }

@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthStore } from '../../core/stores/auth.store';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 
 interface HomeBenefit {
   title: string;
@@ -16,11 +18,12 @@ interface HomeStep {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FooterComponent],
+  imports: [CommonModule, RouterLink, FooterComponent, HeaderComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })
 export class HomePageComponent {
+  readonly authStore = inject(AuthStore);
   readonly currentYear = new Date().getFullYear();
 
   readonly benefits: HomeBenefit[] = [

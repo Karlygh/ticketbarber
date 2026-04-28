@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { FooterComponent } from './footer.component';
 
 describe('FooterComponent', () => {
@@ -8,6 +9,7 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FooterComponent],
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);
@@ -25,7 +27,7 @@ describe('FooterComponent', () => {
   });
 
   it('should render a custom currentYear passed as @Input', () => {
-    component.currentYear = 2030;
+    fixture.componentRef.setInput('currentYear', 2030);
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain('2030');

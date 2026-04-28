@@ -2,40 +2,93 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Tienda (shop) - solo lectura pública
+
+    // ── Helper: comprueba si el usuario tiene uid coincidente ──────────────
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── Perfil del usuario ─────────────────────────────────────────────────
+    // Solo el propio usuario puede leer/actualizar su perfil.
+    // La creación se hace desde el backend (AuthStore) justo después del login.
+    match /users/{userId} {
+      allow read, update: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    // ── Colecciones gestionadas por la extensión "Run Payments with Stripe"
+    // IMPORTANTE: NUNCA permitas que el frontend escriba en subscriptions,
+    // products ni prices. Solo la Cloud Function (extensión) puede hacerlo.
+    // ──────────────────────────────────────────────────────────────────────
+
+    match /customers/{userId} {
+      // Solo el propietario puede leer sus datos de cliente Stripe
+      allow read: if isOwner(userId);
+      // La extensión escribe aquí: no permitimos escritura desde el cliente
+      allow write: if false;
+
+      // checkout_sessions: el cliente crea/actualiza el documento, la extensión lee/escribe
+      match /checkout_sessions/{sessionId} {
+        allow read, create, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      // subscriptions: solo lectura del propietario; escritura exclusiva de la extensión
+      match /subscriptions/{subscriptionId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      // payments: solo lectura del propietario
+      match /payments/{paymentId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+
+    // ── Productos y precios de Stripe (catálogo público de solo lectura) ──
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /prices/{priceId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    // ── Tienda (shop) ──────────────────────────────────────────────────────
     match /shops/{shopId} {
       allow read: if true;
-      
-      // Configuración de la tienda - solo lectura
+
       match /settings/{document=**} {
         allow read: if true;
         allow write: if request.auth != null;
       }
-      
-      // Servicios - solo lectura
+
       match /services/{document=**} {
         allow read: if true;
         allow write: if request.auth != null;
       }
-      
-      // Tickets - crear sin autenticación, leer y actualizar solo personal
+
       match /tickets/{ticketId} {
         allow create: if true;
-        allow read: if true;
+        allow read:   if true;
         allow update: if request.auth != null;
         allow delete: if request.auth != null;
       }
-      
-      // Cola - solo lectura para kiosco
+
       match /queue/{document=**} {
-        allow read: if true;
+        allow read:  if true;
         allow write: if request.auth != null;
       }
     }
-    
-    // Denegar todo lo demás
+
+    // ── Denegar todo lo demás por defecto ─────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
+

@@ -1,0 +1,122 @@
+<app-header></app-header>
+
+<section class="account-page">
+  <h1>Mi cuenta</h1>
+
+  <!-- Datos del usuario -->
+  <div class="user-card">
+    @if (user()?.photoURL) {
+      <img class="avatar" [src]="user()!.photoURL" [alt]="user()!.displayName ?? 'Avatar'" referrerpolicy="no-referrer" />
+    } @else {
+      <div class="avatar avatar-placeholder">{{ (user()?.displayName ?? user()?.email ?? '?')[0] | uppercase }}</div>
+    }
+    <div class="user-info">
+      @if (user()?.displayName) {
+        <h2>{{ user()!.displayName }}</h2>
+      }
+      <p class="email">{{ user()?.email }}</p>
+    </div>
+  </div>
+
+  <!-- Suscripción -->
+  <div class="section">
+    <h3>Suscripción</h3>
+
+    @if (subscriptionStore.loading()) {
+      <p class="muted">Cargando información de suscripción…</p>
+    } @else if (subscriptionStore.error()) {
+      <div class="error-panel" role="alert">
+        <p>No se pudo cargar el estado de tu suscripción.</p>
+        <p class="error-detail">{{ subscriptionStore.error() }}</p>
+      </div>
+    } @else if (subscriptionStore.isPro()) {
+      <div class="sub-card">
+        <div class="sub-header">
+          <span class="badge badge-active">● {{ statusLabel(subscriptionStore.subscription()!.status) }}</span>
+          @if (subscriptionStore.isTrialing()) {
+            <span class="badge badge-trial">Período de prueba</span>
+          }
+        </div>
+
+        <dl class="sub-details">
+          <dt>Inicio del período</dt>
+          <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+
+          <dt>Renovación</dt>
+          <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+
+          @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
+            <dt>Cancelación programada</dt>
+            <dd class="warning">Se cancelará el {{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+          }
+        </dl>
+
+        @if (portalError()) {
+          <p class="error-msg">{{ portalError() }}</p>
+        }
+
+        <button
+          class="btn-primary"
+          [class.btn-loading]="portalLoading()"
+          [disabled]="portalLoading()"
+          (click)="openPortal()">
+          @if (portalLoading()) {
+            <span class="spinner"></span> Abriendo portal…
+          } @else {
+            Gestionar suscripción
+          }
+        </button>
+      </div>
+    } @else {
+      <div class="no-sub">
+        <p>No tienes ningún plan activo.</p>
+        <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+      </div>
+    }
+  </div>
+
+  <!-- Historial de pagos -->
+  <div class="section">
+    <h3>Historial de pagos</h3>
+
+    @if (paymentsLoading()) {
+      <p class="muted">Cargando pagos…</p>
+    } @else if (paymentsError()) {
+      <div class="error-panel" role="alert">
+        <p>{{ paymentsError() }}</p>
+        <button class="btn-primary" type="button" (click)="loadPayments()">Reintentar</button>
+      </div>
+    } @else if (payments().length === 0) {
+      <p class="muted">No hay pagos registrados.</p>
+    } @else {
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Importe</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of payments(); track payment.id) {
+            <tr>
+              <td>{{ (payment.created * 1000) | date:'mediumDate':'':'es' }}</td>
+              <td>{{ (payment.amount / 100) | currency:payment.currency:'symbol':'1.2-2':'es' }}</td>
+              <td>
+                <span class="payment-status" [class.status-succeeded]="payment.status === 'succeeded'">
+                  {{ payment.status === 'succeeded' ? 'Completado' : payment.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <div class="back-link">
+    <a routerLink="/staff">← Volver al panel</a>
+  </div>
+</section>
+
+<app-footer></app-footer>

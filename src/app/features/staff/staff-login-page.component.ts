@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { sanitizeReturnUrl } from '../../core/auth/auth-navigation';
 import { AuthStore } from '../../core/stores/auth.store';
 
 type LoginState = 'idle' | 'loading' | 'success' | 'error';
@@ -14,11 +15,14 @@ type LoginState = 'idle' | 'loading' | 'success' | 'error';
 })
 export class StaffLoginPageComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   readonly loginState = signal<LoginState>('idle');
   readonly errorMsg = signal('');
+  readonly accessReason = signal(this.route.snapshot.queryParamMap.get('reason') ?? '');
 
   get isLoading() { return this.loginState() === 'loading'; }
+  get showAuthRequiredNotice() { return this.accessReason() === 'auth-required'; }
 
   async signIn(): Promise<void> {
     this.errorMsg.set('');
@@ -26,10 +30,38 @@ export class StaffLoginPageComponent {
     try {
       await this.authStore.signInWithGoogle();
       this.loginState.set('success');
-      setTimeout(() => this.router.navigateByUrl('/staff'), 1800);
+      const safeUrl = sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+      setTimeout(() => this.router.navigateByUrl(safeUrl), 1800);
     } catch (err) {
-      this.errorMsg.set(err instanceof Error ? err.message : 'No se pudo iniciar sesion.');
+      this.errorMsg.set(this.toMessage(err));
       this.loginState.set('error');
+    }
+  }
+
+  private toMessage(error: unknown): string {
+    const code =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof (error as { code?: unknown }).code === 'string'
+        ? (error as { code: string }).code
+        : '';
+
+    switch (code) {
+      case 'auth/popup-closed-by-user':
+        return 'Has cerrado la ventana de Google antes de terminar. Vuelve a intentarlo.';
+      case 'auth/popup-blocked':
+      case 'auth/cancelled-popup-request':
+        return 'Tu navegador ha bloqueado la ventana de acceso. Permite popups y prueba de nuevo.';
+      case 'auth/network-request-failed':
+        return 'No se ha podido conectar con Google. Revisa tu conexion e intentalo otra vez.';
+      case 'auth/operation-not-allowed':
+      case 'auth/unauthorized-domain':
+      case 'auth/app-not-authorized':
+      case 'auth/invalid-api-key':
+        return 'El acceso con Google no esta bien configurado todavia. Revisa Firebase antes de continuar.';
+      default:
+        return 'No se pudo iniciar sesion con Google. Intentalo de nuevo en unos segundos.';
     }
   }
 }

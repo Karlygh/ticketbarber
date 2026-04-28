@@ -2,9 +2,10 @@
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 12% 20%, #ffbf5f2b 0, #ffbf5f00 42%),
-    linear-gradient(130deg, #1f2124 0%, #121315 40%, #0d0d0e 100%);
-  color: #f0ebe5;
+    radial-gradient(circle at 12% 20%, var(--section-staff-subtle) 0%, transparent 42%),
+    radial-gradient(circle at 88% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+    linear-gradient(130deg, var(--bg-page) 0%, var(--bg-page-mid) 50%, var(--bg-page) 100%);
+  color: var(--text-primary);
 }
 
 .login-shell {
@@ -27,18 +28,20 @@
 
 .login-card {
   width: min(520px, 94vw);
-  border: 1px solid #ffffff26;
-  border-radius: 1rem;
-  background: #14161acf;
+  border: 1px solid var(--section-staff-border);
+  border-radius: var(--r-xl);
+  background: var(--glass-bg);
   padding: 1.8rem;
-  box-shadow: 0 16px 44px #00000061;
+  box-shadow: var(--glass-shadow), 0 0 30px var(--section-staff-glow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   animation: rise 0.5s cubic-bezier(.22,.68,0,1.2) both;
 }
 
 .eyebrow {
   margin: 0;
   font-size: 0.8rem;
-  color: #f5b04f;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -49,19 +52,27 @@ h1 {
 
 button {
   margin-top: 0;
-  border: 0;
-  border-radius: 0.8rem;
+  border: 1px solid var(--border-accent);
+  border-radius: var(--r-md);
   padding: 0.8rem 1rem;
   font: inherit;
   font-weight: 700;
-  background: linear-gradient(120deg, #ffc26a, #ff8f53);
-  color: #27190a;
+  background: var(--btn-gradient);
+  color: var(--btn-text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   width: 100%;
+  box-shadow: var(--btn-shadow);
+  transition: box-shadow 0.18s, transform 0.14s, filter 0.15s;
+}
+
+button:hover:not(:disabled) {
+  box-shadow: var(--btn-hover-shadow);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
 }
 
 button:disabled {
@@ -72,13 +83,14 @@ button:disabled {
 .icon-wrap {
   width: 52px;
   height: 52px;
-  background: #ffc26a12;
-  border: 1px solid #ffc26a33;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+  color: var(--accent);
 }
 
 .divider {
@@ -87,9 +99,23 @@ button:disabled {
   margin: 0 0 1.4rem;
 }
 
+.notice {
+  margin: 1rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.notice-auth {
+  background: var(--state-warning-bg);
+  border: 1px solid var(--state-warning-border);
+  color: var(--state-warning);
+}
+
 .error {
   margin-top: 0.8rem;
-  color: #ffb2b2;
+  color: var(--state-error);
 }
 
 .security-note {
@@ -99,7 +125,7 @@ button:disabled {
   justify-content: center;
   gap: 5px;
   font-size: 0.75rem;
-  color: #5e5a54;
+  color: var(--text-faint);
 }
 
 @keyframes rise {
@@ -127,24 +153,24 @@ nav {
   align-items: center;
   gap: 5px;
   font-size: 0.85rem;
-  color: #a09890;
+  color: var(--text-muted);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .back-btn:hover {
-  color: #ffc26a;
+  color: var(--accent);
 }
 
 .register-link {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.82rem;
-  color: #6e6862;
+  color: var(--text-faint);
 }
 
 .register-link a {
-  color: #ffc26a;
+  color: var(--accent);
   text-decoration: none;
 }
 
@@ -153,7 +179,7 @@ nav {
 }
 
 a {
-  color: #ffcf8a;
+  color: var(--accent-light);
 }
 
 /* ── Toast (login) ── */
@@ -176,28 +202,28 @@ a {
 }
 
 .toast--loading {
-  background: #1e1b14;
-  border: 1px solid #ffc26a44;
-  color: #ffc26a;
+  background: var(--bg-card-dark);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
 }
 
 .toast--success {
-  background: #14532d;
-  border: 1px solid #4ade8055;
-  color: #4ade80;
+  background: var(--state-success-bg);
+  border: 1px solid var(--state-success-border);
+  color: var(--state-success);
 }
 
 .toast--error {
-  background: #450a0a;
-  border: 1px solid #f8717155;
-  color: #f87171;
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+  color: var(--state-error);
 }
 
 .toast-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #ffc26a44;
-  border-top-color: #ffc26a;
+  border: 2px solid var(--accent-border);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;

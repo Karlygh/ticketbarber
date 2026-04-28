@@ -1,0 +1,65 @@
+<app-header></app-header>
+
+<section class="management-page">
+  <h1>Mi suscripción</h1>
+
+  @if (subscriptionStore.loading()) {
+    <p class="syncing">Cargando información de suscripción…</p>
+  } @else if (subscriptionStore.error()) {
+    <div class="error-panel" role="alert">
+      <p>No se pudo cargar tu suscripción.</p>
+      <p class="error-detail">{{ subscriptionStore.error() }}</p>
+      <button class="btn-secondary" type="button" (click)="goToPlans()">Ver planes</button>
+    </div>
+  } @else if (subscriptionStore.isPro()) {
+    <div class="sub-card">
+      <div class="sub-header">
+        <span class="badge badge-active">● Activo</span>
+        @if (subscriptionStore.isTrialing()) {
+          <span class="badge badge-trial">Período de prueba</span>
+        }
+      </div>
+
+      <dl class="sub-details">
+        <dt>Estado</dt>
+        <dd>{{ statusLabel(subscriptionStore.subscription()!.status) }}</dd>
+
+        <dt>Precio ID</dt>
+        <dd class="mono">{{ subscriptionStore.subscription()!.priceId }}</dd>
+
+        <dt>Inicio del período</dt>
+        <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+
+        <dt>Fin del período / renovación</dt>
+        <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+
+        @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
+          <dt>Cancelación</dt>
+          <dd class="warning">Se cancelará el {{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+        }
+
+        @if (subscriptionStore.subscription()!.trialEnd) {
+          <dt>Fin de prueba</dt>
+          <dd>{{ (subscriptionStore.subscription()!.trialEnd! * 1000) | date:'longDate':'':'es' }}</dd>
+        }
+      </dl>
+
+      <div class="actions">
+        <!-- El Portal de Stripe permite gestionar facturas, cancelar, cambiar tarjeta, etc. -->
+        <!-- Para habilitarlo, configura el Customer Portal en: https://dashboard.stripe.com/test/settings/billing/portal -->
+        <p class="portal-note">
+          Para cancelar, cambiar plan o actualizar el método de pago, usa el
+          <strong>Portal de cliente de Stripe</strong> (configúralo en tu dashboard).
+        </p>
+        <button class="btn-secondary" routerLink="/staff">Volver al panel</button>
+      </div>
+    </div>
+  } @else {
+    <div class="no-sub">
+      <p>No tienes ningún plan activo. ¡Hazte Pro para desbloquear todas las funciones!</p>
+      <button class="btn-primary" (click)="goToPlans()">Ver planes</button>
+    </div>
+  }
+</section>
+
+<app-footer></app-footer>

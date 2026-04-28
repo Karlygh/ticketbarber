@@ -3,18 +3,16 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthStore } from '../stores/auth.store';
 import { sanitizeReturnUrl } from './auth-navigation';
 
-export const staffAuthGuard: CanActivateFn = async (_, state) => {
+export const staffGuestGuard: CanActivateFn = async (route) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
   await authStore.waitUntilReady();
 
-  return authStore.isAuthenticated()
-    ? true
-    : router.createUrlTree(['/staff/login'], {
-      queryParams: {
-        reason: 'auth-required',
-        returnUrl: sanitizeReturnUrl(state.url)
-      }
-    });
+  if (!authStore.isAuthenticated()) {
+    return true;
+  }
+
+  const returnUrl = sanitizeReturnUrl(route.queryParamMap.get('returnUrl'));
+  return router.parseUrl(returnUrl);
 };

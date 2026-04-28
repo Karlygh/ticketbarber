@@ -1,25 +1,281 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap');
+
+/* ═══════════════════════════════════════════════════════
+   TICKETBARBER — DESIGN SYSTEM v2
+   Paleta: Navy azul marino · Electric Blue · Section accents
+   ═══════════════════════════════════════════════════════ */
 
 :root {
-  color-scheme: only light;
+  color-scheme: only dark;
+
+  /* ── Primitivos: Navy ── */
+  --navy-950: #04101e;
+  --navy-900: #08162a;
+  --navy-850: #0c1d36;
+  --navy-800: #102242;
+  --navy-750: #152a50;
+  --navy-700: #1b3360;
+
+  /* ── Primitivos: Blue ── */
+  --blue-700: #1d4ed8;
+  --blue-600: #2563eb;
+  --blue-500: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-300: #93c5fd;
+  --blue-200: #bfdbfe;
+
+  /* ── Primitivos: Cyan (sección Kiosk) ── */
+  --cyan-600: #0891b2;
+  --cyan-500: #06b6d4;
+  --cyan-400: #22d3ee;
+  --cyan-300: #67e8f9;
+
+  /* ── Primitivos: Indigo (sección Account/PRO) ── */
+  --indigo-700: #4338ca;
+  --indigo-600: #4f46e5;
+  --indigo-500: #6366f1;
+  --indigo-400: #818cf8;
+
+  /* ── Primitivos: Amber (sección Pricing) ── */
+  --amber-600: #d97706;
+  --amber-500: #f59e0b;
+  --amber-400: #fbbf24;
+  --amber-300: #fcd34d;
+
+  /* ── Primitivos: Neutral ── */
+  --neutral-50:  #eef4ff;
+  --neutral-100: #d6e4fa;
+  --neutral-200: #9ab8dc;
+  --neutral-400: #4d799e;
+  --neutral-600: #243d58;
+  --neutral-800: #0e2035;
+
+  /* ── Estados ── */
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --red-400:   #f87171;
+  --red-500:   #ef4444;
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — FONDOS
+     ══════════════════════════════════════ */
+  --bg-page:         var(--navy-950);
+  --bg-page-mid:     var(--navy-900);
+  --bg-surface:      var(--navy-850);
+  --bg-card:         rgba(12, 29, 54, 0.78);
+  --bg-card-dark:    rgba(8, 22, 42, 0.88);
+  --bg-card-elevated:rgba(17, 36, 68, 0.92);
+  --bg-input:        rgba(8, 22, 40, 0.90);
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — BORDES
+     ══════════════════════════════════════ */
+  --border:              rgba(255, 255, 255, 0.07);
+  --border-muted:        rgba(255, 255, 255, 0.04);
+  --border-accent:       rgba(59, 130, 246, 0.25);
+  --border-accent-strong:rgba(59, 130, 246, 0.55);
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — TEXTO
+     ══════════════════════════════════════ */
+  --text-primary: #dde8fb;
+  --text-copy:    #7ca8d0;
+  --text-muted:   #3d6485;
+  --text-faint:   #1e3a52;
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — ACENTO PRIMARIO (Blue)
+     ══════════════════════════════════════ */
+  --accent:         var(--blue-500);
+  --accent-light:   var(--blue-400);
+  --accent-lighter: var(--blue-300);
+  --accent-subtle:  rgba(59, 130, 246, 0.11);
+  --accent-border:  rgba(59, 130, 246, 0.26);
+  --accent-glow:    rgba(59, 130, 246, 0.32);
+
+  /* ══════════════════════════════════════
+     SECTION ACCENTS — Diferenciación visual
+     ══════════════════════════════════════ */
+
+  /* Staff / Panel → Blue (primary) */
+  --section-staff:        var(--blue-500);
+  --section-staff-light:  var(--blue-400);
+  --section-staff-subtle: rgba(59, 130, 246, 0.12);
+  --section-staff-border: rgba(59, 130, 246, 0.28);
+  --section-staff-glow:   rgba(59, 130, 246, 0.22);
+
+  /* Kiosk → Cyan (público) */
+  --section-kiosk:        var(--cyan-500);
+  --section-kiosk-light:  var(--cyan-400);
+  --section-kiosk-subtle: rgba(6, 182, 212, 0.11);
+  --section-kiosk-border: rgba(6, 182, 212, 0.28);
+  --section-kiosk-glow:   rgba(6, 182, 212, 0.22);
+
+  /* Account → Indigo */
+  --section-account:        var(--indigo-500);
+  --section-account-light:  var(--indigo-400);
+  --section-account-subtle: rgba(99, 102, 241, 0.11);
+  --section-account-border: rgba(99, 102, 241, 0.28);
+  --section-account-glow:   rgba(99, 102, 241, 0.22);
+
+  /* Pricing / PRO → Amber */
+  --section-pricing:        var(--amber-500);
+  --section-pricing-light:  var(--amber-400);
+  --section-pricing-subtle: rgba(245, 158, 11, 0.11);
+  --section-pricing-border: rgba(245, 158, 11, 0.28);
+  --section-pricing-glow:   rgba(245, 158, 11, 0.22);
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — ESTADOS
+     ══════════════════════════════════════ */
+  --state-success:        var(--green-500);
+  --state-success-bg:     rgba(34, 197, 94, 0.10);
+  --state-success-border: rgba(34, 197, 94, 0.28);
+
+  --state-error:          var(--red-400);
+  --state-error-bg:       rgba(248, 113, 113, 0.10);
+  --state-error-border:   rgba(248, 113, 113, 0.28);
+
+  --state-warning:        var(--amber-400);
+  --state-warning-bg:     rgba(251, 191, 36, 0.10);
+  --state-warning-border: rgba(251, 191, 36, 0.28);
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — BOTONES
+     ══════════════════════════════════════ */
+  --btn-gradient:     linear-gradient(135deg, var(--blue-700), var(--blue-500));
+  --btn-text:         #ffffff;
+  --btn-shadow:       0 6px 22px rgba(59, 130, 246, 0.38);
+  --btn-hover-shadow: 0 10px 30px rgba(59, 130, 246, 0.52);
+
+  /* ══════════════════════════════════════
+     SEMANTIC TOKENS — GLASS / CARD
+     ══════════════════════════════════════ */
+  --glass-bg:     rgba(8, 22, 40, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 18px 56px rgba(0, 0, 0, 0.50),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* PRO badge */
+  --pro-gradient: linear-gradient(135deg, var(--indigo-600), var(--indigo-400));
+
+  /* Radius scale */
+  --r-sm:  0.5rem;
+  --r-md:  0.875rem;
+  --r-lg:  1.25rem;
+  --r-xl:  1.75rem;
+  --r-pill:999px;
 }
 
-* {
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════ */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   min-height: 100%;
 }
 
 body {
-  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3 {
+h1, h2, h3, h4 {
   font-family: 'Sora', 'Manrope', sans-serif;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMACIONES GLOBALES
+   ═══════════════════════════════════════════════════════ */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0   var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILIDADES GLOBALES
+   ═══════════════════════════════════════════════════════ */
+
+/* Botón base premium */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.4rem;
+  background: var(--btn-gradient);
+  color: var(--btn-text);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-md);
+  font: 700 0.92rem/1 'Manrope', sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--btn-shadow);
+  transition: box-shadow 0.18s ease, transform 0.15s ease, filter 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--btn-hover-shadow);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+/* Focus ring accesible */
+:focus-visible {
+  outline: 2px solid var(--blue-400);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--neutral-600); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--neutral-400); }

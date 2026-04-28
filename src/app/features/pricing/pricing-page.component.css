@@ -1,0 +1,710 @@
+:host {
+  display: block;
+}
+
+/* ── Shell ── */
+.pricing-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1.25rem 7rem;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+/* ── Decorativos de fondo ── */
+.bg-blur {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(96px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blur-a {
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, var(--accent-subtle), transparent 70%);
+  top: -140px;
+  left: -120px;
+}
+
+.blur-b {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.07), transparent 70%);
+  bottom: 80px;
+  right: -100px;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Hero ── */
+.pricing-hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 680px;
+  margin: 4.5rem auto 4rem;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  margin-bottom: 1.4rem;
+}
+
+.eyebrow::before,
+.eyebrow::after {
+  content: '';
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: var(--accent-border);
+}
+
+.pricing-hero h1 {
+  font-family: 'Sora', 'Manrope', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1.1rem;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+/* ── Trust bar ── */
+.trust-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  padding: 0.55rem 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-copy);
+}
+
+.trust-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.trust-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--accent-border);
+}
+
+/* ── Grid ── */
+.cards-grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  max-width: 860px;
+  margin: 0 auto 2rem;
+  align-items: flex-start;
+}
+
+/* ── Tarjeta base ── */
+.price-card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-border);
+  border-radius: 1.5rem;
+  padding: 2.5rem 2.25rem 2rem;
+  width: 360px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
+}
+
+.price-card.monthly {
+  border-color: rgba(255, 255, 255, 0.07);
+  opacity: 0.9;
+}
+
+/* Tarjeta anual: protagonista */
+.price-card.annual {
+  background: var(--bg-card-elevated);
+  border-color: var(--section-pricing-border);
+  box-shadow: 0 0 0 1px var(--section-pricing-border), 0 16px 56px var(--section-pricing-glow);
+  transform: translateY(-10px);
+}
+
+.price-card.monthly:hover {
+  transform: translateY(-4px);
+  opacity: 1;
+  border-color: var(--border-accent);
+}
+
+.price-card.annual:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 0 0 1px var(--section-pricing), 0 20px 64px var(--section-pricing-glow);
+}
+
+/* ── Skeleton ── */
+.price-card.skeleton {
+  height: 520px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-card-dark) 25%,
+    var(--bg-card) 50%,
+    var(--bg-card-dark) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Badge "Mas popular" ── */
+.card-badge {
+  position: absolute;
+  top: -0.95rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--btn-text);
+  background: var(--btn-gradient);
+  padding: 0.3rem 1.1rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(96, 165, 250, 0.3);
+}
+
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Cabecera ── */
+.card-header {
+  margin-bottom: 1.75rem;
+}
+
+.plan-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.plan-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.annual-icon {
+  background: var(--btn-gradient);
+}
+
+.monthly-icon {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-border);
+}
+
+.plan-name {
+  font-family: 'Sora', 'Manrope', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.plan-tag {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  padding-left: 36px;
+}
+
+/* ── Bloque precio ── */
+.price-block {
+  margin-bottom: 1.5rem;
+}
+
+.card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  margin-bottom: 0.4rem;
+}
+
+.currency-sym {
+  font-family: 'Sora', 'Manrope', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  line-height: 1;
+  align-self: flex-start;
+  padding-top: 0.6rem;
+}
+
+.amount {
+  font-family: 'Sora', 'Manrope', sans-serif;
+  font-size: clamp(3.5rem, 6vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.interval {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  padding-bottom: 0.3rem;
+  margin-left: 0.15rem;
+}
+
+.price-equivalent {
+  font-size: 0.82rem;
+  color: var(--accent-light);
+  font-weight: 600;
+  margin: 0 0 0.65rem;
+}
+
+.savings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--state-success);
+  background: rgba(34, 197, 94, 0.09);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  padding: 0.28rem 0.8rem;
+  border-radius: 999px;
+}
+
+.savings-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--state-success);
+  flex-shrink: 0;
+}
+
+/* ── Divider ── */
+.card-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-border), transparent);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Features ── */
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.feat-primary {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.feat-secondary {
+  color: var(--text-muted);
+}
+
+/* ── Checkmark CSS puro ── */
+.checkmark {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+}
+
+.checkmark::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+.feat-secondary .checkmark {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.feat-secondary .checkmark::after {
+  border-right-color: var(--text-faint);
+  border-bottom-color: var(--text-faint);
+}
+
+/* ── Botones ── */
+.btn-primary,
+.btn-outline {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 50px;
+  transition: filter 0.15s, opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary {
+  border: 1px solid var(--border-accent);
+  background: var(--btn-gradient);
+  color: var(--btn-text);
+  box-shadow: var(--btn-shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: var(--btn-hover-shadow);
+}
+
+.btn-outline {
+  border: 1.5px solid var(--accent-border);
+  background: transparent;
+  color: var(--accent-light);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-outline:disabled,
+.btn-primary.btn-loading,
+.btn-outline.btn-loading {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+/* ── Spinner CSS ── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--btn-text);
+  border-radius: 50%;
+  animation: spin 0.72s linear infinite;
+  flex-shrink: 0;
+}
+
+.btn-outline .spinner {
+  border-color: var(--accent-border);
+  border-top-color: var(--accent-light);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Garantia ── */
+.guarantee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.shield-icon {
+  width: 11px;
+  height: 13px;
+  background: var(--text-faint);
+  clip-path: polygon(50% 0%, 100% 18%, 100% 62%, 50% 100%, 0% 62%, 0% 18%);
+  flex-shrink: 0;
+}
+
+/* ── Error checkout ── */
+.checkout-error {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: var(--state-error);
+  font-size: 0.9rem;
+  margin: 0.5rem auto 1.25rem;
+}
+
+.retry-inline {
+  max-width: 220px;
+  margin: 1rem auto 0;
+}
+
+/* ── Sin planes ── */
+.empty-msg {
+  text-align: center;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Bottom trust section ── */
+.bottom-trust {
+  position: relative;
+  z-index: 1;
+  max-width: 840px;
+  margin: 3rem auto 2rem;
+  text-align: center;
+}
+
+.bottom-trust-title {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 1.75rem;
+}
+
+.bottom-trust-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.bt-item {
+  flex: 1;
+  min-width: 200px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+.bt-item strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.bt-item span:last-child {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.bt-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shield-icon-lg {
+  width: 22px;
+  height: 26px;
+  background: var(--accent-light);
+  clip-path: polygon(50% 0%, 100% 18%, 100% 62%, 50% 100%, 0% 62%, 0% 18%);
+}
+
+.calendar-icon {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--accent-light);
+  border-radius: 4px;
+  position: relative;
+}
+
+.calendar-icon::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 4px;
+  width: 2px;
+  height: 6px;
+  background: var(--accent-light);
+  border-radius: 2px;
+}
+
+.calendar-icon::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 4px;
+  width: 2px;
+  height: 6px;
+  background: var(--accent-light);
+  border-radius: 2px;
+}
+
+.support-icon {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--accent-light);
+  border-radius: 50%;
+  position: relative;
+}
+
+.support-icon::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 5px;
+  border: 2.5px solid var(--accent-light);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ── Legal ── */
+.legal {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  max-width: 520px;
+  margin: 1.5rem auto 0;
+  line-height: 1.75;
+}
+
+.legal a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.legal a:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .pricing-hero {
+    margin-top: 2.75rem;
+  }
+
+  .pricing-shell {
+    padding-inline: 1rem;
+  }
+
+  .price-card {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .price-card.annual {
+    transform: translateY(0);
+  }
+
+  .price-card.annual:hover {
+    transform: translateY(-5px);
+  }
+
+  .trust-bar {
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .trust-sep {
+    display: none;
+  }
+
+  .bottom-trust-items {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bt-item {
+    max-width: 100%;
+    width: 100%;
+  }
+}

@@ -1,9 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Auth, GoogleAuthProvider, User, onAuthStateChanged, signInWithPopup, signOut } from '@angular/fire/auth';
+import { UserService } from '../services/user.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly auth = inject(Auth);
+  private readonly userService = inject(UserService);
   private readonly userState = signal<User | null>(null);
   private readonly readyState = signal(false);
   private resolveReady!: () => void;
@@ -26,15 +28,15 @@ export class AuthStore {
   }
 
   waitUntilReady(): Promise<void> {
-    if (this.readyState()) {
-      return Promise.resolve();
-    }
+    if (this.readyState()) return Promise.resolve();
     return this.readyPromise;
   }
 
   async signInWithGoogle(): Promise<void> {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(this.auth, provider);
+    const result = await signInWithPopup(this.auth, provider);
+    // Garantizar que el documento users/{uid} existe en Firestore
+    await this.userService.ensureUserProfile(result.user);
   }
 
   async signOut(): Promise<void> {

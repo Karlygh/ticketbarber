@@ -1,0 +1,174 @@
+<app-header></app-header>
+
+<main class="pricing-shell">
+  <div class="bg-blur blur-a"></div>
+  <div class="bg-blur blur-b"></div>
+  <div class="bg-grid"></div>
+
+  <!-- Hero -->
+  <section class="pricing-hero">
+    <div class="eyebrow"><span>Planes y precios</span></div>
+    <h1>Todo lo que necesita<br>tu barberia, en un solo plan</h1>
+    <p class="subtitle">Cola digital, pantalla TV, panel de staff y mucho mas.<br>Sin permanencia. Cancela cuando quieras.</p>
+    <div class="trust-bar">
+      <span class="trust-item"><span class="trust-dot"></span>Sin comisiones</span>
+      <span class="trust-sep"></span>
+      <span class="trust-item"><span class="trust-dot"></span>Soporte incluido</span>
+      <span class="trust-sep"></span>
+      <span class="trust-item"><span class="trust-dot"></span>14 dias de garantia</span>
+    </div>
+  </section>
+
+  <!-- Skeleton -->
+  @if (loading()) {
+    <div class="cards-grid">
+      <div class="price-card skeleton"></div>
+      <div class="price-card skeleton"></div>
+    </div>
+  }
+
+  <!-- Tarjetas -->
+  @if (!loading()) {
+    @if (productsError()) {
+      <div class="checkout-error" role="alert">
+        <strong>No hemos podido cargar los planes.</strong> {{ productsError() }}
+        <button class="btn-outline retry-inline" type="button" (click)="loadProducts()">Reintentar</button>
+      </div>
+    } @else if (products().length === 0) {
+      <p class="empty-msg">No hay planes disponibles en este momento.</p>
+    } @else {
+      @for (product of products(); track product.id) {
+        <div class="cards-grid">
+          @for (price of product.prices; track price.id) {
+            @if (price.active) {
+              <div
+                class="price-card"
+                [class.annual]="price.interval === 'year'"
+                [class.monthly]="price.interval === 'month'">
+
+                @if (price.interval === 'year') {
+                  <div class="card-badge">
+                    <span class="badge-dot"></span>
+                    Mas popular
+                  </div>
+                }
+
+                <div class="card-header">
+                  <div class="plan-label">
+                    @if (price.interval === 'year') {
+                      <span class="plan-icon annual-icon"></span>
+                    } @else {
+                      <span class="plan-icon monthly-icon"></span>
+                    }
+                    <h2 class="plan-name">{{ product.name }}</h2>
+                  </div>
+                  <p class="plan-tag">
+                    @if (price.interval === 'year') { Facturacion anual - maximo ahorro } @else { Facturacion mensual }
+                  </p>
+                </div>
+
+                <div class="price-block">
+                  <div class="card-price">
+                    <span class="currency-sym">&#8364;</span>
+                    <span class="amount">{{ price.unit_amount / 100 | currency:'EUR':'':'1.0-2':'es' }}</span>
+                    <span class="interval">/ {{ intervalLabel(price.interval) }}</span>
+                  </div>
+                  @if (price.interval === 'year') {
+                    <p class="price-equivalent">
+                      Solo {{ price.unit_amount / 100 / 12 | currency:'EUR':'':'1.2-2':'es' }} EUR/mes facturado anualmente
+                    </p>
+                  }
+                  @if (savingsLabel(product, price); as savings) {
+                    <div class="savings-badge">
+                      <span class="savings-icon"></span>
+                      {{ savings }} respecto al mensual
+                    </div>
+                  }
+                </div>
+
+                <div class="card-divider"></div>
+
+                <ul class="feature-list">
+                  @for (feat of parseFeatures(product); track feat; let i = $index) {
+                    <li [class.feat-primary]="i < 3" [class.feat-secondary]="i >= 3">
+                      <span class="checkmark" aria-hidden="true"></span>
+                      {{ feat }}
+                    </li>
+                  }
+                </ul>
+
+                @if (subscriptionStore.isPro()) {
+                  <button
+                    class="btn-primary"
+                    [disabled]="portalLoading()"
+                    (click)="openPortal()">
+                    @if (portalLoading()) { <span class="spinner"></span> }
+                    @else { Gestionar suscripcion }
+                  </button>
+                } @else if (price.interval === 'year') {
+                  <button
+                    class="btn-primary"
+                    [class.btn-loading]="loadingPriceId() === price.id"
+                    [disabled]="loadingPriceId() !== null"
+                    (click)="buy(price)">
+                    @if (loadingPriceId() === price.id) { <span class="spinner"></span> }
+                    @else { Activar plan anual }
+                  </button>
+                } @else {
+                  <button
+                    class="btn-outline"
+                    [class.btn-loading]="loadingPriceId() === price.id"
+                    [disabled]="loadingPriceId() !== null"
+                    (click)="buy(price)">
+                    @if (loadingPriceId() === price.id) { <span class="spinner"></span> }
+                    @else { Empezar ahora }
+                  </button>
+                }
+
+                <p class="guarantee">
+                  <span class="shield-icon" aria-hidden="true"></span>
+                  14 dias de reembolso garantizado
+                </p>
+
+              </div>
+            }
+          }
+        </div>
+      }
+    }
+  }
+
+  @if (checkoutError()) {
+    <p class="checkout-error">{{ checkoutError() }}</p>
+  }
+
+  <div class="bottom-trust">
+    <p class="bottom-trust-title">Por que confiar en Ticketbarber</p>
+    <div class="bottom-trust-items">
+      <div class="bt-item">
+        <span class="bt-icon shield-icon-lg"></span>
+        <strong>Pago 100% seguro</strong>
+        <span>Gestionado por Stripe, el estandar mundial en pagos online.</span>
+      </div>
+      <div class="bt-item">
+        <span class="bt-icon calendar-icon"></span>
+        <strong>Sin permanencia</strong>
+        <span>Cancela en cualquier momento desde tu panel, sin penalizaciones.</span>
+      </div>
+      <div class="bt-item">
+        <span class="bt-icon support-icon"></span>
+        <strong>Soporte real</strong>
+        <span>Te ayudamos a configurar todo desde el primer dia.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="legal">
+    Al suscribirte aceptas nuestros
+    <a routerLink="/legal/terminos">Terminos de servicio</a> y
+    <a routerLink="/legal/privacidad">Politica de privacidad</a>.
+    Pagos gestionados de forma segura por Stripe.
+  </p>
+</main>
+
+<app-footer></app-footer>

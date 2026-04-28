@@ -1,0 +1,131 @@
+<app-header></app-header>
+
+<section class="subscription-page">
+  <header class="pricing-header">
+    <h1>Elige tu plan <span class="highlight">Pro</span></h1>
+    <p>Accede a todas las funciones de TicketBarber sin límites.</p>
+  </header>
+
+  <!-- Aviso contextual: redirigido por guard -->
+  @if (reasonBanner()) {
+    <div class="reason-banner" role="alert">
+      Necesitas una suscripción activa para acceder a esa sección.
+    </div>
+  }
+
+  <!-- Estado actual de suscripción -->
+  @if (subscriptionStore.isPro()) {
+    <div class="current-plan-banner">
+      <span class="badge badge-active">✓ Plan Pro activo</span>
+      <span>Próxima renovación: {{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</span>
+      @if (subscriptionStore.isTrialing()) {
+        <span class="badge badge-trial">Período de prueba</span>
+      }
+    </div>
+  }
+
+  <!-- Error de checkout -->
+  @if (checkoutError()) {
+    <div class="checkout-error" role="alert">
+      <strong>Error:</strong> {{ checkoutError() }}
+    </div>
+  }
+
+  @if (productsError()) {
+    <div class="checkout-error" role="alert">
+      <strong>No se pudieron cargar los planes.</strong> {{ productsError() }}
+      <button class="retry-btn" type="button" (click)="loadProducts()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Loading skeleton -->
+  @if (productsLoading()) {
+    <div class="plans-grid">
+      <div class="plan-card skeleton-card">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-price"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-btn"></div>
+      </div>
+      <div class="plan-card skeleton-card">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-price"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-btn"></div>
+      </div>
+    </div>
+  } @else if (!productsError()) {
+    <!-- Productos y precios dinámicos -->
+    @for (product of products(); track product.id) {
+      <div class="plans-grid">
+        @for (price of product.prices; track price.id) {
+          <div class="plan-card" [class.plan-recommended]="isRecommended(price)">
+            @if (isRecommended(price)) {
+              <div class="plan-badge">Recomendado</div>
+            }
+
+            <h2 class="plan-label">{{ price.interval === 'year' ? 'Anual' : 'Mensual' }}</h2>
+
+            <div class="plan-price">
+              <span class="amount">{{ formatAmount(price) | currency:price.currency:'symbol':'1.2-2':'es' }}</span>
+              <span class="period">{{ intervalLabel(price) }}</span>
+            </div>
+
+            @if (isRecommended(price)) {
+              @if (savingsLabel(product, price); as savings) {
+                <p class="plan-savings">{{ savings }}</p>
+              }
+            }
+
+            @if (parseFeatures(product.metadata); as features) {
+              @if (features.length > 0) {
+                <ul class="plan-features">
+                  @for (feature of features; track feature) {
+                    <li>✓ {{ feature }}</li>
+                  }
+                </ul>
+              }
+            }
+
+            @if (subscriptionStore.isPro()) {
+              <button
+                class="btn-subscribe btn-manage"
+                [class.btn-loading]="portalLoading()"
+                [disabled]="portalLoading()"
+                (click)="openPortal()">
+                @if (portalLoading()) {
+                  <span class="spinner"></span> Abriendo portal…
+                } @else {
+                  Gestionar suscripción
+                }
+              </button>
+            } @else {
+              <button
+                class="btn-subscribe"
+                [class.btn-loading]="loadingPriceId() === price.id"
+                [disabled]="loadingPriceId() !== null"
+                (click)="subscribe(price)">
+                @if (loadingPriceId() === price.id) {
+                  <span class="spinner"></span> Redirigiendo…
+                } @else {
+                  Suscribirse
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <p class="legal-note">
+    Puedes cancelar en cualquier momento. Pagos procesados de forma segura por
+    <strong>Stripe</strong>. Sin permanencia.
+  </p>
+</section>
+
+<app-footer></app-footer>
