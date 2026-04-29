@@ -7,27 +7,28 @@
 
   <section class="hero">
     <div class="hero-copy-block">
-      <p class="eyebrow">Sistema de turnos para barberias</p>
-      <h1>La forma elegante de organizar tu agenda diaria</h1>
+      <p class="eyebrow">Auto tickets para barberias</p>
+      <h1>Gestiona los turnos de tu barbería</h1>
       <p class="hero-copy">
-        Ticketbarber convierte la gestion de turnos en una experiencia clara para clientes y staff.
-        Menos friccion en recepcion, mas foco en el servicio.
+        Ticketbarber profesionaliza la gestion de turnos para barberias que quieren diferenciarse,
+        atender mejor y transmitir confianza desde el primer contacto.
       </p>
 
       <div class="hero-actions">
         @if (authStore.isAuthenticated()) {
           <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
         } @else {
-          <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
+          <a class="primary-cta" routerLink="/staff/register">Empieza gratis 7 dias</a>
         }
-        <a class="secondary-cta" href="#beneficios">Ver como funciona</a>
+        <a class="secondary-cta" routerLink="/contacto">Contactar con el equipo</a>
       </div>
 
       <div class="hero-chips">
-        <span>Sin esperas confusas</span>
-        <span>Ordena la cola automáticamente</span>
-        <span>Pantalla TV en vivo</span>
+        <span>Gestion de turnos barberia sin caos</span>
+        <span>Imagen premium para tu negocio</span>
+        <span>Clientes informados en tiempo real</span>
       </div>
+
     </div>
 
     <div class="hero-preview">
@@ -62,31 +63,61 @@
     </div>
   </section>
 
+  <section class="section final-cta">
+    <div>
+      <p class="eyebrow">Listo para modernizar tu barberia?</p>
+      <h2>Prueba Ticketbarber 7 dias <span class="highlight-gratis">GRATIS</span> cancela cuando quieras</h2>
+      <p>
+        Si quieres evaluar si encaja con tu negocio, te ayudamos a empezar con una ruta clara y sin fricción.
+      </p>
+    </div>
+    <div class="final-cta__actions">
+      @if (authStore.isAuthenticated()) {
+        <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
+      } @else {
+        <a class="primary-cta" routerLink="/staff/register">Empieza gratis 7 dias</a>
+      }
+      <a class="secondary-cta" routerLink="/contacto">Enviar consulta</a>
+    </div>
+  </section>
+
   <section class="section benefits" id="beneficios">
     <div class="section-head">
-      <p class="eyebrow">Beneficios</p>
-      <h2>Disenado para una tienda real</h2>
+      <p class="eyebrow">Beneficios para negocio</p>
+      <h2>Pon el orden que le hace falta a tu barbería.</h2>
     </div>
 
-    <div class="benefits-grid">
-      @for (benefit of benefits; track benefit.title) {
-        <article class="benefit-card">
-          <h3>{{ benefit.title }}</h3>
-          <p>{{ benefit.description }}</p>
-        </article>
-      }
+    <div class="benefits-layout">
+      <article class="benefits-lead-card">
+        <h3>Una barberia moderna no solo corta bien: tambien gestiona mejor</h3>
+        <p>
+          Ticketbarber te ayuda a ordenar la operacion diaria y elevar la experiencia de cliente,
+          para que tu negocio se vea profesional en cada punto de contacto.
+        </p>
+      </article>
+
+      <div class="benefits-grid">
+        @for (benefit of benefits; track benefit.title) {
+          <article class="benefit-card">
+            <h3>{{ benefit.title }}</h3>
+            <p>{{ benefit.description }}</p>
+            <span class="metric-chip">{{ benefit.metric }}</span>
+          </article>
+        }
+      </div>
     </div>
   </section>
 
   <section class="section flow" id="flujo">
     <div class="section-head">
       <p class="eyebrow">Como funciona</p>
-      <h2>Un proceso simple para el equipo</h2>
+      <h2>Implementacion para barberias</h2>
     </div>
 
     <div class="flow-grid">
       @for (step of flow; track step.title) {
         <article class="flow-step">
+          <span class="flow-step__kicker">{{ step.step }}</span>
           <h3>{{ step.title }}</h3>
           <p>{{ step.description }}</p>
         </article>
@@ -94,20 +125,69 @@
     </div>
   </section>
 
-  <section class="section final-cta">
-    <div>
-      <p class="eyebrow">Empieza hoy</p>
-      <h2>Entra al panel y configura tu jornada en minutos</h2>
-      <p>
-        Si es tu primera vez, al iniciar sesion con Google se preparara tu acceso para gestionar
-        Ticketbarber.
-      </p>
+  <!-- ── App Showcase Carousel ────────────────────────────────────────────── -->
+  <section class="section app-showcase" id="showcase">
+    <div class="section-head">
+      <p class="eyebrow">La app por dentro</p>
+      <h2>Diseñada para el dia a dia de tu barberia</h2>
     </div>
-    @if (authStore.isAuthenticated()) {
-      <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
-    } @else {
-      <a class="primary-cta" routerLink="/staff/login">Iniciar sesion</a>
-    }
+
+    <div class="carousel">
+      <div class="carousel-frame">
+        <img
+          [src]="carouselImages[currentIndex]"
+          [alt]="'Captura de la app ' + (currentIndex + 1)"
+          [class]="'carousel-img slide-' + slideDirection"
+        />
+      </div>
+
+      <button
+        class="carousel-btn carousel-btn--prev"
+        (click)="prevSlide()"
+        aria-label="Imagen anterior"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+
+      <button
+        class="carousel-btn carousel-btn--next"
+        (click)="nextSlide()"
+        aria-label="Imagen siguiente"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+
+      <div class="carousel-dots">
+        @for (img of carouselImages; track $index) {
+          <button
+            class="carousel-dot"
+            [class.carousel-dot--active]="$index === currentIndex"
+            (click)="goTo($index)"
+            [attr.aria-label]="'Ver imagen ' + ($index + 1)"
+          ></button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq">
+    <div class="section-head">
+      <p class="eyebrow">Preguntas frecuentes</p>
+      <h2>Respuestas Frecuentes</h2>
+    </div>
+
+    <div class="faq-list">
+      @for (item of faqs; track item.question) {
+        <article class="faq-item">
+          <h3>{{ item.question }}</h3>
+          <p>{{ item.answer }}</p>
+        </article>
+      }
+    </div>
   </section>
 
 </main>

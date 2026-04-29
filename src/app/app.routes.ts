@@ -4,8 +4,18 @@ import { staffGuestGuard } from './core/auth/staff-guest.guard';
 
 export const routes: Routes = [
   {
+    path: 'home',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+  {
     path: '',
     loadComponent: () => import('./features/home/home-page.component').then((m) => m.HomePageComponent)
+  },
+  {
+    path: 'contacto',
+    loadComponent: () =>
+      import('./features/contact/contact-page.component').then((m) => m.ContactPageComponent)
   },
   {
     path: 'kiosk',

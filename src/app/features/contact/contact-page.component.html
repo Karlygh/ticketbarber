@@ -1,0 +1,98 @@
+<app-header></app-header>
+
+<main class="contact-shell">
+  <div class="bg-blur blur-a"></div>
+  <div class="bg-blur blur-b"></div>
+  <div class="bg-grid"></div>
+
+  <section class="contact-hero">
+    <p class="eyebrow">Contacto comercial</p>
+    <h1>Habla con Ticketbarber y evalua si encaja en tu barberia</h1>
+    <p>
+      Si quieres dar un salto de modernidad con una gestion profesional de turnos,
+      cuentanos tu caso y te ayudamos a decidir con claridad.
+    </p>
+    <div class="hero-cta-row">
+      <a class="secondary-link" routerLink="/">Volver al inicio</a>
+      <a class="secondary-link" routerLink="/pricing">Ver planes</a>
+    </div>
+  </section>
+
+  <section class="contact-grid">
+    <article class="contact-value-card">
+      <h2>Que puedes esperar al contactarnos</h2>
+      <ul>
+        <li>Respuesta orientada a negocio, no solo tecnica.</li>
+        <li>Recomendacion segun tamano y flujo de tu barberia.</li>
+        <li>Ruta clara para empezar la prueba gratis de 7 dias.</li>
+      </ul>
+
+      <div class="trust-box">
+        <p class="trust-title">Confianza y seguridad</p>
+        <p>Pagos y suscripciones gestionados con Stripe.</p>
+        <p>Infraestructura desplegada sobre Firebase.</p>
+      </div>
+    </article>
+
+    <article class="contact-form-card">
+      <h2>Envia tu consulta</h2>
+      <p class="form-intro">
+        Completa este formulario y se abrira tu cliente de correo con el mensaje listo para enviar.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="sendEmail()" novalidate>
+        <label>
+          <span>Nombre de la barberia</span>
+          <input type="text" formControlName="businessName" placeholder="Ej. Barberia Centro" />
+          @if (fieldError('businessName'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>Nombre completo</span>
+          <input type="text" formControlName="fullName" placeholder="Tu nombre" />
+          @if (fieldError('fullName'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" formControlName="email" placeholder="tuemail@barberia.com" />
+          @if (fieldError('email'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>Telefono</span>
+          <input type="tel" formControlName="phone" placeholder="600000000" />
+          @if (fieldError('phone'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>Clientes al mes (aprox.)</span>
+          <input type="text" formControlName="monthlyClients" placeholder="Ej. 320" />
+          @if (fieldError('monthlyClients'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <label>
+          <span>Que quieres mejorar en tu barberia?</span>
+          <textarea formControlName="message" rows="5" placeholder="Cuanto mas contexto compartas, mejor podremos ayudarte."></textarea>
+          @if (fieldError('message'); as error) {
+            <small class="error">{{ error }}</small>
+          }
+        </label>
+
+        <button class="primary-cta" type="submit" [disabled]="!canSubmit()">Enviar consulta por email</button>
+      </form>
+    </article>
+  </section>
+</main>
+
+<app-footer [currentYear]="currentYear"></app-footer>

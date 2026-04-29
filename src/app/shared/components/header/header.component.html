@@ -1,5 +1,5 @@
 <header class="topbar">
-  <a class="brand" routerLink="/">
+  <a class="brand" routerLink="/home">
     <img src="/assets/logoticketpeq.png" alt="Ticketbarber" />
     <span>Ticketbarber</span>
   </a>
@@ -18,10 +18,11 @@
 
   <nav class="top-nav" [class.top-nav--open]="mobileMenuOpen()">
     <a
-      routerLink="/"
+      routerLink="/home"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
       (click)="closeMobileMenu()">Inicio</a>
+    <a routerLink="/contacto" routerLinkActive="active" (click)="closeMobileMenu()">Contacto</a>
     <a routerLink="/guia-tv" routerLinkActive="active" (click)="closeMobileMenu()">Guía TV</a>
     <a routerLink="/pricing" routerLinkActive="active" (click)="closeMobileMenu()">Precios</a>
     @if (authStore.isAuthenticated()) {
