@@ -221,8 +221,8 @@ h1 {
 
 .preview-card header span {
   font-size: 0.75rem;
-  color: var(--accent);
-  border: 1px solid var(--accent-border);
+  color: var(--state-error, #f87171);
+  border: 1px solid rgba(248, 113, 113, 0.35);
   border-radius: 999px;
   padding: 0.22rem 0.5rem;
 }
@@ -256,6 +256,44 @@ h1 {
   margin-top: 0.2rem;
   color: var(--text-copy);
   font-size: 0.93rem;
+}
+
+.queue-item__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.queue-item__label {
+  font-size: 0.82rem;
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.queue-item--active .queue-item__label {
+  color: #4ade80;
+  opacity: 1;
+}
+
+.queue-item--next .queue-item__label {
+  color: #b6f6cd;
+  opacity: 1;
+}
+
+.queue-item--waiting .queue-item__label {
+  color: var(--state-warning);
+  opacity: 1;
+}
+
+.queue-item__name {
+  color: var(--accent);
+  font-size: 0.95rem;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.18rem 0.4rem;
+  border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .section {

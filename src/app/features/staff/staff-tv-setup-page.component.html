@@ -1,13 +1,32 @@
 <app-header></app-header>
 
 <main class="tv-setup-shell">
+
+  <!-- HERO -->
   <section class="tv-setup-hero">
-    <div>
+    <div class="hero-content">
       <p class="eyebrow">Configuración fácil</p>
-      <h1>Así de rápido puedes poner la pantalla TV en tu barbería</h1>
+      <h1>Tu barbería con pantalla TV en menos de 5 minutos</h1>
       <p class="intro">
-        Ticketbarber está pensado para que cualquier barbería pueda dejar una televisión mostrando turnos en pocos minutos y sin instalación complicada.
+        Sin instalaciones, sin técnicos. Si tienes una TV con internet y una cuenta de Ticketbarber, ya lo tienes todo. Sigue estos 5 pasos y tendrás la pantalla lista para tus clientes.
       </p>
+
+      <div class="hero-badge">
+        <span class="badge-icon">⏱</span>
+        <span>Configuración de unos 5 minutos</span>
+      </div>
+
+      <div class="prereqs">
+        <p class="prereqs-title">Necesitas tener:</p>
+        <ul class="prereqs-list">
+          @for (req of prereqs; track req.label) {
+            <li>
+              <span class="prereq-icon">{{ req.icon }}</span>
+              <span>{{ req.label }}</span>
+            </li>
+          }
+        </ul>
+      </div>
     </div>
 
     <div class="hero-actions">
@@ -16,6 +35,7 @@
     </div>
   </section>
 
+  <!-- PASOS -->
   <section class="setup-steps">
     @for (step of steps; track step.number) {
       <article class="step-card">
@@ -23,18 +43,27 @@
           <div class="step-badge">Paso {{ step.number }}</div>
           <h2>{{ step.title }}</h2>
           <p>{{ step.description }}</p>
+          <button class="more-info-btn" (click)="openModal(step)" type="button">
+            Ver detalles del paso
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
         </div>
 
         <div class="step-media" role="img" [attr.aria-label]="step.imageLabel">
           <div class="step-media__frame">
-            <span class="step-media__label">{{ step.imageLabel }}</span>
-            <span class="step-media__hint">{{ step.imageHint }}</span>
+            @if (step.imageSrc) {
+              <img class="step-media__img" [src]="step.imageSrc" [alt]="step.imageLabel" />
+            } @else {
+              <span class="step-media__label">{{ step.imageLabel }}</span>
+              <span class="step-media__hint">{{ step.imageHint }}</span>
+            }
           </div>
         </div>
       </article>
     }
   </section>
 
+  <!-- CONSEJOS -->
   <section class="tips-card">
     <div class="tips-head">
       <p class="eyebrow eyebrow-soft">Consejos rápidos</p>
@@ -53,5 +82,49 @@
     </div>
   </section>
 </main>
+
+<!-- MODAL DE DETALLE -->
+@if (activeStep) {
+  <div class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" [attr.aria-label]="'Detalles del paso ' + activeStep.number">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div class="modal-step-badge">Paso {{ activeStep.number }}</div>
+        <h3 class="modal-title">{{ activeStep.title }}</h3>
+        <button class="modal-close" (click)="closeModal()" type="button" aria-label="Cerrar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-intro">{{ activeStep.detail.body }}</p>
+
+        <ol class="modal-substeps">
+          @for (sub of activeStep.detail.subSteps; track sub) {
+            <li>{{ sub }}</li>
+          }
+        </ol>
+
+        @if (activeStep.detail.warning) {
+          <div class="modal-warning">
+            <span class="modal-warning__icon">⚠️</span>
+            <p>{{ activeStep.detail.warning }}</p>
+          </div>
+        }
+
+        @if (activeStep.detail.tip) {
+          <div class="modal-tip">
+            <span class="modal-tip__icon">💡</span>
+            <p>{{ activeStep.detail.tip }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="primary-btn" (click)="closeModal()" type="button">Entendido</button>
+      </div>
+    </div>
+  </div>
+}
 
 <app-footer></app-footer>

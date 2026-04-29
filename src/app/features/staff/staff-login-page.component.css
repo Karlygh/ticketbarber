@@ -182,6 +182,23 @@ a {
   color: var(--accent-light);
 }
 
+.page-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+}
+
+/* ── Mobile fixes ── */
+@media (max-width: 500px) {
+  .back-btn {
+    position: static;
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* ── Toast (login) ── */
 .toast {
   position: fixed;

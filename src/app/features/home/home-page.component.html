@@ -25,7 +25,7 @@
 
       <div class="hero-chips">
         <span>Sin esperas confusas</span>
-        <span>Panel para staff</span>
+        <span>Ordena la cola automáticamente</span>
         <span>Pantalla TV en vivo</span>
       </div>
     </div>
@@ -37,16 +37,24 @@
           <span>En directo</span>
         </header>
         <ul>
-          <li>
-            <strong>Turno actual</strong>
+          <li class="queue-item queue-item--active">
+            <div class="queue-item__meta">
+              <strong class="queue-item__label">Turno actual</strong>
+              <strong class="queue-item__name">Carlos</strong>
+            </div>
             <span>Corte clasico · 6 min restantes</span>
           </li>
-          <li>
-            <strong>Siguiente</strong>
+          <li class="queue-item queue-item--next">
+            <div class="queue-item__meta">
+              <strong class="queue-item__label">Siguiente</strong>
+              <strong class="queue-item__name">Miguel</strong>
+            </div>
             <span>Arreglo de barba · 12 min aprox.</span>
           </li>
-          <li>
-            <strong>En espera</strong>
+          <li class="queue-item queue-item--waiting">
+            <div class="queue-item__meta">
+              <strong class="queue-item__label">En espera</strong>
+            </div>
             <span>5 clientes activos</span>
           </li>
         </ul>
