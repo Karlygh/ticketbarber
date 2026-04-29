@@ -387,6 +387,66 @@ export class QueueRepository {
     };
   }
 
+  // ── Métodos públicos para la TV (sin auth, shopId explícito) ─────────────
+
+  observeTicketsForShop(shopId: string): Observable<Ticket[]> {
+    const ref = this.runInInjectionContext(() =>
+      collection(this.firestore, `shops/${shopId}/tickets`)
+    );
+    return this.runInInjectionContext(() => collectionData(query(ref), { idField: 'id' })).pipe(
+      map((rows) =>
+        rows
+          .map((row) => this.toTicket(row as Ticket))
+          .sort((a, b) => {
+            if (a.status === 'done' && b.status !== 'done') return 1;
+            if (a.status !== 'done' && b.status === 'done') return -1;
+            return a.position - b.position || a.createdAtMs - b.createdAtMs;
+          })
+      ),
+      catchError(() => of([]))
+    );
+  }
+
+  observeServicesForShop(shopId: string): Observable<BarberService[]> {
+    const ref = this.runInInjectionContext(() =>
+      collection(this.firestore, `shops/${shopId}/services`)
+    );
+    return this.runInInjectionContext(() => collectionData(ref, { idField: 'id' })).pipe(
+      map((rows) =>
+        rows
+          .map((row) => {
+            const service = row as BarberService;
+            return {
+              ...service,
+              durationMin: Number(service.durationMin ?? 0),
+              active: Boolean(service.active)
+            };
+          })
+          .sort((a, b) => a.name.localeCompare(b.name))
+      ),
+      catchError(() => of([]))
+    );
+  }
+
+  observeSettingsForShop(shopId: string): Observable<QueueSettings> {
+    const ref = this.runInInjectionContext(() =>
+      doc(this.firestore, `shops/${shopId}/settings/queue`)
+    );
+    return this.runInInjectionContext(() => docData(ref, { idField: 'id' })).pipe(
+      map((row) => {
+        const raw = row as Partial<QueueSettings> | undefined;
+        if (!raw) return DEFAULT_QUEUE_SETTINGS;
+        return {
+          isOpen: raw.isOpen ?? true,
+          currentTicketId: raw.currentTicketId ?? null,
+          updatedAtMs: raw.updatedAtMs ?? 0,
+          lastAdvance: raw.lastAdvance ?? null
+        };
+      }),
+      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
+    );
+  }
+
   private activeQueue(tickets: Ticket[]): Ticket[] {
     return tickets
       .filter((ticket) => ticket.status !== 'done')

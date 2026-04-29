@@ -27,9 +27,14 @@
     <a routerLink="/pricing" routerLinkActive="active" (click)="closeMobileMenu()">Precios</a>
     @if (authStore.isAuthenticated()) {
       <a routerLink="/staff" routerLinkActive="active" (click)="closeMobileMenu()">Panel</a>
+      <a routerLink="/staff/devices" routerLinkActive="active" (click)="closeMobileMenu()">Mis TVs</a>
     }
 
     <div class="top-actions">
+      <a routerLink="/tv/connect" class="btn-tv-open" (click)="closeMobileMenu()">🖥️ Código TV</a>
+      @if (authStore.isAuthenticated()) {
+        <a routerLink="/activate" class="btn-tv-link" (click)="closeMobileMenu()">📺 Vincular TV</a>
+      }
       @if (authStore.isAuthenticated()) {
         @if (subscriptionStore.isPro()) {
           <span class="badge-pro">PRO</span>

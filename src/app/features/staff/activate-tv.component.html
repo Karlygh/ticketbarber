@@ -1,0 +1,62 @@
+<main class="activate-shell">
+  <header class="activate-head">
+    <p class="eyebrow">📺 Vincula tu TV con tu cuenta</p>
+    <h1>Introduce el código que ves en la TV</h1>
+    <p class="subtitle">
+      <strong>Paso 1:</strong> Abre <strong>ticketbarber.com/tv</strong> en tu TV<br>
+      <strong>Paso 2:</strong> La TV mostrará un código de 6 dígitos<br>
+      <strong>Paso 3:</strong> Escribe ese código aquí 👇
+    </p>
+  </header>
+
+  @if (status() === 'success') {
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <h2>¡TV vinculada correctamente!</h2>
+      <p>Tu pantalla ya está mostrando la cola de turnos en tiempo real.</p>
+      <div class="success-actions">
+        <button class="primary" (click)="goToDevices()">Ver mis dispositivos</button>
+        <button class="secondary" (click)="reset()">Vincular otra TV</button>
+      </div>
+    </div>
+  } @else {
+    <form class="activate-form" (ngSubmit)="activate()" #form="ngForm">
+      <label for="code-input">Código de 6 dígitos</label>
+      <input
+        id="code-input"
+        type="text"
+        inputmode="numeric"
+        placeholder="123-456"
+        autocomplete="off"
+        [class.input-error]="status() === 'error'"
+        (input)="onInput($event)"
+        [value]="formattedCode"
+        maxlength="7"
+      />
+
+      @if (status() === 'error') {
+        <p class="error-msg">{{ errorMsg() }}</p>
+      }
+
+      <p class="hint">
+        ℹ️ El código aparece en la TV al abrir ticketbarber.com/tv y expira en 15 minutos.
+      </p>
+
+      <button
+        type="submit"
+        class="primary btn-activate"
+        [disabled]="status() === 'loading' || rawCode().length !== 6">
+        @if (status() === 'loading') {
+          Conectando...
+        } @else {
+          Conectar TV
+        }
+      </button>
+    </form>
+  }
+
+  <nav class="back-links">
+    <a routerLink="/staff">← Volver al panel</a>
+    <a routerLink="/staff/devices">Mis dispositivos</a>
+  </nav>
+</main>

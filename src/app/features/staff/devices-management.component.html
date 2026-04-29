@@ -1,0 +1,73 @@
+<main class="devices-shell">
+  <header class="devices-head">
+    <div>
+      <p class="eyebrow">Pantallas</p>
+      <h1>Mis dispositivos</h1>
+      <p class="subtitle">TVs y pantallas vinculadas a tu cuenta</p>
+    </div>
+    <a routerLink="/activate" class="btn-add">
+      + Vincular nueva TV
+    </a>
+  </header>
+
+  @if (devices().length === 0) {
+    <div class="empty-state">
+      <p class="empty-icon">🖥️</p>
+      <p class="empty-title">Sin dispositivos vinculados</p>
+      <p class="empty-sub">Abre <strong>/tv</strong> en tu pantalla e introduce el código desde esta app.</p>
+      <a routerLink="/activate" class="btn-add-lg">Vincular primera TV</a>
+    </div>
+  } @else {
+    <ul class="devices-list">
+      @for (device of devices(); track device.deviceId) {
+        <li class="device-card" [class.unlinking]="unlinkingId() === device.deviceId">
+
+          <div class="device-info">
+            <span class="device-icon">🖥️</span>
+            @if (renamingId() === device.deviceId) {
+              <input
+                class="rename-input"
+                type="text"
+                [value]="newName()"
+                (input)="newName.set($any($event.target).value)"
+                (keydown.enter)="confirmRename()"
+                (keydown.escape)="cancelRename()"
+                autofocus
+              />
+            } @else {
+              <div class="device-meta">
+                <strong class="device-name">{{ device.name }}</strong>
+                <span class="device-last-seen">Última conexión: {{ formatLastSeen(device.lastSeen) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="device-actions">
+            @if (renamingId() === device.deviceId) {
+              <button class="btn-confirm" (click)="confirmRename()">Guardar</button>
+              <button class="btn-cancel" (click)="cancelRename()">Cancelar</button>
+            } @else {
+              <button class="btn-rename" (click)="startRename(device)">Renombrar</button>
+              <button
+                class="btn-unlink"
+                (click)="unlink(device.deviceId)"
+                [disabled]="unlinkingId() !== null">
+                @if (unlinkingId() === device.deviceId) {
+                  Desvinculando...
+                } @else {
+                  Desvincular
+                }
+              </button>
+            }
+          </div>
+
+        </li>
+      }
+    </ul>
+  }
+
+  <nav class="back-links">
+    <a routerLink="/staff">← Volver al panel</a>
+    <a routerLink="/activate">Vincular TV</a>
+  </nav>
+</main>

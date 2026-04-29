@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { staffAuthGuard } from './core/auth/staff-auth.guard';
 import { staffGuestGuard } from './core/auth/staff-guest.guard';
+import { TvConnectComponent } from './features/tv/tv-connect.component';
 
 export const routes: Routes = [
   {
@@ -25,8 +26,39 @@ export const routes: Routes = [
   },
   {
     path: 'tv',
+    children: [
+      {
+        path: 'connect',
+        component: TvConnectComponent
+      },
+      {
+        path: 'pair',
+        loadComponent: () =>
+          import('./features/tv/tv-pairing.component').then(m => m.TvPairingComponent)
+      },
+      {
+        path: ':shopId',
+        loadComponent: () =>
+          import('./features/tv/tv-page.component').then(m => m.TvPageComponent)
+      },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/tv/tv-page.component').then(m => m.TvPageComponent)
+      }
+    ]
+  },
+  {
+    path: 'activate',
     canActivate: [staffAuthGuard],
-    loadComponent: () => import('./features/tv/tv-page.component').then((m) => m.TvPageComponent)
+    loadComponent: () =>
+      import('./features/staff/activate-tv.component').then(m => m.ActivateTvComponent)
+  },
+  {
+    path: 'staff/devices',
+    canActivate: [staffAuthGuard],
+    loadComponent: () =>
+      import('./features/staff/devices-management.component').then(m => m.DevicesManagementComponent)
   },
   {
     path: 'guia-tv',

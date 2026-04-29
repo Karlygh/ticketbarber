@@ -1,0 +1,58 @@
+<main class="pairing-shell">
+
+  @if (status() === 'loading') {
+    <div class="state-loading">
+      <div class="spinner"></div>
+      <p>Generando código...</p>
+    </div>
+  }
+
+  @if (status() === 'linking') {
+    <div class="state-linking">
+      <div class="spinner"></div>
+      <p>✅ TV vinculada. Cargando cola...</p>
+    </div>
+  }
+
+  @if (status() === 'error') {
+    <div class="state-error">
+      <p class="error-msg">{{ errorMsg() }}</p>
+      <button (click)="regenerate()">Reintentar</button>
+    </div>
+  }
+
+  @if (status() === 'expired') {
+    <div class="state-expired">
+      <p class="eyebrow">Código expirado</p>
+      <h1>El código ha caducado</h1>
+      <p class="subtitle">Genera uno nuevo para continuar</p>
+      <button class="btn-regenerate" (click)="regenerate()">Generar nuevo código</button>
+    </div>
+  }
+
+  @if (status() === 'waiting') {
+    <div class="state-waiting">
+      <p class="eyebrow">Vincula esta TV con tu cuenta</p>
+      <h1>Código de vinculación</h1>
+
+      <div class="code-display" aria-label="Código de vinculación">
+        {{ formattedCode() }}
+      </div>
+
+      <p class="instructions">
+        <strong>Desde tu móvil:</strong><br>
+        1. Inicia sesión en ticketbarber.com<br>
+        2. Haz clic en el botón <strong>"📺 Vincular TV"</strong><br>
+        3. Introduce este código de 6 dígitos
+      </p>
+
+      <div class="status-row">
+        <span class="dot-pulse"></span>
+        <span>Esperando vinculación...</span>
+      </div>
+
+      <p class="countdown">Expira en: {{ formatTime(secondsLeft()) }}</p>
+    </div>
+  }
+
+</main>

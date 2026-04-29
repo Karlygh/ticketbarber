@@ -85,6 +85,29 @@ service cloud.firestore {
       }
     }
 
+    // ── Códigos de vinculación TV (temporales, 15 min) ────────────────────
+    match /device_codes/{codeId} {
+      // La TV (sin auth) puede crear y leer el documento
+      allow create: if true;
+      allow read:   if true;
+      // Solo el usuario autenticado puede activar (rellenar userId)
+      allow update: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && resource.data.userId == '';
+      allow delete: if false;
+    }
+
+    // ── Dispositivos vinculados (permanentes) ─────────────────────────────
+    match /devices/{deviceId} {
+      // Solo el propietario puede leer, crear, actualizar y eliminar
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+    }
+
     // ── Denegar todo lo demás por defecto ─────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
