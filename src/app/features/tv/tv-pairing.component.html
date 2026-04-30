@@ -1,58 +1,76 @@
+<app-header></app-header>
+
 <main class="pairing-shell">
-
-  @if (status() === 'loading') {
-    <div class="state-loading">
-      <div class="spinner"></div>
-      <p>Generando código...</p>
-    </div>
-  }
-
-  @if (status() === 'linking') {
-    <div class="state-linking">
-      <div class="spinner"></div>
-      <p>✅ TV vinculada. Cargando cola...</p>
-    </div>
-  }
-
-  @if (status() === 'error') {
-    <div class="state-error">
-      <p class="error-msg">{{ errorMsg() }}</p>
-      <button (click)="regenerate()">Reintentar</button>
-    </div>
-  }
-
-  @if (status() === 'expired') {
-    <div class="state-expired">
-      <p class="eyebrow">Código expirado</p>
-      <h1>El código ha caducado</h1>
-      <p class="subtitle">Genera uno nuevo para continuar</p>
-      <button class="btn-regenerate" (click)="regenerate()">Generar nuevo código</button>
-    </div>
-  }
-
-  @if (status() === 'waiting') {
-    <div class="state-waiting">
-      <p class="eyebrow">Vincula esta TV con tu cuenta</p>
-      <h1>Código de vinculación</h1>
-
-      <div class="code-display" aria-label="Código de vinculación">
-        {{ formattedCode() }}
+  <section class="pairing-card">
+    @if (status() === 'loading') {
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Preparando tu código...</p>
       </div>
+    }
 
-      <p class="instructions">
-        <strong>Desde tu móvil:</strong><br>
-        1. Inicia sesión en ticketbarber.com<br>
-        2. Haz clic en el botón <strong>"📺 Vincular TV"</strong><br>
-        3. Introduce este código de 6 dígitos
-      </p>
-
-      <div class="status-row">
-        <span class="dot-pulse"></span>
-        <span>Esperando vinculación...</span>
+    @if (status() === 'error') {
+      <div class="state-error">
+        <p class="eyebrow">No disponible</p>
+        <h1>No pudimos cargar el código</h1>
+        <p class="error-msg">{{ errorMsg() }}</p>
+        <button type="button" (click)="regenerate()">Reintentar</button>
       </div>
+    }
 
-      <p class="countdown">Expira en: {{ formatTime(secondsLeft()) }}</p>
-    </div>
-  }
+    @if (status() === 'expired') {
+      <div class="state-expired">
+        <p class="eyebrow">Código expirado</p>
+        <h1>Genera un código nuevo</h1>
+        <p class="subtitle">El anterior ya no se puede usar en la TV.</p>
+        <button class="btn-regenerate" type="button" (click)="regenerate()">Generar nuevo código</button>
+      </div>
+    }
 
+    @if (status() === 'ready') {
+      <div class="state-ready">
+        <p class="eyebrow">Vincular TV</p>
+        <h1>Introduce este código en la TV</h1>
+        <p class="subtitle">Si vuelves a entrar antes de que caduque, verás este mismo código.</p>
+
+        <div class="code-display" aria-label="Código de vinculación">
+          {{ formattedCode() }}
+        </div>
+
+        <div class="status-row">
+          <span class="dot-pulse"></span>
+          <span>Expira en {{ formatTime(secondsLeft()) }}</span>
+        </div>
+
+        <div class="instructions">
+          <p><strong>1.</strong> En la TV abre la ruta <strong>/activate</strong>.</p>
+          <p><strong>2.</strong> Pulsa <strong>Ingresar código TV</strong> si estás navegando desde la web.</p>
+          <p><strong>3.</strong> Escribe este código de 6 dígitos y la pantalla quedará vinculada.</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn-regenerate" type="button" (click)="regenerate()">Generar nuevo código</button>
+          <a class="btn-secondary" [routerLink]="routes.staff.devices">Mis TVs</a>
+        </div>
+      </div>
+    }
+
+    @if (status() === 'linked') {
+      <div class="state-linked">
+        <div class="success-icon">OK</div>
+        <p class="eyebrow">Vinculación completada</p>
+        <h1>La TV ya se ha vinculado correctamente</h1>
+        <p class="subtitle">Esta pantalla ya quedó conectada con tu cuenta y puede mostrar los turnos en tiempo real.</p>
+
+        @if (linkedDeviceId()) {
+          <p class="linked-meta">Dispositivo vinculado: {{ linkedDeviceId() }}</p>
+        }
+
+        <div class="actions">
+          <a class="btn-secondary" [routerLink]="routes.staff.devices">Ver mis TVs</a>
+          <button class="btn-regenerate" type="button" (click)="regenerate()">Vincular otra TV</button>
+        </div>
+      </div>
+    }
+  </section>
 </main>

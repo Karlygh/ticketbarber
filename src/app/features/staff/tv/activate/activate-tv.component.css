@@ -1,6 +1,3 @@
-/* ═══════════════════════════════════════════════════════
-   ACTIVATE TV PAGE — Accent: Kiosk cyan
-   ═══════════════════════════════════════════════════════ */
 :host {
   display: block;
   min-height: 100dvh;
@@ -12,7 +9,7 @@
 .activate-shell {
   width: min(520px, 94vw);
   margin: 0 auto;
-  padding: 2.4rem 0 3rem;
+  padding: 2.8rem 0 3rem;
   animation: fade-up 0.25s ease both;
 }
 
@@ -96,7 +93,7 @@ input.input-error {
 
 .hint {
   margin: 0.4rem 0 0;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: var(--text-copy);
   opacity: 0.75;
 }
@@ -181,6 +178,8 @@ button:disabled {
 .back-links {
   margin-top: 1.5rem;
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 1.5rem;
   font-size: 0.88rem;
 }

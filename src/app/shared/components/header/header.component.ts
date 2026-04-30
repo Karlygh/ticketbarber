@@ -10,7 +10,7 @@ import { APP_ROUTES } from '../../routing/app-routes';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {
   readonly authStore = inject(AuthStore);
@@ -18,6 +18,7 @@ export class HeaderComponent {
   private readonly router = inject(Router);
   readonly routes = APP_ROUTES;
   readonly mobileMenuOpen = signal(false);
+  readonly userMenuOpen = signal(false);
 
   get accountLabel(): string {
     const user = this.authStore.user();
@@ -26,11 +27,21 @@ export class HeaderComponent {
   }
 
   toggleMobileMenu(): void {
+    this.userMenuOpen.set(false);
     this.mobileMenuOpen.update((open) => !open);
   }
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+    this.userMenuOpen.set(false);
+  }
+
+  toggleUserMenu(): void {
+    this.userMenuOpen.update((open) => !open);
+  }
+
+  closeUserMenu(): void {
+    this.userMenuOpen.set(false);
   }
 
   async signOut(): Promise<void> {

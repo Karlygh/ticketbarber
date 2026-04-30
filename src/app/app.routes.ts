@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { staffAuthGuard } from './core/auth/staff-auth.guard';
 import { staffGuestGuard } from './core/auth/staff-guest.guard';
-import { TvConnectComponent } from './features/tv/tv-connect.component';
 
 export const routes: Routes = [
   {
@@ -28,11 +27,8 @@ export const routes: Routes = [
     path: 'tv',
     children: [
       {
-        path: 'connect',
-        component: TvConnectComponent
-      },
-      {
         path: 'pair',
+        canActivate: [staffAuthGuard],
         loadComponent: () =>
           import('./features/tv/tv-pairing.component').then(m => m.TvPairingComponent)
       },
@@ -50,9 +46,13 @@ export const routes: Routes = [
   },
   {
     path: 'activate',
-    canActivate: [staffAuthGuard],
     loadComponent: () =>
       import('./features/staff/tv/activate/activate-tv.component').then(m => m.ActivateTvComponent)
+  },
+  {
+    path: 'staff/tv/generate-code',
+    redirectTo: 'tv/pair',
+    pathMatch: 'full'
   },
   {
     path: 'staff/devices',

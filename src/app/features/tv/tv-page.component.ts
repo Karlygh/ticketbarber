@@ -6,7 +6,6 @@ import { QueueRepository } from '../../core/data/queue.repository';
 import { TvAuthService } from '../../core/services/tv-auth.service';
 import { DEFAULT_QUEUE_SETTINGS, QueueSettings } from '../../core/models/settings.model';
 import { Ticket } from '../../core/models/ticket.model';
-import { AuthStore } from '../../core/stores/auth.store';
 import { TvQueueRow } from '../../core/stores/queue.store';
 
 @Component({
@@ -21,7 +20,6 @@ export class TvPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly repository = inject(QueueRepository);
   private readonly tvAuthService = inject(TvAuthService);
-  private readonly authStore = inject(AuthStore);
 
   readonly now = signal(Date.now());
   private readonly tickets = signal<Ticket[]>([]);
@@ -43,24 +41,15 @@ export class TvPageComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     const shopIdFromRoute = this.route.snapshot.params['shopId'] as string | undefined;
     const shopIdFromStorage = this.tvAuthService.getShopId();
-    let shopIdFromSession = this.authStore.user()?.uid;
-
-    if (!shopIdFromRoute && !shopIdFromStorage && !shopIdFromSession) {
-      await this.authStore.waitUntilReady();
-      shopIdFromSession = this.authStore.user()?.uid;
-    }
-
-    const shopId = shopIdFromRoute ?? shopIdFromStorage ?? shopIdFromSession;
+    const shopId = shopIdFromRoute ?? shopIdFromStorage;
 
     if (!shopId) {
-      void this.router.navigate(['/tv/pair']);
+      void this.router.navigate(['/activate']);
       return;
     }
 
     if (shopIdFromRoute && !shopIdFromStorage) {
       this.tvAuthService.saveBinding(shopIdFromRoute);
-    } else if (!shopIdFromStorage && shopIdFromSession) {
-      this.tvAuthService.saveBinding(shopIdFromSession);
     }
 
     this.subs.push(

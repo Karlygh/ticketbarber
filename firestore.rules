@@ -8,6 +8,39 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    function isCodeInactive() {
+      return resource.data.expiresAt <= request.time.toMillis()
+             || resource.data.consumedAt > 0
+             || resource.data.revokedAt > 0;
+    }
+
+    function canRedeemPairingCode(codeId) {
+      return request.auth == null
+             && resource.data.user_code == codeId
+             && resource.data.expiresAt > request.time.toMillis()
+             && resource.data.consumedAt == 0
+             && resource.data.revokedAt == 0
+             && request.resource.data.userId == resource.data.userId
+             && request.resource.data.user_code == resource.data.user_code
+             && request.resource.data.createdAt == resource.data.createdAt
+             && request.resource.data.expiresAt == resource.data.expiresAt
+             && request.resource.data.revokedAt == resource.data.revokedAt
+             && request.resource.data.consumedAt > 0
+             && request.resource.data.deviceId is string
+             && request.resource.data.deviceId.size() > 0;
+    }
+
+    function canCreateDeviceFromCode(deviceId) {
+      return request.auth == null
+             && request.resource.data.deviceId == deviceId
+             && request.resource.data.activationCode is string
+             && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.userId == request.resource.data.userId
+             && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.deviceId == deviceId
+             && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.consumedAt > 0
+             && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.revokedAt == 0
+             && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.expiresAt > request.time.toMillis();
+    }
+
     // ── Perfil del usuario ─────────────────────────────────────────────────
     // Solo el propio usuario puede leer/actualizar su perfil.
     // La creación se hace desde el backend (AuthStore) justo después del login.
@@ -87,14 +120,25 @@ service cloud.firestore {
 
     // ── Códigos de vinculación TV (temporales, 15 min) ────────────────────
     match /device_codes/{codeId} {
-      // La TV (sin auth) puede crear y leer el documento
-      allow create: if true;
-      allow read:   if true;
-      // Solo el usuario autenticado puede activar (rellenar userId)
-      allow update: if request.auth != null
+      // El barbero autenticado genera o reutiliza códigos temporales.
+      allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
-                    && resource.data.userId == '';
-      allow delete: if false;
+                    && request.resource.data.user_code == codeId
+                    && request.resource.data.expiresAt > request.time.toMillis();
+      allow read:   if true;
+      allow update: if (
+                      request.auth != null
+                      && resource.data.userId == request.auth.uid
+                      && request.resource.data.userId == request.auth.uid
+                      && request.resource.data.user_code == codeId
+                    ) || (
+                      request.auth != null
+                      && request.resource.data.userId == request.auth.uid
+                      && request.resource.data.user_code == codeId
+                      && isCodeInactive()
+                    ) || canRedeemPairingCode(codeId);
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
     }
 
     // ── Dispositivos vinculados (permanentes) ─────────────────────────────
@@ -103,7 +147,8 @@ service cloud.firestore {
       allow read, delete: if request.auth != null
                           && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid;
+                    && request.resource.data.userId == request.auth.uid
+                    || canCreateDeviceFromCode(deviceId);
       allow update: if request.auth != null
                     && resource.data.userId == request.auth.uid;
     }

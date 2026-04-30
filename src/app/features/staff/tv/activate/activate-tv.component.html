@@ -1,22 +1,22 @@
 <main class="activate-shell">
   <header class="activate-head">
-    <p class="eyebrow">📺 Vincula tu TV con tu cuenta</p>
-    <h1>Introduce el código que ves en la TV</h1>
+    <p class="eyebrow">Pantalla TV</p>
+    <h1>Ingresa el código de vinculación</h1>
     <p class="subtitle">
-      <strong>Paso 1:</strong> Abre <strong>ticketbarber.com/tv</strong> en tu TV<br>
-      <strong>Paso 2:</strong> La TV mostrará un código de 6 dígitos<br>
-      <strong>Paso 3:</strong> Escribe ese código aquí 👇
+      <strong>Paso 1:</strong> Inicia sesión en tu móvil y abre <strong>Vincular TV</strong><br>
+      <strong>Paso 2:</strong> Copia el código de 6 dígitos que aparece ahí<br>
+      <strong>Paso 3:</strong> Escríbelo en esta pantalla para completar la vinculación
     </p>
   </header>
 
   @if (status() === 'success') {
     <div class="success-card">
       <div class="success-icon">✅</div>
-      <h2>¡TV vinculada correctamente!</h2>
-      <p>Tu pantalla ya está mostrando la cola de turnos en tiempo real.</p>
+      <h2>TV vinculada correctamente</h2>
+      <p>En unos segundos abrirás la cola de turnos en esta pantalla.</p>
       <div class="success-actions">
-        <button class="primary" (click)="goToDevices()">Ver mis dispositivos</button>
-        <button class="secondary" (click)="reset()">Vincular otra TV</button>
+        <button class="primary" (click)="openTvView()">Abrir pantalla TV</button>
+        <button class="secondary" (click)="reset()">Ingresar otro código</button>
       </div>
     </div>
   } @else {
@@ -39,7 +39,7 @@
       }
 
       <p class="hint">
-        ℹ️ El código aparece en la TV al abrir ticketbarber.com/tv y expira en 15 minutos.
+        El código se genera desde la cuenta del barbero, dura 15 minutos y solo puede usarse una vez.
       </p>
 
       <button
@@ -47,16 +47,16 @@
         class="primary btn-activate"
         [disabled]="status() === 'loading' || rawCode().length !== 6">
         @if (status() === 'loading') {
-          Conectando...
+          Vinculando...
         } @else {
-          Conectar TV
+          Vincular pantalla
         }
       </button>
     </form>
   }
 
   <nav class="back-links">
-    <a [routerLink]="routes.staff.root">← Volver al panel</a>
-    <a [routerLink]="routes.staff.devices">Mis dispositivos</a>
+    <a [routerLink]="routes.root">Volver al inicio</a>
+    <a [routerLink]="routes.staff.login">Iniciar sesión</a>
   </nav>
 </main>

@@ -46,8 +46,9 @@ export class ActivateTvComponent {
     this.errorMsg.set('');
 
     try {
-      await this.tvAuthService.activateCode(code);
+      await this.tvAuthService.redeemCode(code);
       this.status.set('success');
+      window.setTimeout(() => void this.router.navigateByUrl(this.routes.tv), 1400);
     } catch (err: unknown) {
       this.status.set('error');
       this.errorMsg.set(err instanceof Error ? err.message : 'Error al vincular la TV');
@@ -60,7 +61,7 @@ export class ActivateTvComponent {
     this.errorMsg.set('');
   }
 
-  goToDevices(): void {
-    void this.router.navigateByUrl(this.routes.staff.devices);
+  openTvView(): void {
+    void this.router.navigateByUrl(this.routes.tv);
   }
 }

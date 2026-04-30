@@ -1,113 +1,115 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { RouterLink } from '@angular/router';
 import { TvAuthService } from '../../core/services/tv-auth.service';
+import { HeaderComponent } from '../../shared/components/header/header.component';
+import { APP_ROUTES } from '../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-tv-pairing',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, RouterLink, HeaderComponent],
   templateUrl: './tv-pairing.component.html',
   styleUrl: './tv-pairing.component.css'
 })
 export class TvPairingComponent implements OnInit, OnDestroy {
-  private readonly router = inject(Router);
   private readonly tvAuthService = inject(TvAuthService);
+  readonly routes = APP_ROUTES;
 
   readonly code = signal('');
+  readonly now = signal(Date.now());
   readonly formattedCode = computed(() => {
     const c = this.code();
     return c ? `${c.slice(0, 3)}-${c.slice(3)}` : '';
   });
-  readonly secondsLeft = signal(900);
-  readonly status = signal<'loading' | 'waiting' | 'expired' | 'linking' | 'error'>('loading');
+  readonly expiresAt = signal(0);
+  readonly secondsLeft = computed(() => {
+    const expiresAt = this.expiresAt();
+    if (!expiresAt) return 0;
+    return Math.max(0, Math.ceil((expiresAt - this.now()) / 1000));
+  });
+  readonly status = signal<'loading' | 'ready' | 'linked' | 'expired' | 'error'>('loading');
   readonly errorMsg = signal('');
+  readonly linkedDeviceId = signal('');
 
-  private activationSub?: Subscription;
   private countdownInterval?: number;
+  private linkCheckInterval?: number;
 
   async ngOnInit(): Promise<void> {
-    await this.initPairing();
+    this.startCountdown();
+    await this.loadCode();
   }
 
-  private async initPairing(): Promise<void> {
+  private async loadCode(forceNew = false): Promise<void> {
+    this.stopLinkCheck();
     this.status.set('loading');
     this.errorMsg.set('');
-
-    const deviceId = this.tvAuthService.getDeviceId();
-    const pending = this.tvAuthService.getPendingCode();
-
-    if (pending) {
-      this.code.set(pending.code);
-      this.secondsLeft.set(this.secondsUntil(pending.expiresAt));
-      this.status.set('waiting');
-      this.startCountdown();
-      this.watchActivation(pending.code);
-      return;
-    }
-
-    this.secondsLeft.set(900);
-    const code = this.tvAuthService.generateCode();
-    this.code.set(code);
+    this.linkedDeviceId.set('');
 
     try {
-      await this.tvAuthService.createDeviceCode(code, deviceId);
+      const activeCode = await this.tvAuthService.ensurePairingCode(forceNew);
+      this.code.set(activeCode.code);
+      this.expiresAt.set(activeCode.expiresAt);
+      const nextStatus = this.secondsLeft() > 0 ? 'ready' : 'expired';
+      this.status.set(nextStatus);
+      if (nextStatus === 'ready') {
+        this.startLinkCheck(activeCode.code);
+      }
     } catch {
       this.status.set('error');
-      this.errorMsg.set('Error al generar el código. Recarga la página.');
-      return;
+      this.errorMsg.set('No pudimos preparar tu código. Inténtalo otra vez.');
     }
-
-    this.status.set('waiting');
-    this.startCountdown();
-    this.watchActivation(code);
   }
 
   private startCountdown(): void {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
     this.countdownInterval = window.setInterval(() => {
-      this.secondsLeft.update(s => {
-        if (s <= 1) {
-          this.handleExpiry();
-          return 0;
-        }
-        return s - 1;
-      });
+      this.now.set(Date.now());
+      if (this.status() === 'ready' && this.secondsLeft() <= 0) {
+        this.stopLinkCheck();
+        this.status.set('expired');
+      }
     }, 1000);
   }
 
-  private watchActivation(code: string): void {
-    this.activationSub?.unsubscribe();
-    this.activationSub = this.tvAuthService.watchCodeActivation(code).subscribe(userId => {
-      if (userId) {
-        this.cleanup();
-        this.status.set('linking');
-        this.tvAuthService.clearPendingCode();
-        this.tvAuthService.saveBinding(userId);
-        void this.router.navigate(['/tv', userId]);
-      }
-    });
+  private startLinkCheck(code: string): void {
+    this.stopLinkCheck();
+    this.linkCheckInterval = window.setInterval(() => {
+      void this.checkIfLinked(code);
+    }, 3000);
   }
 
-  private handleExpiry(): void {
-    this.cleanup();
-    this.tvAuthService.clearPendingCode();
-    this.status.set('expired');
+  private stopLinkCheck(): void {
+    if (this.linkCheckInterval) clearInterval(this.linkCheckInterval);
+  }
+
+  private async checkIfLinked(code: string): Promise<void> {
+    if (this.status() !== 'ready' || this.code() !== code) {
+      return;
+    }
+
+    const pairingStatus = await this.tvAuthService.getPairingCodeStatus(code);
+
+    if (!pairingStatus.exists || pairingStatus.expired) {
+      this.stopLinkCheck();
+      this.status.set('expired');
+      return;
+    }
+
+    if (pairingStatus.consumed) {
+      this.stopLinkCheck();
+      this.linkedDeviceId.set(pairingStatus.deviceId ?? '');
+      this.status.set('linked');
+    }
   }
 
   private cleanup(): void {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
-    this.activationSub?.unsubscribe();
+    this.stopLinkCheck();
   }
 
   async regenerate(): Promise<void> {
-    this.cleanup();
-    this.tvAuthService.clearPendingCode();
-    await this.initPairing();
-  }
-
-  private secondsUntil(expiresAt: number): number {
-    return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    await this.loadCode(true);
   }
 
   formatTime(seconds: number): string {

@@ -24,25 +24,33 @@
       (click)="closeMobileMenu()">Inicio</a>
     <a [routerLink]="routes.contact" routerLinkActive="active" (click)="closeMobileMenu()">Contacto</a>
     <a [routerLink]="routes.guiaTv" routerLinkActive="active" (click)="closeMobileMenu()">Guía TV</a>
+    <a [routerLink]="routes.activateTv" routerLinkActive="active" (click)="closeMobileMenu()">Ingresar código TV</a>
     <a [routerLink]="routes.pricing" routerLinkActive="active" (click)="closeMobileMenu()">Precios</a>
-    @if (authStore.isAuthenticated()) {
-      <a [routerLink]="routes.staff.root" routerLinkActive="active" (click)="closeMobileMenu()">Panel</a>
-      <a [routerLink]="routes.staff.devices" routerLinkActive="active" (click)="closeMobileMenu()">Mis TVs</a>
-    }
 
     <div class="top-actions">
-      <a [routerLink]="routes.tvConnect" class="btn-tv-open" (click)="closeMobileMenu()">🖥️ Código TV</a>
       @if (authStore.isAuthenticated()) {
-        <a [routerLink]="routes.activate" class="btn-tv-link" (click)="closeMobileMenu()">📺 Vincular TV</a>
-      }
-      @if (authStore.isAuthenticated()) {
+        <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
         @if (subscriptionStore.isPro()) {
           <span class="badge-pro">PRO</span>
         }
-        <a class="top-account" [routerLink]="routes.account" (click)="closeMobileMenu()">
-          {{ accountLabel }}
-        </a>
-        <button class="top-logout" type="button" (click)="signOut()">Salir</button>
+        <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
+          <button
+            class="user-trigger"
+            type="button"
+            [attr.aria-expanded]="userMenuOpen()"
+            aria-label="Abrir menú de usuario"
+            (click)="toggleUserMenu()">
+            <span class="top-account">{{ accountLabel }}</span>
+            <span class="user-gear" aria-hidden="true">⚙</span>
+          </button>
+
+          <div class="user-dropdown">
+            <a [routerLink]="routes.staff.root" (click)="closeMobileMenu()">Panel</a>
+            <a [routerLink]="routes.staff.devices" (click)="closeMobileMenu()">Mis TVs</a>
+            <a [routerLink]="routes.account" (click)="closeMobileMenu()">Mi cuenta</a>
+            <button class="top-logout" type="button" (click)="signOut()">Cerrar sesión</button>
+          </div>
+        </div>
       } @else {
         <a class="top-login" [routerLink]="routes.staff.login" (click)="closeMobileMenu()">Iniciar sesión</a>
       }

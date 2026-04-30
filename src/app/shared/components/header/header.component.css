@@ -88,6 +88,78 @@
   flex-shrink: 0;
 }
 
+.user-menu {
+  position: relative;
+}
+
+.user-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 0.45rem 0.8rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.user-trigger:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--accent-border);
+}
+
+.user-gear {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.55rem);
+  min-width: 190px;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: rgba(8, 22, 42, 0.98);
+  box-shadow: var(--glass-shadow);
+  z-index: 25;
+}
+
+.user-menu--open .user-dropdown {
+  display: flex;
+}
+
+.user-dropdown a,
+.user-dropdown button {
+  width: 100%;
+  text-align: left;
+  padding: 0.72rem 0.8rem;
+  border-radius: 0.85rem;
+  color: var(--text-copy);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.user-dropdown a::after {
+  display: none;
+}
+
+.user-dropdown a:hover,
+.user-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
 .menu-toggle {
   display: none;
   width: 44px;
@@ -144,7 +216,6 @@
 
 /* Nombre/cuenta */
 .top-account {
-  text-decoration: none;
   color: var(--text-copy);
   font-size: 0.88rem;
   max-width: 210px;
@@ -158,26 +229,14 @@
   color: var(--accent-light);
 }
 
-/* Botón salir */
 .top-logout {
-  background: transparent;
-  border: 1px solid var(--border-accent);
   color: var(--text-copy);
-  padding: 0.38rem 0.85rem;
-  border-radius: var(--r-pill);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .top-logout:hover {
-  background: var(--accent-subtle);
   color: var(--accent-light);
-  border-color: var(--accent-border);
 }
 
-/* Botón vincular TV */
 .btn-tv-link {
   text-decoration: none;
   color: var(--btn-text);
@@ -197,26 +256,6 @@
   filter: brightness(1.1);
 }
 
-.btn-tv-open {
-  text-decoration: none;
-  color: #ffffff;
-  background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
-  padding: 0.58rem 1rem;
-  border-radius: var(--r-pill);
-  font-weight: 700;
-  font-size: 0.88rem;
-  border: 1px solid rgba(56, 189, 248, 0.45);
-  box-shadow: 0 4px 14px rgba(3, 105, 161, 0.35);
-  transition: box-shadow 0.18s, transform 0.15s, filter 0.15s;
-}
-
-.btn-tv-open:hover {
-  box-shadow: 0 6px 22px rgba(3, 105, 161, 0.45);
-  transform: translateY(-1px);
-  filter: brightness(1.12);
-}
-
-/* Botón iniciar sesión */
 .top-login {
   text-decoration: none;
   color: var(--btn-text);
@@ -281,8 +320,7 @@
   }
 
   .top-account,
-  .top-login,
-  .top-logout {
+  .top-login {
     max-width: none;
     text-align: center;
     justify-content: center;
@@ -293,11 +331,19 @@
     width: 100%;
   }
 
-  .top-logout {
-    width: auto;
-    min-width: 96px;
-    padding: 0.34rem 0.75rem;
-    font-size: 0.78rem;
+  .user-menu,
+  .user-trigger,
+  .user-dropdown {
+    width: 100%;
+  }
+
+  .user-trigger {
+    justify-content: center;
+  }
+
+  .user-dropdown {
+    position: static;
+    margin-top: 0.6rem;
   }
 
   .badge-pro {

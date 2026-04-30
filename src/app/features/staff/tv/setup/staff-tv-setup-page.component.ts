@@ -125,38 +125,39 @@ export class StaffTvSetupPageComponent {
     },
     {
       number: '04',
-      title: 'Accede a la vista TV',
+      title: 'Genera el código desde tu móvil',
       description:
-        'Con sesión iniciada en la app, abre la pantalla TV desde el panel de barbero. Solo los barberos con sesión activa pueden verla.',
+        'Con sesión iniciada en Ticketbarber, abre la opción Vincular TV desde el navbar para generar un código temporal para esa pantalla.',
       imageLabel: 'Imagen del paso 4',
-      imageHint: 'Sustituir por una captura con la ruta /tv visible.',
+      imageHint: 'Sustituir por una captura de la pantalla Vincular TV con el código visible.',
       imageSrc: 'assets/5.png',
       detail: {
-        body: 'La vista TV solo está disponible para barberos con sesión iniciada. Una vez que hayas accedido a la app con tu cuenta, tienes dos formas de llegar a ella:',
+        body: 'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos. Mientras siga activo, volverás a ver ese mismo código al entrar en la pantalla de Vincular TV.',
         subSteps: [
-          '4.1  Opción A — Desde el panel: al iniciar sesión la app te lleva al panel de barbero. Pulsa el botón "Vista TV" o "TV" que encontrarás ahí.',
-          '4.2  Opción B — Desde la URL: en la barra de direcciones escribe la URL de la app seguida de /tv y pulsa Enter.',
-          '4.3  Si has iniciado sesión, la app te redirigirá a la pantalla automáticamente.',
+          '4.1  Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
+          '4.2  En el navbar pulsa "Vincular TV".',
+          '4.3  Si ya tienes un código activo, verás ese mismo código y su tiempo restante.',
+          '4.4  Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
         ],
-        warning: 'La vista /tv requiere sesión iniciada con cuenta de barbero. Sin login, la app redirigirá al inicio de sesión.',
-        tip: 'Guarda la URL de /tv en favoritos de la TV. Si la sesión sigue activa al día siguiente, entrará directamente sin tener que logarse de nuevo.'
+        warning: 'No compartas un código caducado: cada código solo puede usarse una vez y expira automáticamente.',
+        tip: 'Mantén esta pantalla abierta mientras configuras la TV para no perder de vista el contador.'
       }
     },
     {
       number: '05',
-      title: 'Deja la pantalla lista para clientes',
+      title: 'Introduce el código en la TV y deja la pantalla lista',
       description:
-        'Activa la pantalla completa, comprueba que los turnos se ven bien desde la sala y deja la TV encendida durante todo el horario.',
+        'En la TV abre /activate, introduce el código y, cuando termine la vinculación, deja la vista preparada para tus clientes.',
       imageLabel: 'Imagen del paso 5',
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
       imageSrc: 'assets/3.png',
       detail: {
-        body: 'Ya tienes todo en marcha. Solo queda ajustar la pantalla para que los clientes lo vean perfectamente desde cualquier punto de la sala y dejar la TV funcionando sin tocarla durante el día.',
+        body: 'La TV no necesita iniciar sesión. Solo tienes que abrir la pantalla pública de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [
-          '5.1  Busca la opción "Pantalla completa" en el menú del navegador.',
-          '5.2  Comprueba desde la sala de espera que los turnos se leen con claridad.',
-          '5.3  Ajusta el brillo de la TV si la imagen aparece demasiado oscura o intensa.',
-          '5.4  Deja la pantalla encendida durante todo el horario de apertura del negocio, pon un temporizador en su TV si fuese necesario.'
+          '5.1  En la TV escribe la URL de la app seguida de /activate y pulsa Enter.',
+          '5.2  Introduce el código de 6 dígitos que generaste desde tu cuenta.',
+          '5.3  Espera a que la TV confirme la vinculación y cargue la cola en tiempo real.',
+          '5.4  Activa pantalla completa y comprueba desde la sala que los turnos se leen bien.'
         ],
         tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático.'
       }
@@ -165,8 +166,8 @@ export class StaffTvSetupPageComponent {
 
   readonly tips: string[] = [
     'Activa el modo pantalla completa para que la información se vea mejor desde lejos.',
-    'Guarda la URL completa de la pantalla TV en favoritos para abrirla más rápido cada día.',
-    'Comprueba la conexión Wi-Fi antes de abrir la vista /tv para evitar cortes.',
+    'Guarda /activate en favoritos de la TV para volver a vincularla rápidamente si hace falta.',
+    'Comprueba la conexión Wi-Fi antes de introducir el código para evitar cortes.',
     'Si necesitas cambiar turnos o revisar la cola, vuelve al panel de barberos desde la tablet.'
   ];
 
