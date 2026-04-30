@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DeviceDoc, TvAuthService } from '../../core/services/tv-auth.service';
+import { DeviceDoc, TvAuthService } from '../../../../core/services/tv-auth.service';
+import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-devices-management',
@@ -14,6 +15,7 @@ import { DeviceDoc, TvAuthService } from '../../core/services/tv-auth.service';
 })
 export class DevicesManagementComponent implements OnInit, OnDestroy {
   private readonly tvAuthService = inject(TvAuthService);
+  readonly routes = APP_ROUTES;
 
   readonly devices = signal<DeviceDoc[]>([]);
   readonly unlinkingId = signal<string | null>(null);

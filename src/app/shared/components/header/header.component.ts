@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { SubscriptionStore } from '../../../core/stores/subscription.store';
+import { APP_ROUTES } from '../../routing/app-routes';
 
 @Component({
   selector: 'app-header',
@@ -15,6 +16,7 @@ export class HeaderComponent {
   readonly authStore = inject(AuthStore);
   readonly subscriptionStore = inject(SubscriptionStore);
   private readonly router = inject(Router);
+  readonly routes = APP_ROUTES;
   readonly mobileMenuOpen = signal(false);
 
   get accountLabel(): string {
@@ -34,6 +36,6 @@ export class HeaderComponent {
   async signOut(): Promise<void> {
     this.closeMobileMenu();
     await this.authStore.signOut();
-    void this.router.navigateByUrl('/');
+    void this.router.navigateByUrl(this.routes.root);
   }
 }

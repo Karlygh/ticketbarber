@@ -1,3 +1,20 @@
+.phone-icon {
+  margin-left: 0.35em;
+  color: var(--section-staff-light, #2563eb);
+  font-size: 1em;
+  vertical-align: middle;
+}
+/* Nombre de cliente clicable */
+.name-text.clickable {
+  color: var(--section-staff-light, #2563eb);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.18s;
+}
+.name-text.clickable:hover {
+  color: var(--section-staff, #1d4ed8);
+  text-decoration: underline;
+}
 /* ═══════════════════════════════════════════════════════
    STAFF PAGE — Section accent: Blue
    ═══════════════════════════════════════════════════════ */
@@ -175,7 +192,7 @@ button:disabled {
 
 .queue li {
   display: grid;
-  grid-template-columns: 32px 1fr 1fr auto;
+  grid-template-columns: 32px 1fr 1fr auto auto;
   gap: 0.8rem;
   align-items: center;
   padding: 0.75rem 0.9rem;
@@ -200,6 +217,40 @@ button:disabled {
   color: var(--accent-light);
   font-size: 0.87rem;
   font-weight: 600;
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrival-time {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.44rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--section-staff-light);
+  background: var(--section-staff-subtle);
+  border: 1px solid var(--section-staff-border);
+  white-space: nowrap;
+}
+
+.ticket-remove {
+  width: auto;
+  padding: 0.42rem 0.72rem;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  line-height: 1;
 }
 
 .empty {
@@ -248,11 +299,128 @@ button:disabled {
   }
 
   .queue li {
-    grid-template-columns: 28px 1fr auto;
+    grid-template-columns: 28px 1fr auto auto;
   }
 
   .queue li .service {
     display: none;
+  }
+
+  .name {
+    gap: 0.35rem;
+  }
+
+  .arrival-time {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+  }
+}
+
+/* ══════════════════════════════════════
+   Modal de acciones destructivas
+   ══════════════════════════════════════ */
+.danger-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 13, 26, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.18s ease;
+}
+
+.danger-modal {
+  width: min(430px, 92vw);
+  background:
+    radial-gradient(circle at 20% 8%, rgba(248, 113, 113, 0.1) 0%, transparent 46%),
+    var(--bg-card-elevated);
+  border: 1px solid var(--state-error-border);
+  border-radius: var(--r-xl);
+  padding: 1.5rem 1.4rem;
+  box-shadow: var(--glass-shadow), 0 0 0 1px rgba(248, 113, 113, 0.2);
+  animation: rise 0.24s cubic-bezier(.22,.68,0,1.12) both;
+}
+
+.danger-modal__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--state-error);
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+}
+
+.danger-modal__title {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.danger-modal__sub {
+  margin: 0;
+  color: var(--text-copy);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.danger-modal__warning {
+  margin: 0.75rem 0 0;
+  color: var(--state-error);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.danger-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.2rem;
+}
+
+.danger-modal__cancel,
+.danger-modal__confirm {
+  width: auto;
+  padding: 0.58rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: 0.87rem;
+}
+
+.danger-modal__cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-copy);
+}
+
+.danger-modal__cancel:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.danger-modal__confirm {
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+  color: var(--state-error);
+  box-shadow: 0 10px 28px rgba(248, 113, 113, 0.12);
+}
+
+.danger-modal__confirm:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.18);
+  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.2);
+}
+
+@media (max-width: 560px) {
+  .danger-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .danger-modal__cancel,
+  .danger-modal__confirm {
+    width: 100%;
   }
 }
 

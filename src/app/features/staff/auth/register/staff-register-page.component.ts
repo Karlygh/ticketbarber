@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '../../core/stores/auth.store';
+import { AuthStore } from '../../../../core/stores/auth.store';
+import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 type ModalState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -15,6 +16,7 @@ type ModalState = 'idle' | 'loading' | 'success' | 'error';
 export class StaffRegisterPageComponent {
   private readonly router = inject(Router);
   readonly authStore = inject(AuthStore);
+  readonly routes = APP_ROUTES;
   readonly modalState = signal<ModalState>('idle');
   readonly errorMsg = signal('');
 
@@ -26,7 +28,7 @@ export class StaffRegisterPageComponent {
     try {
       await this.authStore.signInWithGoogle();
       this.modalState.set('success');
-      setTimeout(() => this.router.navigateByUrl('/staff'), 2500);
+      setTimeout(() => this.router.navigateByUrl(this.routes.staff.root), 2500);
     } catch (err) {
       this.errorMsg.set(err instanceof Error ? err.message : 'No se pudo crear la cuenta.');
       this.modalState.set('error');

@@ -5,7 +5,7 @@
       <h1>Mis dispositivos</h1>
       <p class="subtitle">TVs y pantallas vinculadas a tu cuenta</p>
     </div>
-    <a routerLink="/activate" class="btn-add">
+    <a [routerLink]="routes.activate" class="btn-add">
       + Vincular nueva TV
     </a>
   </header>
@@ -15,7 +15,7 @@
       <p class="empty-icon">🖥️</p>
       <p class="empty-title">Sin dispositivos vinculados</p>
       <p class="empty-sub">Abre <strong>/tv</strong> en tu pantalla e introduce el código desde esta app.</p>
-      <a routerLink="/activate" class="btn-add-lg">Vincular primera TV</a>
+      <a [routerLink]="routes.activate" class="btn-add-lg">Vincular primera TV</a>
     </div>
   } @else {
     <ul class="devices-list">
@@ -67,7 +67,7 @@
   }
 
   <nav class="back-links">
-    <a routerLink="/staff">← Volver al panel</a>
-    <a routerLink="/activate">Vincular TV</a>
+    <a [routerLink]="routes.staff.root">← Volver al panel</a>
+    <a [routerLink]="routes.activate">Vincular TV</a>
   </nav>
 </main>

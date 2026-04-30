@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TvAuthService } from '../../core/services/tv-auth.service';
+import { TvAuthService } from '../../../../core/services/tv-auth.service';
+import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-activate-tv',
@@ -13,6 +14,7 @@ import { TvAuthService } from '../../core/services/tv-auth.service';
 export class ActivateTvComponent {
   private readonly router = inject(Router);
   private readonly tvAuthService = inject(TvAuthService);
+  readonly routes = APP_ROUTES;
 
   readonly rawCode = signal('');
   readonly status = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -59,6 +61,6 @@ export class ActivateTvComponent {
   }
 
   goToDevices(): void {
-    void this.router.navigate(['/staff/devices']);
+    void this.router.navigateByUrl(this.routes.staff.devices);
   }
 }

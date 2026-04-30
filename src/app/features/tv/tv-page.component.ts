@@ -6,6 +6,7 @@ import { QueueRepository } from '../../core/data/queue.repository';
 import { TvAuthService } from '../../core/services/tv-auth.service';
 import { DEFAULT_QUEUE_SETTINGS, QueueSettings } from '../../core/models/settings.model';
 import { Ticket } from '../../core/models/ticket.model';
+import { AuthStore } from '../../core/stores/auth.store';
 import { TvQueueRow } from '../../core/stores/queue.store';
 
 @Component({
@@ -20,6 +21,7 @@ export class TvPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly repository = inject(QueueRepository);
   private readonly tvAuthService = inject(TvAuthService);
+  private readonly authStore = inject(AuthStore);
 
   readonly now = signal(Date.now());
   private readonly tickets = signal<Ticket[]>([]);
@@ -38,10 +40,17 @@ export class TvPageComponent implements OnInit, OnDestroy {
   private readonly clockInterval = window.setInterval(() => this.now.set(Date.now()), 1000);
   private heartbeatInterval?: number;
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const shopIdFromRoute = this.route.snapshot.params['shopId'] as string | undefined;
     const shopIdFromStorage = this.tvAuthService.getShopId();
-    const shopId = shopIdFromRoute ?? shopIdFromStorage;
+    let shopIdFromSession = this.authStore.user()?.uid;
+
+    if (!shopIdFromRoute && !shopIdFromStorage && !shopIdFromSession) {
+      await this.authStore.waitUntilReady();
+      shopIdFromSession = this.authStore.user()?.uid;
+    }
+
+    const shopId = shopIdFromRoute ?? shopIdFromStorage ?? shopIdFromSession;
 
     if (!shopId) {
       void this.router.navigate(['/tv/pair']);
@@ -50,6 +59,8 @@ export class TvPageComponent implements OnInit, OnDestroy {
 
     if (shopIdFromRoute && !shopIdFromStorage) {
       this.tvAuthService.saveBinding(shopIdFromRoute);
+    } else if (!shopIdFromStorage && shopIdFromSession) {
+      this.tvAuthService.saveBinding(shopIdFromSession);
     }
 
     this.subs.push(
@@ -78,6 +89,15 @@ export class TvPageComponent implements OnInit, OnDestroy {
     return m === 0 ? `${h} ${horaLabel}` : `${h} ${horaLabel} y ${m} min`;
   }
 
+  formatApproxTime(timestampMs: number): string {
+    const formatter = new Intl.DateTimeFormat('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: false 
+    });
+    return `Aprox. ${formatter.format(new Date(timestampMs))}`;
+  }
+
   private queueForTv(nowMs: number): TvQueueRow[] {
     const active = this.tickets()
       .filter(t => t.status !== 'done')
@@ -90,11 +110,13 @@ export class TvPageComponent implements OnInit, OnDestroy {
     active.forEach((ticket, index) => {
       if (index === 0 && ticket.status === 'current') {
         const remaining = this.remainingMin(ticket, nowMs);
-        rows.push({ ticket, waitMin: remaining });
+        const etaAtMs = nowMs + (remaining * 60000);
+        rows.push({ ticket, waitMin: remaining, etaAtMs });
         carry = remaining;
         return;
       }
-      rows.push({ ticket, waitMin: carry });
+      const etaAtMs = nowMs + (carry * 60000);
+      rows.push({ ticket, waitMin: carry, etaAtMs });
       carry += ticket.estimatedDurationMin;
     });
     return rows;

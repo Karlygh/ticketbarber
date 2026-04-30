@@ -28,6 +28,11 @@
           </select>
         </label>
 
+        <label>
+          <span>Pon tu teléfono por si te mueves o necesitamos contactarte (opcional)</span>
+          <input formControlName="phone" type="tel" inputmode="numeric" pattern="[0-9]{9,15}" maxlength="15" autocomplete="tel" placeholder="Ej: 612345678" />
+        </label>
+
         <button type="submit" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Generando ticket...' : 'Coger turno' }}
         </button>
@@ -48,7 +53,7 @@
   </section>
 
   <nav class="quick-links">
-    <a routerLink="/tv">Ver pantalla TV</a>
+    <a [routerLink]="tvQueueRoute()">Ver pantalla TV</a>
     <a routerLink="/staff">Panel barberos</a>
   </nav>
 </main>

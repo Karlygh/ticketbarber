@@ -12,11 +12,13 @@ export interface Ticket {
   createdAtMs: number;
   startedAtMs: number | null;
   completedAtMs: number | null;
+  phone?: string;
 }
 
 export interface CreateTicketInput {
   customerName: string;
   serviceId: string;
+  phone?: string;
 }
 
 export interface TicketReceipt {

@@ -170,7 +170,8 @@ export class QueueRepository {
       position,
       createdAtMs: nowMs,
       startedAtMs: hasCurrent ? null : nowMs,
-      completedAtMs: null
+      completedAtMs: null,
+      ...(input.phone ? { phone: input.phone } : {})
     };
 
     const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
@@ -319,6 +320,75 @@ export class QueueRepository {
     await batch.commit();
   }
 
+  async deleteTicket(ticketId: string): Promise<void> {
+    const nowMs = Date.now();
+    const settingsRef = this.settingsDocRef();
+    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
+    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    const tickets = await this.fetchTickets();
+    const ticketToDelete = tickets.find((ticket) => ticket.id === ticketId);
+    if (!ticketToDelete) {
+      return;
+    }
+
+    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
+    batch.delete(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticketId}`)));
+
+    const remainingActive = this.activeQueue(tickets.filter((ticket) => ticket.id !== ticketId));
+    let currentTicket = remainingActive.find((ticket) => ticket.status === 'current') ?? null;
+
+    if (!currentTicket) {
+      const promoted = remainingActive.find((ticket) => ticket.status === 'waiting') ?? null;
+      if (promoted) {
+        currentTicket = {
+          ...promoted,
+          status: 'current',
+          position: 1,
+          startedAtMs: promoted.startedAtMs ?? nowMs,
+          completedAtMs: null
+        };
+        batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
+          status: 'current',
+          position: 1,
+          startedAtMs: promoted.startedAtMs ?? nowMs,
+          completedAtMs: null
+        });
+      }
+    }
+
+    if (currentTicket) {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${currentTicket.id}`)), {
+        status: 'current',
+        position: 1,
+        startedAtMs: currentTicket.startedAtMs ?? nowMs,
+        completedAtMs: null
+      });
+    }
+
+    const waiting = remainingActive.filter((ticket) => ticket.id !== currentTicket?.id);
+    const waitingStartPosition = currentTicket ? 2 : 1;
+    waiting.forEach((ticket, index) => {
+      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
+        status: 'waiting',
+        position: waitingStartPosition + index,
+        completedAtMs: null
+      });
+    });
+
+    batch.set(
+      settingsRef,
+      {
+        ...settings,
+        currentTicketId: currentTicket?.id ?? null,
+        lastAdvance: null,
+        updatedAtMs: nowMs
+      },
+      { merge: true }
+    );
+
+    await batch.commit();
+  }
+
   async closeDay(): Promise<void> {
     const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
     const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
@@ -383,7 +453,8 @@ export class QueueRepository {
       position: Number(value.position ?? 0),
       createdAtMs: Number(value.createdAtMs ?? 0),
       startedAtMs: value.startedAtMs ?? null,
-      completedAtMs: value.completedAtMs ?? null
+      completedAtMs: value.completedAtMs ?? null,
+      phone: value.phone ?? undefined
     };
   }
 

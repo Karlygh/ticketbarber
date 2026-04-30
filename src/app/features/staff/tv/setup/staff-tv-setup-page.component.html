@@ -30,7 +30,7 @@
     </div>
 
     <div class="hero-actions">
-      <a class="primary-link" routerLink="/tv">Abrir vista TV</a>
+      <a class="primary-link" [routerLink]="routes.tv">Abrir vista TV</a>
       <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
     </div>
   </section>
@@ -78,7 +78,7 @@
 
     <div class="tips-actions">
       <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
-      <a class="primary-link" routerLink="/tv">Ir a /tv</a>
+      <a class="primary-link" [routerLink]="routes.tv">Ir a /tv</a>
     </div>
   </section>
 </main>

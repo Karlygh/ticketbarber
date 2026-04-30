@@ -1,0 +1,10 @@
+<div class="modal-backdrop" (click)="close()"></div>
+<div class="modal-content">
+  <button class="close-btn" (click)="close()">&times;</button>
+  <h2>Detalles del Cliente</h2>
+  <div class="customer-details">
+    <div><strong>Nombre:</strong> {{ customer?.name || '-' }}</div>
+    <div><strong>Hora de llegada:</strong> {{ customer?.arrivalTime || '-' }}</div>
+    <div><strong>Teléfono:</strong> {{ customer?.phone || '-' }}</div>
+  </div>
+</div>

@@ -44,27 +44,80 @@
       @for (ticket of queueStore.activeQueue(); track ticket.id) {
         <li [class.current]="ticket.status === 'current'">
           <span class="position">{{ ticket.position }}</span>
-          <span class="name">{{ ticket.displayName }}</span>
+          <span class="name">
+            <span class="name-text clickable" (click)="openCustomerModal(ticket)">
+              {{ ticket.displayName }}
+              @if (ticket.phone) { <span class="phone-icon" title="Tiene teléfono">📞</span> }
+            </span>
+            <span class="arrival-time">Llegada: {{ formatArrivalTime(ticket.createdAtMs) }}</span>
+          </span>
           <span class="service">{{ ticket.serviceNameSnapshot }}</span>
+          <!-- El teléfono solo se muestra en el modal -->
           <span class="badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
+          <button
+            class="danger ticket-remove"
+            type="button"
+            (click)="deleteTicket(ticket.id, ticket.displayName, ticket.status)"
+            [disabled]="isBusy()"
+          >
+            Eliminar
+          </button>
         </li>
       } @empty {
         <li class="empty">No hay tickets activos.</li>
       }
     </ul>
+
+    @if (showCustomerModal && selectedCustomer) {
+      <app-customer-detail-modal
+        [customer]="selectedCustomer"
+        (closed)="closeCustomerModal()"
+      ></app-customer-detail-modal>
+    }
   </section>
 
   <nav class="quick-links">
-    <a routerLink="/kiosk">← Kiosk / Agenda</a>
-    <a routerLink="/activate">� Conectar TV</a>
-    <a routerLink="/staff/devices">🖥️ Mis pantallas</a>
-    <a routerLink="/staff/tv-setup">Guía TV</a>
-    <a routerLink="/account">Mi cuenta</a>
-    <a routerLink="/subscription/manage">Mi suscripción</a>
-    <a routerLink="/pricing">Ver planes</a>
-    <a routerLink="/home">Volver a la web</a>
+    <a [routerLink]="routes.kiosk">← Kiosk / Agenda</a>
+    <a [routerLink]="tvQueueRoute()">Ver pantalla TV</a>
+    <a [routerLink]="routes.activate">� Conectar TV</a>
+    <a [routerLink]="routes.staff.devices">🖥️ Mis pantallas</a>
+    <a [routerLink]="routes.staff.tvSetup">Guía TV</a>
+    <a [routerLink]="routes.account">Mi cuenta</a>
+    <a [routerLink]="routes.subscriptionManage">Mi suscripción</a>
+    <a [routerLink]="routes.pricing">Ver planes</a>
+    <a [routerLink]="routes.home">Volver a la web</a>
   </nav>
-</main>
+
+
+<!-- Modal de confirmación para acciones destructivas -->
+@if (destructiveAction()) {
+  <div class="danger-backdrop" (click)="cancelDestructiveAction()">
+    <div class="danger-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="danger-modal__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+
+      <p class="danger-modal__title">{{ destructiveTitle() }}</p>
+      <p class="danger-modal__sub">{{ destructiveMessage() }}</p>
+      <p class="danger-modal__warning">Esta acción no se puede deshacer.</p>
+
+      <div class="danger-modal__actions">
+        <button class="danger-modal__cancel" type="button" (click)="cancelDestructiveAction()" [disabled]="isBusy()">
+          Cancelar
+        </button>
+        <button class="danger-modal__confirm" type="button" (click)="confirmDestructiveAction()" [disabled]="isBusy()">
+          {{ destructiveConfirmLabel() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Modal de confirmación de logout -->
 @if (logoutState() === 'confirm' || logoutState() === 'loading') {

@@ -21,7 +21,10 @@
           <span class="position">{{ row.ticket.position }}</span>
           <span class="name">{{ row.ticket.displayName }}</span>
           <span class="service">{{ row.ticket.serviceNameSnapshot }}</span>
-          <span class="eta">En {{ formatWait(row.waitMin) }}</span>
+          <span class="eta">
+            <span class="eta-main">En {{ formatWait(row.waitMin) }}</span>
+            <span class="eta-time">{{ formatApproxTime(row.etaAtMs) }}</span>
+          </span>
         </li>
       }
     </ul>

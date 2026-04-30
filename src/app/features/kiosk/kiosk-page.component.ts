@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { QueueStore } from '../../core/stores/queue.store';
+import { AuthStore } from '../../core/stores/auth.store';
 import { TicketReceipt } from '../../core/models/ticket.model';
 
 @Component({
@@ -14,15 +15,21 @@ import { TicketReceipt } from '../../core/models/ticket.model';
 })
 export class KioskPageComponent {
   private readonly fb = inject(FormBuilder);
+  readonly authStore = inject(AuthStore);
   readonly queueStore = inject(QueueStore);
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
   readonly receipt = signal<TicketReceipt | null>(null);
+  readonly tvQueueRoute = computed(() => {
+    const shopId = this.authStore.user()?.uid;
+    return shopId ? ['/tv', shopId] : ['/tv'];
+  });
 
   readonly form = this.fb.nonNullable.group({
     customerName: ['', [Validators.required, Validators.minLength(2)]],
-    serviceId: ['', [Validators.required]]
+    serviceId: ['', [Validators.required]],
+    phone: ['']
   });
 
   async submitTicket(): Promise<void> {
@@ -34,17 +41,19 @@ export class KioskPageComponent {
       return;
     }
 
-    const { customerName, serviceId } = this.form.getRawValue();
+    const { customerName, serviceId, phone } = this.form.getRawValue();
     this.isSubmitting.set(true);
     try {
       const receipt = await this.queueStore.createTicket({
         customerName,
-        serviceId
+        serviceId,
+        phone: phone?.trim() || undefined
       });
       this.receipt.set(receipt);
       this.form.reset({
         customerName: '',
-        serviceId: ''
+        serviceId: '',
+        phone: ''
       });
     } catch (error) {
       this.errorMessage.set(this.toMessage(error));

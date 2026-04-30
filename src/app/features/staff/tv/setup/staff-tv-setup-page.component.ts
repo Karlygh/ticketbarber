@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthStore } from '../../core/stores/auth.store';
-import { FooterComponent } from '../../shared/components/footer/footer.component';
-import { HeaderComponent } from '../../shared/components/header/header.component';
+import { AuthStore } from '../../../../core/stores/auth.store';
+import { FooterComponent } from '../../../../shared/components/footer/footer.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 interface StepDetail {
   body: string;
@@ -36,6 +37,7 @@ interface Prereq {
 })
 export class StaffTvSetupPageComponent {
   readonly authStore = inject(AuthStore);
+  readonly routes = APP_ROUTES;
 
   activeStep: SetupStep | null = null;
 
@@ -173,6 +175,6 @@ export class StaffTvSetupPageComponent {
   }
 
   get secondaryCtaLink(): string {
-    return this.authStore.isAuthenticated() ? '/staff' : '/pricing';
+    return this.authStore.isAuthenticated() ? this.routes.staff.root : this.routes.pricing;
   }
 }

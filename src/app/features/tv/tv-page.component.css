@@ -152,8 +152,23 @@
 }
 
 .eta {
-  color: var(--section-pricing-light);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
   font-weight: 600;
+}
+
+.eta-main {
+  font-size: inherit;
+  color: var(--section-pricing-light);
+}
+
+.eta-time {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-copy);
+  opacity: 0.9;
 }
 
 .tv-foot {

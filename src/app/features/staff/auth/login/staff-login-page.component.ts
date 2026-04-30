@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { sanitizeReturnUrl } from '../../core/auth/auth-navigation';
-import { AuthStore } from '../../core/stores/auth.store';
+import { sanitizeReturnUrl } from '../../../../core/auth/auth-navigation';
+import { AuthStore } from '../../../../core/stores/auth.store';
+import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 type LoginState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -17,6 +18,7 @@ export class StaffLoginPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
+  readonly routes = APP_ROUTES;
   readonly loginState = signal<LoginState>('idle');
   readonly errorMsg = signal('');
   readonly accessReason = signal(this.route.snapshot.queryParamMap.get('reason') ?? '');

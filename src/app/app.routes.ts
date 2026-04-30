@@ -52,18 +52,18 @@ export const routes: Routes = [
     path: 'activate',
     canActivate: [staffAuthGuard],
     loadComponent: () =>
-      import('./features/staff/activate-tv.component').then(m => m.ActivateTvComponent)
+      import('./features/staff/tv/activate/activate-tv.component').then(m => m.ActivateTvComponent)
   },
   {
     path: 'staff/devices',
     canActivate: [staffAuthGuard],
     loadComponent: () =>
-      import('./features/staff/devices-management.component').then(m => m.DevicesManagementComponent)
+      import('./features/staff/tv/devices/devices-management.component').then(m => m.DevicesManagementComponent)
   },
   {
     path: 'guia-tv',
     loadComponent: () =>
-      import('./features/staff/staff-tv-setup-page.component').then(
+      import('./features/staff/tv/setup/staff-tv-setup-page.component').then(
         (m) => m.StaffTvSetupPageComponent
       )
   },
@@ -71,25 +71,25 @@ export const routes: Routes = [
     path: 'staff/login',
     canActivate: [staffGuestGuard],
     loadComponent: () =>
-      import('./features/staff/staff-login-page.component').then((m) => m.StaffLoginPageComponent)
+      import('./features/staff/auth/login/staff-login-page.component').then((m) => m.StaffLoginPageComponent)
   },
   {
     path: 'staff/register',
     canActivate: [staffGuestGuard],
     loadComponent: () =>
-      import('./features/staff/staff-register-page.component').then((m) => m.StaffRegisterPageComponent)
+      import('./features/staff/auth/register/staff-register-page.component').then((m) => m.StaffRegisterPageComponent)
   },
   {
     path: 'staff',
     canActivate: [staffAuthGuard],
     loadComponent: () =>
-      import('./features/staff/staff-page.component').then((m) => m.StaffPageComponent)
+      import('./features/staff/dashboard/staff-page.component').then((m) => m.StaffPageComponent)
   },
   {
     path: 'staff/tv-setup',
     canActivate: [staffAuthGuard],
     loadComponent: () =>
-      import('./features/staff/staff-tv-setup-page.component').then(
+      import('./features/staff/tv/setup/staff-tv-setup-page.component').then(
         (m) => m.StaffTvSetupPageComponent
       )
   },

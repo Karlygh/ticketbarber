@@ -8,6 +8,7 @@ import { SettingsStore } from './settings.store';
 export interface TvQueueRow {
   ticket: Ticket;
   waitMin: number;
+  etaAtMs: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,6 +53,10 @@ export class QueueStore {
     await this.repository.movePrevious();
   }
 
+  async deleteTicket(ticketId: string): Promise<void> {
+    await this.repository.deleteTicket(ticketId);
+  }
+
   async closeDay(): Promise<void> {
     await this.settingsStore.closeDay();
   }
@@ -71,12 +76,14 @@ export class QueueStore {
     active.forEach((ticket, index) => {
       if (index === 0 && ticket.status === 'current') {
         const remaining = this.remainingCurrentMinutes(ticket, nowMs);
-        rows.push({ ticket, waitMin: remaining });
+        const etaAtMs = nowMs + (remaining * 60000);
+        rows.push({ ticket, waitMin: remaining, etaAtMs });
         carry = remaining;
         return;
       }
 
-      rows.push({ ticket, waitMin: carry });
+      const etaAtMs = nowMs + (carry * 60000);
+      rows.push({ ticket, waitMin: carry, etaAtMs });
       carry += ticket.estimatedDurationMin;
     });
 
