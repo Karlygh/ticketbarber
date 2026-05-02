@@ -90,6 +90,6 @@ export class AccountPageComponent implements OnInit {
   }
 
   goToPlans(): void {
-    void this.router.navigateByUrl('/subscription');
+    void this.router.navigateByUrl('/pricing');
   }
 }

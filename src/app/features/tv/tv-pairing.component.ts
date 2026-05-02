@@ -28,16 +28,25 @@ export class TvPairingComponent implements OnInit, OnDestroy {
     if (!expiresAt) return 0;
     return Math.max(0, Math.ceil((expiresAt - this.now()) / 1000));
   });
-  readonly status = signal<'loading' | 'ready' | 'linked' | 'expired' | 'error'>('loading');
+  readonly status = signal<'idle' | 'loading' | 'ready' | 'linked' | 'expired' | 'error'>('idle');
   readonly errorMsg = signal('');
   readonly linkedDeviceId = signal('');
+  readonly confirmModalOpen = signal(true);
 
   private countdownInterval?: number;
   private linkCheckInterval?: number;
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.startCountdown();
+  }
+
+  async confirmGenerateCode(): Promise<void> {
+    this.confirmModalOpen.set(false);
     await this.loadCode();
+  }
+
+  cancelGenerateCode(): void {
+    this.confirmModalOpen.set(false);
   }
 
   private async loadCode(forceNew = false): Promise<void> {

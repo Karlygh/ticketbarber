@@ -153,6 +153,15 @@ service cloud.firestore {
                     && resource.data.userId == request.auth.uid;
     }
 
+    // ── Contactos (formulario de contacto) ────────────────────────────────
+    // Solo Cloud Functions puede escribir en esta colección.
+    // Los usuarios no pueden leer ni escribir directamente.
+    // Solo admin desde Firebase Console puede leer.
+    match /contactos/{contactId} {
+      allow read: if false;  // Solo admin desde Console
+      allow write: if false; // Solo Cloud Functions (server-side)
+    }
+
     // ── Denegar todo lo demás por defecto ─────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

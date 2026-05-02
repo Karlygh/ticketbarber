@@ -1,6 +1,9 @@
 <app-header></app-header>
 
 <main class="tv-setup-shell">
+  <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  </a>
 
   <!-- HERO -->
   <section class="tv-setup-hero">
@@ -30,7 +33,11 @@
     </div>
 
     <div class="hero-actions">
-      <a class="primary-link" [routerLink]="routes.tv">Abrir vista TV</a>
+      @if (authStore.isAuthenticated()) {
+        <a class="primary-link" [routerLink]="routes.tv">Abrir vista TV</a>
+      } @else {
+        <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta gratuita</a>
+      }
       <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
     </div>
   </section>
@@ -78,7 +85,11 @@
 
     <div class="tips-actions">
       <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
-      <a class="primary-link" [routerLink]="routes.tv">Ir a /tv</a>
+      @if (authStore.isAuthenticated()) {
+        <a class="primary-link" [routerLink]="routes.tv">Ir a /tv</a>
+      } @else {
+        <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta</a>
+      }
     </div>
   </section>
 </main>

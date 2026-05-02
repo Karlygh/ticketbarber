@@ -7,7 +7,7 @@ import {
   inject,
   signal
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthStore } from '../../core/stores/auth.store';
 import { SubscriptionStore } from '../../core/stores/subscription.store';
@@ -15,6 +15,7 @@ import { StripeService } from '../../core/services/stripe.service';
 import { StripePrice, StripeProduct } from '../../core/models/user.model';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { APP_ROUTES } from '../../shared/routing/app-routes';
 
 export interface PricingProduct extends StripeProduct {
   prices: StripePrice[];
@@ -30,10 +31,13 @@ export interface PricingProduct extends StripeProduct {
 })
 export class PricingPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   readonly subscriptionStore = inject(SubscriptionStore);
   private readonly stripeService = inject(StripeService);
   private productsSub: Subscription | null = null;
+
+  readonly routes = APP_ROUTES;
 
   readonly products = signal<PricingProduct[]>([]);
   readonly loading = signal(true);
@@ -41,8 +45,12 @@ export class PricingPageComponent implements OnInit, OnDestroy {
   readonly loadingPriceId = signal<string | null>(null);
   readonly checkoutError = signal<string | null>(null);
   readonly portalLoading = signal(false);
+  /** Razón de llegada desde el guard: 'trial-expired' | 'subscription-required' | '' */
+  readonly reason = signal('');
 
   ngOnInit(): void {
+    const r = this.route.snapshot.queryParamMap.get('reason') ?? '';
+    this.reason.set(r);
     this.loadProducts();
   }
 
@@ -161,5 +169,10 @@ export class PricingPageComponent implements OnInit, OnDestroy {
 
   intervalLabel(interval: string): string {
     return interval === 'year' ? 'año' : 'mes';
+  }
+
+  /** Salta el pago y continúa usando el trial activo. */
+  continueTrial(): void {
+    void this.router.navigateByUrl('/staff');
   }
 }

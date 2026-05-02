@@ -32,6 +32,8 @@
         <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
         @if (subscriptionStore.isPro()) {
           <span class="badge-pro">PRO</span>
+        } @else if (subscriptionStore.isTrialActive()) {
+          <span class="badge-trial">{{ subscriptionStore.trialDaysLeft() }}d prueba</span>
         }
         <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
           <button

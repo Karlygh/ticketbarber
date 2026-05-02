@@ -2,12 +2,14 @@ import { Component, DestroyRef, OnInit, effect, inject, signal } from '@angular/
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { SubscriptionStore } from '../../core/stores/subscription.store';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-subscription-success-page',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, HeaderComponent],
   template: `
+    <app-header></app-header>
     <div class="result-page success">
       @if (confirmed()) {
         <div class="icon">🎉</div>

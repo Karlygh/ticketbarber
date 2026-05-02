@@ -2,12 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TvAuthService } from '../../../../core/services/tv-auth.service';
+import { FooterComponent } from '../../../../shared/components/footer/footer.component';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-activate-tv',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './activate-tv.component.html',
   styleUrl: './activate-tv.component.css'
 })

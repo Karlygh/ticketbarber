@@ -128,6 +128,26 @@ button:disabled {
   color: var(--text-faint);
 }
 
+.google-info {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--r-md);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.google-info svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #60a5fa;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

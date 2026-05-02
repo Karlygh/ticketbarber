@@ -71,6 +71,7 @@
      SEMANTIC TOKENS — BORDES
      ══════════════════════════════════════ */
   --border:              rgba(255, 255, 255, 0.07);
+  --border-subtle:       rgba(255, 255, 255, 0.07);
   --border-muted:        rgba(255, 255, 255, 0.04);
   --border-accent:       rgba(59, 130, 246, 0.25);
   --border-accent-strong:rgba(59, 130, 246, 0.55);
@@ -133,6 +134,7 @@
   --state-success-border: rgba(34, 197, 94, 0.28);
 
   --state-error:          var(--red-400);
+  --danger:               var(--red-400);
   --state-error-bg:       rgba(248, 113, 113, 0.10);
   --state-error-border:   rgba(248, 113, 113, 0.28);
 

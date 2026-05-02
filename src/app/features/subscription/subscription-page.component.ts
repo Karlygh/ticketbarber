@@ -1,6 +1,6 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 import { AuthStore } from '../../core/stores/auth.store';
@@ -24,13 +24,12 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 @Component({
   selector: 'app-subscription-page',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, HeaderComponent, FooterComponent],
+  imports: [CurrencyPipe, DatePipe, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './subscription-page.component.html',
   styleUrl: './subscription-page.component.css'
 })
 export class SubscriptionPageComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   private readonly stripeService = inject(StripeService);
   private readonly destroyRef = inject(DestroyRef);
@@ -43,16 +42,9 @@ export class SubscriptionPageComponent implements OnInit {
   readonly productsError = signal<string | null>(null);
   readonly loadingPriceId = signal<string | null>(null);
   readonly checkoutError = signal<string | null>(null);
-  readonly reasonBanner = signal(false);
   readonly portalLoading = signal(false);
 
   ngOnInit(): void {
-    // Mostrar aviso contextual si viene redirigido por el proGuard
-    const reason = this.route.snapshot.queryParamMap.get('reason');
-    if (reason === 'subscription-required') {
-      this.reasonBanner.set(true);
-    }
-
     this.destroyRef.onDestroy(() => this.productsSub?.unsubscribe());
     this.loadProducts();
   }

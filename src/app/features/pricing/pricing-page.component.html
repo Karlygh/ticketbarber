@@ -1,6 +1,9 @@
 <app-header></app-header>
 
 <main class="pricing-shell">
+  <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  </a>
   <div class="bg-blur blur-a"></div>
   <div class="bg-blur blur-b"></div>
   <div class="bg-grid"></div>
@@ -18,6 +21,36 @@
       <span class="trust-item"><span class="trust-dot"></span>14 dias de garantia</span>
     </div>
   </section>
+
+  <!-- Banners contextuales según estado/razón de llegada -->
+  @if (reason() === 'trial-expired') {
+    <div class="access-banner access-banner--expired" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <strong>Tu prueba de 7 días ha expirado.</strong>
+        Elige un plan para seguir usando TicketBarber sin interrupciones.
+      </div>
+    </div>
+  } @else if (reason() === 'subscription-required') {
+    <div class="access-banner access-banner--info" role="status">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>Necesitas un plan activo</strong> para acceder a esa sección.
+      </div>
+    </div>
+  } @else if (subscriptionStore.isTrialActive()) {
+    <div class="access-banner access-banner--trial" role="status">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <div>
+        <strong>Estás en tu prueba gratuita</strong> — te quedan
+        <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong>.
+        Suscríbete ahora o continúa explorando.
+      </div>
+      <button class="btn-continue-trial" type="button" (click)="continueTrial()">
+        Continuar con mi prueba
+      </button>
+    </div>
+  }
 
   <!-- Skeleton -->
   @if (loading()) {

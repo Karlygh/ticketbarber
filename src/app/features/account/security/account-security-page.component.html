@@ -1,0 +1,177 @@
+<app-header></app-header>
+
+<section class="security-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Navegación">
+    <a routerLink="/account">Mi cuenta</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span>Contraseña y seguridad</span>
+  </nav>
+
+  <h1>Contraseña y seguridad</h1>
+  <p class="page-lead">
+    Tu acceso a TicketBarber está gestionado por Google. Aquí encontrarás cómo funciona y qué hacer si tienes algún problema.
+  </p>
+
+  <!-- ─── 1. Método de acceso ──────────────────────────────────────── -->
+  <div class="section">
+    <h2>Método de acceso</h2>
+
+    <div class="provider-card">
+      <div class="provider-logo" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28">
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v8.51h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.14z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        </svg>
+      </div>
+      <div class="provider-info">
+        <p class="provider-name">Google</p>
+        @if (linkedEmail()) {
+          <p class="provider-email">{{ linkedEmail() }}</p>
+        }
+        <span class="provider-badge">Activo</span>
+      </div>
+    </div>
+
+    <p class="section-note">
+      Cada vez que inicias sesión en TicketBarber, Google verifica tu identidad de forma segura. Nunca compartimos tu contraseña con terceros ni la almacenamos en nuestros servidores.
+    </p>
+  </div>
+
+  <!-- ─── 2. Contraseña ─────────────────────────────────────────────── -->
+  <div class="section">
+    <h2>Contraseña</h2>
+
+    <div class="info-card">
+      <div class="info-card-icon" aria-hidden="true">🔑</div>
+      <div class="info-card-body">
+        <h3>Tu contraseña no está aquí</h3>
+        <p>
+          TicketBarber <strong>no almacena ni gestiona tu contraseña</strong>. El acceso está delegado íntegramente a Google, que aplica cifrado de extremo a extremo y prácticas de seguridad de nivel empresarial.
+        </p>
+        <p>
+          Si necesitas cambiar o restablecer tu contraseña, debes hacerlo directamente desde tu cuenta de Google.
+        </p>
+        <button class="btn-action" type="button" (click)="openGooglePassword()">
+          <span aria-hidden="true">🔒</span>
+          Cambiar contraseña en Google
+          <span class="btn-external" aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 3. Qué gestiona cada uno ─────────────────────────────────── -->
+  <div class="section">
+    <h2>¿Quién gestiona qué?</h2>
+    <p class="section-note">
+      Tu cuenta está dividida entre dos servicios independientes. Cada uno controla una parte distinta de tu experiencia.
+    </p>
+
+    <div class="responsibility-grid">
+      <div class="responsibility-card responsibility-google">
+        <div class="rc-header">
+          <span class="rc-icon" aria-hidden="true">🔵</span>
+          <h3>Google gestiona</h3>
+        </div>
+        <ul class="rc-list">
+          <li>Tu contraseña y cómo la recuperas</li>
+          <li>Verificación en dos pasos</li>
+          <li>Tu nombre y foto de perfil</li>
+          <li>Tu dirección de correo principal</li>
+          <li>Seguridad de inicio de sesión</li>
+          <li>Actividad de la cuenta Google</li>
+        </ul>
+        <button class="rc-link" type="button" (click)="openGoogleSecurity()">
+          Ver configuración de Google ↗
+        </button>
+      </div>
+
+      <div class="responsibility-card responsibility-ticketbarber">
+        <div class="rc-header">
+          <span class="rc-icon" aria-hidden="true">⚡</span>
+          <h3>TicketBarber gestiona</h3>
+        </div>
+        <ul class="rc-list">
+          <li>Tu suscripción y plan activo</li>
+          <li>Historial de pagos</li>
+          <li>Configuración de tu negocio</li>
+          <li>Cola de clientes</li>
+          <li>Dispositivos TV vinculados</li>
+          <li>Datos de barberos y servicios</li>
+        </ul>
+        <a class="rc-link" routerLink="/account">
+          Ver mi cuenta ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 4. Advertencia de pérdida de acceso ──────────────────────── -->
+  <div class="section">
+    <h2>Si pierdes acceso a tu cuenta</h2>
+
+    <div class="warning-card" role="note">
+      <div class="warning-header">
+        <span class="warning-icon" aria-hidden="true">⚠️</span>
+        <h3>Tu acceso a TicketBarber depende de Google</h3>
+      </div>
+      <p>
+        Tu cuenta está vinculada de forma exclusiva a tu cuenta de Google. Si pierdes el acceso a Google, <strong>no podrás iniciar sesión en TicketBarber</strong> hasta que lo recuperes.
+      </p>
+    </div>
+
+    <div class="scenarios">
+      <div class="scenario">
+        <div class="scenario-q">¿Olvidé mi contraseña?</div>
+        <div class="scenario-a">Restablécela directamente en Google. Una vez recuperes el acceso a Google, podrás volver a entrar a TicketBarber con normalidad.</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-q">¿No tengo acceso a mi Gmail?</div>
+        <div class="scenario-a">Inicia el proceso de recuperación de cuenta en Google. TicketBarber no puede recuperar tu acceso, ya que no controlamos la autenticación.</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-q">¿Alguien entró a mi cuenta sin permiso?</div>
+        <div class="scenario-a">Cambia tu contraseña de Google inmediatamente y activa la verificación en dos pasos. Luego contacta con nuestro soporte desde <a routerLink="/contacto">aquí</a>.</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-q">¿Quiero cambiar el correo de mi cuenta?</div>
+        <div class="scenario-a">El correo de tu cuenta está ligado a tu cuenta de Google. Para cambiarlo necesitarías crear una nueva cuenta de Google y volver a registrarte en TicketBarber.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 5. Recomendación: 2FA ────────────────────────────────────── -->
+  <div class="section">
+    <h2>Recomendación de seguridad</h2>
+
+    <div class="tip-card">
+      <div class="tip-icon" aria-hidden="true">🛡️</div>
+      <div class="tip-body">
+        <h3>Activa la verificación en dos pasos</h3>
+        <p>
+          La verificación en dos pasos (2FA) añade una capa extra de protección a tu cuenta de Google. Aunque alguien obtenga tu contraseña, no podrá acceder sin un segundo código.
+        </p>
+        <p class="tip-note">
+          Es gratis, solo tarda 2 minutos en configurarse y protege tanto tu Gmail como tu acceso a TicketBarber.
+        </p>
+        <button class="btn-action btn-action--subtle" type="button" (click)="openGoogle2FA()">
+          <span aria-hidden="true">🛡️</span>
+          Activar verificación en dos pasos
+          <span class="btn-external" aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Back link ────────────────────────────────────────────────── -->
+  <div class="back-link">
+    <a routerLink="/account">← Volver a mi cuenta</a>
+  </div>
+
+</section>
+
+<app-footer></app-footer>

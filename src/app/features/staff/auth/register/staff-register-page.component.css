@@ -222,6 +222,12 @@ button:disabled {
   border: 1.5px solid rgba(34, 197, 94, 0.33);
 }
 
+.modal-icon--info {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1.5px solid rgba(59, 130, 246, 0.33);
+}
+
 .modal-icon--err {
   background: var(--state-error-bg);
   color: var(--state-error);

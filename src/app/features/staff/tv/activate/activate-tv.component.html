@@ -1,4 +1,12 @@
+<app-header></app-header>
+
 <main class="activate-shell">
+  <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </a>
+
   <header class="activate-head">
     <p class="eyebrow">Pantalla TV</p>
     <h1>Ingresa el código de vinculación</h1>
@@ -56,7 +64,8 @@
   }
 
   <nav class="back-links">
-    <a [routerLink]="routes.root">Volver al inicio</a>
     <a [routerLink]="routes.staff.login">Iniciar sesión</a>
   </nav>
 </main>
+
+<app-footer></app-footer>

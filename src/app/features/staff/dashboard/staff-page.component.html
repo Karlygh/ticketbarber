@@ -8,6 +8,16 @@
     <button class="secondary" (click)="requestLogout()" [disabled]="isBusy()">Salir</button>
   </header>
 
+  @if (!subscriptionStore.isPro() && subscriptionStore.isTrialActive()) {
+    <div
+      class="trial-warning"
+      [class.trial-warning--urgent]="subscriptionStore.trialDaysLeft() <= 2"
+      role="status">
+      ⏱ Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de prueba gratuita.
+      <a routerLink="/pricing">Suscríbete ahora</a>
+    </div>
+  }
+
   @if (error()) {
     <div class="error">{{ error() }}</div>
   }

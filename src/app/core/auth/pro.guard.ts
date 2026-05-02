@@ -5,8 +5,9 @@ import { SubscriptionStore } from '../stores/subscription.store';
 import { sanitizeReturnUrl } from './auth-navigation';
 
 /**
- * Protege rutas que requieren suscripción Pro activa (active | trialing).
- * Redirige a /subscription si no es Pro, o a /staff/login si no autenticado.
+ * Protege rutas que requieren acceso completo:
+ * suscripción Stripe activa (Pro) O trial gratuito de 7 días en curso.
+ * Redirige a /subscription si no tiene acceso, o a /staff/login si no autenticado.
  */
 export const proGuard: CanActivateFn = async (_, state) => {
   const authStore = inject(AuthStore);
@@ -24,32 +25,37 @@ export const proGuard: CanActivateFn = async (_, state) => {
     });
   }
 
-  // Esperar a que el store de suscripción deje de cargar
-  await waitForSubscriptionLoad(subscriptionStore);
+  // Esperar a que tanto la suscripción Stripe como el perfil estén listos
+  await waitForStoreReady(subscriptionStore);
 
-  if (subscriptionStore.isPro()) {
+  if (subscriptionStore.hasAccess()) {
     return true;
   }
 
-  return router.createUrlTree(['/subscription'], {
-    queryParams: { reason: 'subscription-required' }
+  // Diferenciar motivo: trial expirado vs. sin suscripción nunca contratada
+  const trialExpires = subscriptionStore.trialExpiresAt();
+  const reason = trialExpires && Date.now() > trialExpires.getTime()
+    ? 'trial-expired'
+    : 'subscription-required';
+
+  return router.createUrlTree(['/pricing'], {
+    queryParams: { reason }
   });
 };
 
-function waitForSubscriptionLoad(store: SubscriptionStore): Promise<void> {
+function waitForStoreReady(store: SubscriptionStore): Promise<void> {
   return new Promise((resolve) => {
-    // Si ya cargó, resolvemos inmediatamente
-    if (!store.loading()) {
+    if (!store.loading() && store.profileReady()) {
       resolve();
       return;
     }
-    // Poll ligero: max 5s para que Firestore responda
+    // Poll ligero con timeout de 5s para que Firestore responda
     const start = Date.now();
     const interval = setInterval(() => {
-      if (!store.loading() || Date.now() - start > 5000) {
+      if ((!store.loading() && store.profileReady()) || Date.now() - start > 5000) {
         clearInterval(interval);
         resolve();
       }
-    }, 100);
+    }, 50);
   });
 }

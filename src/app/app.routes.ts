@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { staffAuthGuard } from './core/auth/staff-auth.guard';
 import { staffGuestGuard } from './core/auth/staff-guest.guard';
+import { proGuard } from './core/auth/pro.guard';
 
 export const routes: Routes = [
   {
@@ -18,8 +19,13 @@ export const routes: Routes = [
       import('./features/contact/contact-page.component').then((m) => m.ContactPageComponent)
   },
   {
+    path: 'contacto/guia-consultas',
+    loadComponent: () =>
+      import('./features/contact/help/contact-help-page.component').then((m) => m.ContactHelpPageComponent)
+  },
+  {
     path: 'kiosk',
-    canActivate: [staffAuthGuard],
+    canActivate: [staffAuthGuard, proGuard],
     loadComponent: () =>
       import('./features/kiosk/kiosk-page.component').then((m) => m.KioskPageComponent)
   },
@@ -28,7 +34,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'pair',
-        canActivate: [staffAuthGuard],
+        canActivate: [staffAuthGuard, proGuard],
         loadComponent: () =>
           import('./features/tv/tv-pairing.component').then(m => m.TvPairingComponent)
       },
@@ -56,7 +62,7 @@ export const routes: Routes = [
   },
   {
     path: 'staff/devices',
-    canActivate: [staffAuthGuard],
+    canActivate: [staffAuthGuard, proGuard],
     loadComponent: () =>
       import('./features/staff/tv/devices/devices-management.component').then(m => m.DevicesManagementComponent)
   },
@@ -65,6 +71,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/staff/tv/setup/staff-tv-setup-page.component').then(
         (m) => m.StaffTvSetupPageComponent
+      )
+  },
+  {
+    path: 'staff/start',
+    loadComponent: () =>
+      import('./features/staff/auth/trial-start/staff-trial-start-page.component').then(
+        (m) => m.StaffTrialStartPageComponent
       )
   },
   {
@@ -81,13 +94,13 @@ export const routes: Routes = [
   },
   {
     path: 'staff',
-    canActivate: [staffAuthGuard],
+    canActivate: [staffAuthGuard, proGuard],
     loadComponent: () =>
       import('./features/staff/dashboard/staff-page.component').then((m) => m.StaffPageComponent)
   },
   {
     path: 'staff/tv-setup',
-    canActivate: [staffAuthGuard],
+    canActivate: [staffAuthGuard, proGuard],
     loadComponent: () =>
       import('./features/staff/tv/setup/staff-tv-setup-page.component').then(
         (m) => m.StaffTvSetupPageComponent
@@ -155,6 +168,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/account/account-page.component').then(
         (m) => m.AccountPageComponent
+      )
+  },
+  {
+    path: 'account/seguridad',
+    canActivate: [staffAuthGuard],
+    loadComponent: () =>
+      import('./features/account/security/account-security-page.component').then(
+        (m) => m.AccountSecurityPageComponent
       )
   },
   {

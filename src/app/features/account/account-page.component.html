@@ -30,6 +30,15 @@
         <p class="error-detail">{{ subscriptionStore.error() }}</p>
       </div>
     } @else if (subscriptionStore.isPro()) {
+      @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
+        <div class="cancel-alert" role="alert">
+          <div class="cancel-alert__body">
+            <strong>⚠️ Suscripción en cancelación</strong>
+            <span>Tu acceso Pro finalizará el <strong>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</strong>. Reactívala para no perder el acceso.</span>
+          </div>
+          <button class="cancel-alert__cta" type="button" (click)="openPortal()">Reactivar</button>
+        </div>
+      }
       <div class="sub-card">
         <div class="sub-header">
           <span class="badge badge-active">● {{ statusLabel(subscriptionStore.subscription()!.status) }}</span>
@@ -67,9 +76,24 @@
           }
         </button>
       </div>
+    } @else if (subscriptionStore.isTrialActive()) {
+      <div class="trial-card">
+        <div class="sub-header">
+          <span class="badge badge-trial">⏱ Período de prueba gratuita</span>
+        </div>
+        <p class="trial-msg">
+          Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de acceso gratuito.
+          Suscríbete para seguir usando TicketBarber sin interrupciones.
+        </p>
+        <p class="trial-expires">
+          Tu acceso gratuito expira el
+          {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.
+        </p>
+        <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
+      </div>
     } @else {
       <div class="no-sub">
-        <p>No tienes ningún plan activo.</p>
+        <p>Tu período de prueba ha terminado.</p>
         <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
       </div>
     }
@@ -112,6 +136,21 @@
         </tbody>
       </table>
     }
+  </div>
+
+  <!-- Accesos rápidos -->
+  <div class="section">
+    <h3>Más opciones</h3>
+    <div class="quick-links">
+      <a class="quick-link" routerLink="/account/seguridad">
+        <span class="ql-icon" aria-hidden="true">🔒</span>
+        <div class="ql-body">
+          <span class="ql-title">Contraseña y seguridad</span>
+          <span class="ql-desc">Cómo funciona tu acceso con Google y qué hacer si pierdes la cuenta</span>
+        </div>
+        <span class="ql-arrow" aria-hidden="true">›</span>
+      </a>
+    </div>
   </div>
 
   <div class="back-link">

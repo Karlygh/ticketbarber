@@ -1,10 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-subscription-cancel-page',
   standalone: true,
+  imports: [HeaderComponent],
   template: `
+    <app-header></app-header>
     <div class="result-page cancel">
       <div class="icon">😕</div>
       <h1>Pago cancelado</h1>
@@ -56,6 +59,6 @@ import { Router } from '@angular/router';
 export class SubscriptionCancelPageComponent {
   private readonly router = inject(Router);
 
-  tryAgain(): void { void this.router.navigateByUrl('/subscription'); }
+  tryAgain(): void { void this.router.navigateByUrl('/pricing'); }
   goHome(): void { void this.router.navigateByUrl('/'); }
 }

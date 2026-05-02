@@ -2,6 +2,16 @@
 
 <main class="pairing-shell">
   <section class="pairing-card">
+    @if (status() === 'idle') {
+      <div class="state-idle">
+        <p class="eyebrow">Vincular TV</p>
+        <h1>Genera un código solo cuando vayas a usarlo</h1>
+        <p class="subtitle">
+          Así evitamos crear códigos por error y reducimos escrituras innecesarias en la base de datos.
+        </p>
+      </div>
+    }
+
     @if (status() === 'loading') {
       <div class="state-loading">
         <div class="spinner"></div>
@@ -74,3 +84,20 @@
     }
   </section>
 </main>
+
+@if (confirmModalOpen()) {
+  <div class="confirm-backdrop" (click)="cancelGenerateCode()">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="pairing-confirm-title" (click)="$event.stopPropagation()">
+      <div class="confirm-icon" aria-hidden="true">!</div>
+      <p class="eyebrow">Confirmación</p>
+      <h2 id="pairing-confirm-title">¿Quieres generar un código de vinculación?</h2>
+      <p class="confirm-copy">
+        El código se creará solo cuando confirmes. Úsalo si ya vas a vincular una TV ahora mismo.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" type="button" (click)="cancelGenerateCode()">Cancelar</button>
+        <button class="btn-regenerate" type="button" (click)="confirmGenerateCode()">Sí, generar código</button>
+      </div>
+    </div>
+  </div>
+}

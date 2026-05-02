@@ -75,9 +75,9 @@ export class StaffTvSetupPageComponent {
         body: 'Antes de poner en marcha la pantalla TV, necesitas tener acceso al panel de barberos desde tu tablet o móvil. Desde ahí controlarás los turnos en tiempo real mientras la TV los muestra automáticamente a tus clientes.',
         subSteps: [
           '1.1  Abre el navegador (Chrome recomendado) en tu tablet o móvil.',
-          '1.2  Ve a la URL de Ticketbarber e introduce tu email y contraseña.',
-          '1.3  Pulsa "Iniciar sesión" y espera a que cargue el panel de barberos.',
-          '1.4  Comprueba que ves el listado de turnos — eso significa que todo está correcto.'
+          '1.2  Ve a la URL oficial de Ticketbarber ',
+          '1.3  Pulsa "Iniciar sesión" ,rellena tus credenciales y accede a tu cuenta de barbero.Si no tienes cuenta, regístrate primero para crearla.',
+          '1.4  Cuando hayas iniciado sesión correctamente, podrás acceder al panel de gestión de turnos.'
         ],
         warning: 'Asegúrate de iniciar sesión con la cuenta de barbero.',
         tip: 'Guarda la URL en favoritos de la tablet para abrirla más rápido cada día.'
@@ -87,16 +87,16 @@ export class StaffTvSetupPageComponent {
       number: '02',
       title: 'Abre el navegador en la TV',
       description:
-        'En la televisión o dispositivo conectado, abre Chrome o el navegador disponible. No hace falta instalar nada extra.',
+        'En la televisión con el mando dirígete a "Ingresar codigo TV". No hace falta instalar nada extra.',
       imageLabel: 'Imagen del paso 2',
       imageHint: 'Sustituir por una captura del navegador abierto en la TV.',
       imageSrc: 'assets/2.png',
       detail: {
         body: 'La TV solo necesita un navegador web, sin instalar ninguna app adicional. Funciona con cualquier smart TV, Chromecast, Fire TV Stick o cualquier dispositivo conectado a la pantalla.',
         subSteps: [
-          '2.1  Enciende la TV y selecciona la entrada correcta (HDMI, Chromecast, etc.).',
+          '2.1  Enciende la TV y selecciona la entrada correcta (HDMI, TV, Chromecast, Fire TV Stick, etc.).',
           '2.2  Localiza el navegador web del sistema (Chrome, Silk Browser, etc.).',
-          '2.3  Ábrelo y comprueba que tienes conexión a internet.',
+          '2.3  Ábrelo y comprueba que tienes conexión a internet.Si no tienes internet debes de activarlo antes de realizar este paso.',
           '2.4  Si el navegador pide actualización, acéptala antes de continuar.'
         ],
         warning: 'Comprueba que la TV tiene Wi-Fi o cable de red activo antes de continuar. Sin conexión, la vista no se actualizará.',
@@ -127,7 +127,7 @@ export class StaffTvSetupPageComponent {
       number: '04',
       title: 'Genera el código desde tu móvil',
       description:
-        'Con sesión iniciada en Ticketbarber, abre la opción Vincular TV desde el navbar para generar un código temporal para esa pantalla.',
+        'Con sesión iniciada en Ticketbarber, abre la opción Vincular TV desde el navbar para generar un código temporal para la TV.',
       imageLabel: 'Imagen del paso 4',
       imageHint: 'Sustituir por una captura de la pantalla Vincular TV con el código visible.',
       imageSrc: 'assets/5.png',
@@ -136,7 +136,7 @@ export class StaffTvSetupPageComponent {
         subSteps: [
           '4.1  Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
           '4.2  En el navbar pulsa "Vincular TV".',
-          '4.3  Si ya tienes un código activo, verás ese mismo código y su tiempo restante.',
+          '4.3  Puedes generar un nuevo código o visualizar el código activo si ya lo generaste antes. Copia el código de 6 dígitos para introducirlo en la TV.',
           '4.4  Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
         ],
         warning: 'No compartas un código caducado: cada código solo puede usarse una vez y expira automáticamente.',
@@ -150,7 +150,7 @@ export class StaffTvSetupPageComponent {
         'En la TV abre /activate, introduce el código y, cuando termine la vinculación, deja la vista preparada para tus clientes.',
       imageLabel: 'Imagen del paso 5',
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
-      imageSrc: 'assets/3.png',
+      imageSrc: 'assets/5.png',
       detail: {
         body: 'La TV no necesita iniciar sesión. Solo tienes que abrir la pantalla pública de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [

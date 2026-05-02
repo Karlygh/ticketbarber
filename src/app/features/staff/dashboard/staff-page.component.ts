@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
+import { SubscriptionStore } from '../../../core/stores/subscription.store';
 import { QueueStore } from '../../../core/stores/queue.store';
 import { APP_ROUTES } from '../../../shared/routing/app-routes';
 import { CustomerDetailModalComponent } from '../../../shared/components/customer-detail-modal.component';
@@ -49,6 +50,7 @@ export class StaffPageComponent {
     hour12: false
   });
   readonly authStore = inject(AuthStore);
+  readonly subscriptionStore = inject(SubscriptionStore);
   readonly queueStore = inject(QueueStore);
   readonly routes = APP_ROUTES;
   readonly tvQueueRoute = computed(() => {
