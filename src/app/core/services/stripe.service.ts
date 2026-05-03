@@ -168,8 +168,8 @@ export class StripeService {
         success_url: `${window.location.origin}/subscription/success`,
         cancel_url: `${window.location.origin}/subscription/cancel`,
         allow_promotion_codes: true,
-        metadata: { createdAt: serverTimestamp() as unknown as string },
-        ...(trial ? { trial_from_plan: true } : {})
+        metadata: { createdAt: new Date().toISOString() },
+        ...(trial ? { trial_period_days: 7 } : {})
       };
 
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
