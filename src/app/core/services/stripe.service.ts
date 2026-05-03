@@ -254,7 +254,6 @@ export class StripeService {
       const q = query(
         subsRef,
         where('status', 'in', ['active', 'trialing']),
-        orderBy('currentPeriodEnd', 'desc'),
         limit(1)
       );
 
@@ -289,7 +288,7 @@ export class StripeService {
   getAllSubscriptions(uid: string): Observable<StripeSubscription[]> {
     return new Observable<StripeSubscription[]>((subscriber) => {
       const subsRef = collection(this.firestore, `customers/${uid}/subscriptions`);
-      const q = query(subsRef, orderBy('currentPeriodEnd', 'desc'));
+      const q = query(subsRef, orderBy('current_period_end', 'desc'));
 
       const unsub = onSnapshot(
         q,

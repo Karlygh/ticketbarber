@@ -367,7 +367,8 @@ export class SubscriptionSuccessPageComponent implements OnInit {
           clearTimeout(this.timeoutId);
           this.timeoutId = null;
         }
-        sessionStorage.setItem(CELEBRATION_KEY, '1');
+        // NO escribir sessionStorage aquí — se escribe solo al navegar,
+        // para que la celebración siempre se muestre la primera vez.
       }
     });
   }
