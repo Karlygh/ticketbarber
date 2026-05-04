@@ -8,14 +8,28 @@
     <button class="secondary" (click)="requestLogout()" [disabled]="isBusy()">Salir</button>
   </header>
 
-  @if (!subscriptionStore.isPro() && subscriptionStore.isTrialActive()) {
-    <div
-      class="trial-warning"
-      [class.trial-warning--urgent]="subscriptionStore.trialDaysLeft() <= 2"
-      role="status">
-      ⏱ Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de prueba gratuita.
-      <a routerLink="/pricing">Suscríbete ahora</a>
-    </div>
+  @switch (subscriptionStore.subscriptionStatus()) {
+    @case ('trial-active') {
+      <div
+        class="trial-warning"
+        [class.trial-warning--urgent]="subscriptionStore.trialDaysLeft() <= 2"
+        role="status">
+        ⏱ Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de prueba gratuita.
+        <a routerLink="/pricing">Suscríbete ahora</a>
+      </div>
+    }
+    @case ('trial-expired') {
+      <div class="trial-warning trial-warning--urgent" role="alert">
+        ⚠️ Tu prueba gratuita ha expirado.
+        <a routerLink="/pricing">Ver planes Pro</a>
+      </div>
+    }
+    @case ('pro-past-due') {
+      <div class="trial-warning trial-warning--urgent" role="alert">
+        💳 Pago pendiente — actualiza tu método de pago para mantener el acceso.
+        <a routerLink="/subscription/manage">Gestionar pago</a>
+      </div>
+    }
   }
 
   @if (error()) {
@@ -94,6 +108,7 @@
     <a [routerLink]="routes.staff.devices">🖥️ Mis pantallas</a>
     <a [routerLink]="routes.staff.tvSetup">Guía TV</a>
     <a [routerLink]="routes.account">Mi cuenta</a>
+    <a routerLink="/account/negocio">✂️ Mi negocio</a>
     <a [routerLink]="routes.subscriptionManage">Mi suscripción</a>
     <a [routerLink]="routes.pricing">Ver planes</a>
     <a [routerLink]="routes.home">Volver a la web</a>

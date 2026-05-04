@@ -29,73 +29,133 @@
         <p>No se pudo cargar el estado de tu suscripción.</p>
         <p class="error-detail">{{ subscriptionStore.error() }}</p>
       </div>
-    } @else if (subscriptionStore.isPro()) {
-      @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
-        <div class="cancel-alert" role="alert">
-          <div class="cancel-alert__body">
-            <strong>⚠️ Suscripción en cancelación</strong>
-            <span>Tu acceso Pro finalizará el <strong>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</strong>. Reactívala para no perder el acceso.</span>
+    } @else {
+      @switch (subscriptionStore.subscriptionStatus()) {
+
+        @case ('pro-canceling') {
+          <div class="cancel-alert" role="alert">
+            <div class="cancel-alert__body">
+              <strong>⚠️ Suscripción en cancelación</strong>
+              <span>Tu acceso Pro finalizará el <strong>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</strong>. Reactívala para no perder el acceso.</span>
+            </div>
+            <button class="cancel-alert__cta" type="button" (click)="openPortal()">Reactivar</button>
           </div>
-          <button class="cancel-alert__cta" type="button" (click)="openPortal()">Reactivar</button>
-        </div>
-      }
-      <div class="sub-card">
-        <div class="sub-header">
-          <span class="badge badge-active">● {{ statusLabel(subscriptionStore.subscription()!.status) }}</span>
-          @if (subscriptionStore.isTrialing()) {
-            <span class="badge badge-trial">Período de prueba</span>
-          }
-        </div>
-
-        <dl class="sub-details">
-          <dt>Inicio del período</dt>
-          <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
-
-          <dt>Renovación</dt>
-          <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
-
-          @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
-            <dt>Cancelación programada</dt>
-            <dd class="warning">Se cancelará el {{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
-          }
-        </dl>
-
-        @if (portalError()) {
-          <p class="error-msg">{{ portalError() }}</p>
+          <div class="sub-card">
+            <div class="sub-header">
+              <span class="badge badge-active">● {{ statusLabel(subscriptionStore.subscription()!.status) }}</span>
+              <span class="badge badge-cancel">Cancelación programada</span>
+            </div>
+            <dl class="sub-details">
+              <dt>Inicio del período</dt>
+              <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+              <dt>Acceso hasta</dt>
+              <dd class="warning">{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </dl>
+            @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner"></span> Abriendo portal… } @else { Gestionar suscripción }
+            </button>
+          </div>
         }
 
-        <button
-          class="btn-primary"
-          [class.btn-loading]="portalLoading()"
-          [disabled]="portalLoading()"
-          (click)="openPortal()">
-          @if (portalLoading()) {
-            <span class="spinner"></span> Abriendo portal…
-          } @else {
-            Gestionar suscripción
-          }
-        </button>
-      </div>
-    } @else if (subscriptionStore.isTrialActive()) {
-      <div class="trial-card">
-        <div class="sub-header">
-          <span class="badge badge-trial">⏱ Período de prueba gratuita</span>
-        </div>
-        <p class="trial-msg">
-          Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de acceso gratuito.
-          Suscríbete para seguir usando TicketBarber sin interrupciones.
-        </p>
-        <p class="trial-expires">
-          Tu acceso gratuito expira el
-          {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.
-        </p>
-        <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
-      </div>
-    } @else {
-      <div class="no-sub">
-        <p>Tu período de prueba ha terminado.</p>
-        <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
-      </div>
+        @case ('pro-past-due') {
+          <div class="cancel-alert cancel-alert--warning" role="alert">
+            <div class="cancel-alert__body">
+              <strong>💳 Pago pendiente</strong>
+              <span>Actualiza tu método de pago para mantener el acceso Pro.</span>
+            </div>
+            <button class="cancel-alert__cta" type="button" (click)="openPortal()">Actualizar pago</button>
+          </div>
+          <div class="sub-card">
+            <div class="sub-header">
+              <span class="badge badge-cancel">● Pago pendiente</span>
+            </div>
+            <dl class="sub-details">
+              <dt>Renovación</dt>
+              <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </dl>
+            @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner"></span> Abriendo portal… } @else { Gestionar suscripción }
+            </button>
+          </div>
+        }
+
+        @case ('pro-active') {
+          <div class="sub-card">
+            <div class="sub-header">
+              <span class="badge badge-active">● Activo</span>
+            </div>
+            <dl class="sub-details">
+              <dt>Inicio del período</dt>
+              <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+              <dt>Renovación</dt>
+              <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </dl>
+            @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner"></span> Abriendo portal… } @else { Gestionar suscripción }
+            </button>
+          </div>
+        }
+
+        @case ('pro-trialing') {
+          <div class="sub-card">
+            <div class="sub-header">
+              <span class="badge badge-active">● Activo</span>
+              <span class="badge badge-trial">Período de prueba Stripe</span>
+            </div>
+            <dl class="sub-details">
+              <dt>Prueba hasta</dt>
+              <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </dl>
+            @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner"></span> Abriendo portal… } @else { Gestionar suscripción }
+            </button>
+          </div>
+        }
+
+        @case ('pro-expired') {
+          <div class="no-sub">
+            <p><strong>Tu suscripción ha finalizado.</strong></p>
+            <p>Para seguir usando TicketBarber elige un plan Pro.</p>
+            <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          </div>
+        }
+
+        @case ('trial-active') {
+          <div class="trial-card">
+            <div class="sub-header">
+              <span class="badge badge-trial">⏱ Período de prueba gratuita</span>
+            </div>
+            <p class="trial-msg">
+              Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de acceso gratuito.
+              Suscríbete para seguir usando TicketBarber sin interrupciones.
+            </p>
+            <p class="trial-expires">
+              Tu acceso gratuito expira el
+              {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.
+            </p>
+            <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
+          </div>
+        }
+
+        @case ('trial-expired') {
+          <div class="no-sub">
+            <p>Tu período de prueba ha terminado.</p>
+            <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          </div>
+        }
+
+        @default {
+          <div class="no-sub">
+            <p>No tienes ningún plan activo.</p>
+            <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          </div>
+        }
+
+      }
     }
   </div>
 
@@ -142,11 +202,43 @@
   <div class="section">
     <h3>Más opciones</h3>
     <div class="quick-links">
+      <a class="quick-link" routerLink="/account/perfil">
+        <span class="ql-icon" aria-hidden="true">👤</span>
+        <div class="ql-body">
+          <span class="ql-title">Mi perfil</span>
+          <span class="ql-desc">Edita tu nombre y foto de perfil personal</span>
+        </div>
+        <span class="ql-arrow" aria-hidden="true">›</span>
+      </a>
+      <a class="quick-link" routerLink="/account/negocio">
+        <span class="ql-icon" aria-hidden="true">✂️</span>
+        <div class="ql-body">
+          <span class="ql-title">Mi negocio</span>
+          <span class="ql-desc">Nombre, logo y horarios de tu barbería — aparece en la pantalla TV y el kiosk</span>
+        </div>
+        <span class="ql-arrow" aria-hidden="true">›</span>
+      </a>
+      <a class="quick-link" routerLink="/subscription/manage">
+        <span class="ql-icon" aria-hidden="true">💳</span>
+        <div class="ql-body">
+          <span class="ql-title">Gestionar suscripción</span>
+          <span class="ql-desc">Cambiar plan, cancelar o gestionar método de pago</span>
+        </div>
+        <span class="ql-arrow" aria-hidden="true">›</span>
+      </a>
       <a class="quick-link" routerLink="/account/seguridad">
         <span class="ql-icon" aria-hidden="true">🔒</span>
         <div class="ql-body">
           <span class="ql-title">Contraseña y seguridad</span>
           <span class="ql-desc">Cómo funciona tu acceso con Google y qué hacer si pierdes la cuenta</span>
+        </div>
+        <span class="ql-arrow" aria-hidden="true">›</span>
+      </a>
+      <a class="quick-link" routerLink="/account/privacidad">
+        <span class="ql-icon" aria-hidden="true">🛡️</span>
+        <div class="ql-body">
+          <span class="ql-title">Privacidad y datos</span>
+          <span class="ql-desc">Exportar tus datos o eliminar tu cuenta permanentemente</span>
         </div>
         <span class="ql-arrow" aria-hidden="true">›</span>
       </a>

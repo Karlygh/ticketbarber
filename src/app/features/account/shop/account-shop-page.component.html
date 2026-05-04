@@ -1,0 +1,220 @@
+<app-header></app-header>
+
+<section class="shop-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Navegación">
+    <a routerLink="/account">Mi cuenta</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span>Mi negocio</span>
+  </nav>
+
+  <h1>Mi negocio</h1>
+  <p class="page-lead">
+    Esta información aparece en la pantalla TV y el kiosk de tu barbería.
+  </p>
+
+  @if (loading()) {
+    <div class="skeleton-list">
+      <div class="skeleton-field"></div>
+      <div class="skeleton-field"></div>
+      <div class="skeleton-field skeleton-field--short"></div>
+    </div>
+  } @else {
+    <!-- ── Logo ────────────────────────────────────────── -->
+    <div class="form-section">
+      <form [formGroup]="basicForm" (ngSubmit)="saveLogo()" novalidate>
+        <h2 class="section-title">Logo del negocio</h2>
+
+        <div class="logo-area">
+          <div class="logo-preview-wrap">
+            @if (logoPreview()) {
+              <img class="logo-preview" [src]="logoPreview()!" alt="Logo del negocio" />
+            } @else {
+              <div class="logo-placeholder">✂️</div>
+            }
+          </div>
+
+          <div class="logo-actions">
+            @if (logoUploading()) {
+              <div class="upload-progress">
+                <div class="progress-bar" [style.width.%]="logoUploadProgress()"></div>
+              </div>
+              <p class="upload-hint">Subiendo… {{ logoUploadProgress() }}%</p>
+            } @else {
+              <label class="btn-secondary upload-btn" for="logo-input">
+                {{ logoPreview() ? 'Cambiar logo' : 'Subir logo' }}
+              </label>
+              <input
+                id="logo-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                class="visually-hidden"
+                (change)="onLogoSelected($event)"
+              />
+              @if (logoPreview()) {
+                <button type="button" class="btn-ghost-danger" (click)="removeLogo()">Eliminar logo</button>
+              }
+            }
+            <p class="upload-hint">JPG, PNG, WebP o SVG · Máx. 2 MB · Recomendado: 256×256 px</p>
+            @if (logoUploadError()) {
+              <p class="field-error">{{ logoUploadError() }}</p>
+            }
+            @if (logoSaveError()) {
+              <p class="save-error">{{ logoSaveError() }}</p>
+            }
+            @if (logoSaveSuccess()) {
+              <p class="save-success">✓ Logo guardado correctamente.</p>
+            }
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button type="button" class="btn-ghost" (click)="revertLogo()" [disabled]="logoSaving() || !logoHasChanges()">
+            Revertir
+          </button>
+          <button type="submit" class="btn-primary" [class.btn-loading]="logoSaving()" [disabled]="logoSaving() || !logoHasChanges() || logoUploading()">
+            @if (logoSaving()) {
+              <span class="spinner" aria-hidden="true"></span> Guardando…
+            } @else {
+              Guardar logo
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ── Información básica ────────────────────────── -->
+    <div class="form-section">
+      <form [formGroup]="basicForm" (ngSubmit)="saveBasic()" novalidate>
+        <h2 class="section-title">Información básica</h2>
+
+        <div class="field">
+          <label class="field-label" for="shopName">Nombre del negocio *</label>
+          <input
+            id="shopName"
+            type="text"
+            class="field-input"
+            [class.field-input--error]="basicForm.get('shopName')!.invalid && basicForm.get('shopName')!.touched"
+            formControlName="shopName"
+            placeholder="Ej: Barbería El Rincón"
+            maxlength="60"
+          />
+          @if (basicForm.get('shopName')!.invalid && basicForm.get('shopName')!.touched) {
+            <p class="field-error">El nombre del negocio es obligatorio (máx. 60 caracteres).</p>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="description">Descripción breve</label>
+          <textarea
+            id="description"
+            class="field-input field-textarea"
+            formControlName="description"
+            placeholder="Ej: Barbería tradicional en el centro de Madrid"
+            maxlength="200"
+            rows="3"
+          ></textarea>
+          <p class="field-hint">{{ basicForm.get('description')!.value?.length ?? 0 }}/200</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="address">Dirección</label>
+            <input
+              id="address"
+              type="text"
+              class="field-input"
+              formControlName="address"
+              placeholder="Calle, número, ciudad"
+              maxlength="120"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="phone">Teléfono</label>
+            <input
+              id="phone"
+              type="tel"
+              class="field-input"
+              formControlName="phone"
+              placeholder="+34 600 000 000"
+              maxlength="20"
+            />
+          </div>
+        </div>
+        @if (basicSaveError()) {
+          <p class="save-error">{{ basicSaveError() }}</p>
+        }
+        @if (basicSaveSuccess()) {
+          <p class="save-success">✓ Información básica guardada correctamente.</p>
+        }
+
+        <div class="section-actions">
+          <button type="button" class="btn-ghost" (click)="revertBasic()" [disabled]="basicSaving() || !basicHasChanges()">
+            Revertir
+          </button>
+          <button type="submit" class="btn-primary" [class.btn-loading]="basicSaving()" [disabled]="basicSaving() || !basicHasChanges() || basicForm.get('shopName')!.invalid">
+            @if (basicSaving()) {
+              <span class="spinner" aria-hidden="true"></span> Guardando…
+            } @else {
+              Guardar información
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ── Horarios ──────────────────────────────────── -->
+    <div class="form-section">
+      <form [formGroup]="hoursForm" (ngSubmit)="saveHours()" novalidate>
+        <h2 class="section-title">Horario de apertura</h2>
+        <p class="section-note">Se muestra en la pantalla TV cuando la jornada está abierta.</p>
+
+        <div class="hours-grid" formArrayName="openingHours">
+          @for (day of hoursArray.controls; track $index; let i = $index) {
+            <div class="hours-row" [formGroupName]="i">
+              <span class="hours-day">{{ weekDays[i] }}</span>
+              <label class="hours-toggle">
+                <input type="checkbox" formControlName="closed" />
+                <span class="toggle-label">{{ day.get('closed')!.value ? 'Cerrado' : 'Abierto' }}</span>
+              </label>
+              @if (!day.get('closed')!.value) {
+                <div class="hours-times">
+                  <input type="time" class="field-input field-input--time" formControlName="opens" />
+                  <span class="times-sep">–</span>
+                  <input type="time" class="field-input field-input--time" formControlName="closes" />
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (hoursSaveError()) {
+          <p class="save-error">{{ hoursSaveError() }}</p>
+        }
+        @if (hoursSaveSuccess()) {
+          <p class="save-success">✓ Horario guardado correctamente.</p>
+        }
+
+        <div class="section-actions">
+          <button type="button" class="btn-ghost" (click)="revertHours()" [disabled]="hoursSaving() || !hoursHasChanges()">
+            Revertir
+          </button>
+          <button type="submit" class="btn-primary" [class.btn-loading]="hoursSaving()" [disabled]="hoursSaving() || !hoursHasChanges()">
+            @if (hoursSaving()) {
+              <span class="spinner" aria-hidden="true"></span> Guardando…
+            } @else {
+              Guardar horario
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn-ghost" routerLink="/account">Volver a mi cuenta</a>
+    </div>
+  }
+
+</section>
+
+<app-footer></app-footer>

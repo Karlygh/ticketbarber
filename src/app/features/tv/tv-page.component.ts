@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { QueueRepository } from '../../core/data/queue.repository';
 import { TvAuthService } from '../../core/services/tv-auth.service';
+import { ShopService } from '../../core/services/shop.service';
 import { DEFAULT_QUEUE_SETTINGS, QueueSettings } from '../../core/models/settings.model';
 import { Ticket } from '../../core/models/ticket.model';
 import { TvQueueRow } from '../../core/stores/queue.store';
@@ -20,8 +21,11 @@ export class TvPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly repository = inject(QueueRepository);
   private readonly tvAuthService = inject(TvAuthService);
+  private readonly shopService = inject(ShopService);
 
   readonly now = signal(Date.now());
+  readonly shopName = signal<string>('');
+  readonly shopLogoUrl = signal<string>('');
   private readonly tickets = signal<Ticket[]>([]);
   private readonly settings = signal<QueueSettings>(DEFAULT_QUEUE_SETTINGS);
 
@@ -56,6 +60,13 @@ export class TvPageComponent implements OnInit, OnDestroy {
       this.repository.observeTicketsForShop(shopId).subscribe(t => this.tickets.set(t)),
       this.repository.observeSettingsForShop(shopId).subscribe(s => this.settings.set(s))
     );
+
+    void this.shopService.getShopProfile(shopId).then(profile => {
+      if (profile) {
+        this.shopName.set(profile.shopName || '');
+        this.shopLogoUrl.set(profile.logoUrl || '');
+      }
+    });
 
     const deviceId = this.tvAuthService.getDeviceId();
     this.heartbeatInterval = window.setInterval(

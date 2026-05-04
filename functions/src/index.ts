@@ -378,3 +378,53 @@ Para responder, haz Reply a este email.
     }
   }
 );
+
+// ═════════════════════════════════════════════════════════════════════
+// DELETE ACCOUNT
+// Elimina todos los datos del usuario y su cuenta de Firebase Auth.
+// Solo puede invocarse autenticado y solo borra el uid del token.
+// ═════════════════════════════════════════════════════════════════════
+
+export const deleteAccount = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Debes estar autenticado para eliminar tu cuenta.");
+  }
+
+  const uid = request.auth.uid;
+  logger.info("Solicitud de eliminación de cuenta", {uid});
+
+  const collectionsToDelete = [
+    `users/${uid}`,
+    `shops/${uid}`,
+    `cancellation_feedback/${uid}`,
+  ];
+
+  // Borrar documentos raíz del usuario
+  await Promise.all(
+    collectionsToDelete.map((path) => db.doc(path).delete().catch(() => { /* ya no existía */ }))
+  );
+
+  // Borrar subcolección de tickets del shop
+  const ticketsRef = db.collection(`shops/${uid}/tickets`);
+  const ticketsSnap = await ticketsRef.get();
+  const deleteBatch = db.batch();
+  ticketsSnap.docs.forEach((d) => deleteBatch.delete(d.ref));
+  if (!ticketsSnap.empty) await deleteBatch.commit();
+
+  // Borrar subcolecciones de Stripe (customers/{uid}/*)
+  const stripeSubCollections = ["subscriptions", "payments", "checkout_sessions"];
+  for (const sub of stripeSubCollections) {
+    const snap = await db.collection(`customers/${uid}/${sub}`).get();
+    const batch = db.batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    if (!snap.empty) await batch.commit();
+  }
+  await db.doc(`customers/${uid}`).delete().catch(() => { /* ya no existía */ });
+
+  // Borrar cuenta de Firebase Auth (siempre al final)
+  await admin.auth().deleteUser(uid);
+
+  logger.info("Cuenta eliminada correctamente", {uid});
+  return {success: true};
+});
+

@@ -47,6 +47,14 @@
   color: var(--text-primary);
 }
 
+.kiosk-logo {
+  height: 3rem;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  border-radius: 8px;
+}
+
 .eyebrow {
   margin: 0 0 0.35rem;
   color: var(--section-kiosk);

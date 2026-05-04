@@ -225,6 +225,17 @@
   text-transform: uppercase;
 }
 
+.badge-expired {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--r-pill);
+  text-transform: uppercase;
+}
+
 /* Nombre/cuenta */
 .top-account {
   color: var(--text-copy);

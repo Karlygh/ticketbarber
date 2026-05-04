@@ -1,0 +1,15 @@
+[
+  {
+    "origin": ["http://localhost:4200", "https://ticketbarber-7c16d.firebaseapp.com", "https://ticketbarber-7c16d.web.app"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "Content-Length",
+      "User-Agent",
+      "x-firebase-storage-version",
+      "x-goog-resumable"
+    ]
+  }
+]

@@ -1,6 +1,11 @@
 <main class="tv-shell">
   <header class="tv-head">
-    <p class="brand">TicketBarber </p>
+    <div class="tv-brand">
+      @if (shopLogoUrl()) {
+        <img class="tv-brand-logo" [src]="shopLogoUrl()" alt="Logo" />
+      }
+      <p class="brand">{{ shopName() || 'TicketBarber' }}</p>
+    </div>
     <p class="clock">{{ now() | date: 'HH:mm:ss' }}</p>
   </header>
 

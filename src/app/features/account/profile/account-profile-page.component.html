@@ -1,0 +1,101 @@
+<app-header></app-header>
+
+<section class="profile-page">
+
+  <nav class="breadcrumb" aria-label="Navegación">
+    <a routerLink="/account">Mi cuenta</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span>Mi perfil</span>
+  </nav>
+
+  <h1>Mi perfil</h1>
+  <p class="page-lead">Edita tu nombre y foto de perfil.</p>
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+
+    <!-- ── Avatar ── -->
+    <div class="form-section">
+      <h2 class="section-title">Foto de perfil</h2>
+      <div class="avatar-area">
+        <div class="avatar-wrap">
+          @if (avatarPreview()) {
+            <img class="avatar-img" [src]="avatarPreview()!" alt="Avatar" referrerpolicy="no-referrer" />
+          } @else {
+            <div class="avatar-placeholder">
+              {{ (form.get('displayName')!.value?.[0] ?? '?').toUpperCase() }}
+            </div>
+          }
+        </div>
+
+        <div class="avatar-actions">
+          @if (avatarUploading()) {
+            <div class="upload-progress">
+              <div class="progress-bar" [style.width.%]="avatarProgress()"></div>
+            </div>
+            <p class="upload-hint">Subiendo… {{ avatarProgress() }}%</p>
+          } @else {
+            <label class="btn-secondary" for="avatar-input">Cambiar foto</label>
+            <input
+              id="avatar-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="visually-hidden"
+              (change)="onAvatarSelected($event)"
+            />
+          }
+          <p class="upload-hint">JPG, PNG o WebP · Máx. 2 MB</p>
+          @if (avatarError()) {
+            <p class="field-error">{{ avatarError() }}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Nombre ── -->
+    <div class="form-section">
+      <h2 class="section-title">Información personal</h2>
+
+      <div class="field">
+        <label class="field-label" for="displayName">Nombre *</label>
+        <input
+          id="displayName"
+          type="text"
+          class="field-input"
+          [class.field-input--error]="form.get('displayName')!.invalid && form.get('displayName')!.touched"
+          formControlName="displayName"
+          placeholder="Tu nombre"
+          maxlength="60"
+        />
+        @if (form.get('displayName')!.invalid && form.get('displayName')!.touched) {
+          <p class="field-error">El nombre es obligatorio (máx. 60 caracteres).</p>
+        }
+      </div>
+    </div>
+
+    @if (saveError()) {
+      <p class="save-error">{{ saveError() }}</p>
+    }
+    @if (saveSuccess()) {
+      <p class="save-success">✓ Perfil actualizado correctamente.</p>
+    }
+
+    <div class="form-actions">
+      <a class="btn-ghost" routerLink="/account">Cancelar</a>
+      <button
+        type="submit"
+        class="btn-primary"
+        [class.btn-loading]="saving()"
+        [disabled]="saving() || form.invalid">
+        @if (saving()) {
+          <span class="spinner" aria-hidden="true"></span> Guardando…
+        } @else {
+          Guardar cambios
+        }
+      </button>
+    </div>
+
+  </form>
+
+</section>
+
+<app-footer></app-footer>

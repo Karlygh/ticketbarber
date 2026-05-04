@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { QueueStore } from '../../core/stores/queue.store';
 import { AuthStore } from '../../core/stores/auth.store';
+import { ShopService } from '../../core/services/shop.service';
 import { TicketReceipt } from '../../core/models/ticket.model';
 
 @Component({
@@ -13,11 +14,14 @@ import { TicketReceipt } from '../../core/models/ticket.model';
   templateUrl: './kiosk-page.component.html',
   styleUrl: './kiosk-page.component.css'
 })
-export class KioskPageComponent {
+export class KioskPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   readonly authStore = inject(AuthStore);
   readonly queueStore = inject(QueueStore);
+  private readonly shopService = inject(ShopService);
 
+  readonly shopName = signal<string>('');
+  readonly shopLogoUrl = signal<string>('');
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
   readonly receipt = signal<TicketReceipt | null>(null);
@@ -31,6 +35,18 @@ export class KioskPageComponent {
     serviceId: ['', [Validators.required]],
     phone: ['']
   });
+
+  ngOnInit(): void {
+    const uid = this.authStore.user()?.uid;
+    if (uid) {
+      void this.shopService.getShopProfile(uid).then(profile => {
+        if (profile) {
+          this.shopName.set(profile.shopName || '');
+          this.shopLogoUrl.set(profile.logoUrl || '');
+        }
+      });
+    }
+  }
 
   async submitTicket(): Promise<void> {
     this.errorMessage.set('');

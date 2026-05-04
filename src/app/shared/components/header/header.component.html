@@ -30,10 +30,13 @@
     <div class="top-actions">
       @if (authStore.isAuthenticated()) {
         <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
-        @if (subscriptionStore.isPro()) {
-          <span class="badge-pro">PRO</span>
-        } @else if (subscriptionStore.isTrialActive()) {
-          <span class="badge-trial">{{ subscriptionStore.trialDaysLeft() }}d prueba</span>
+        @switch (subscriptionStore.subscriptionStatus()) {
+          @case ('pro-active') { <span class="badge-pro">PRO</span> }
+          @case ('pro-trialing') { <span class="badge-pro">PRO</span> }
+          @case ('pro-canceling') { <span class="badge-pro">PRO</span> }
+          @case ('pro-past-due') { <span class="badge-trial">Pago pendiente</span> }
+          @case ('trial-active') { <span class="badge-trial">{{ subscriptionStore.trialDaysLeft() }}d prueba</span> }
+          @case ('trial-expired') { <span class="badge-expired">Sin plan</span> }
         }
         <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
           <button
@@ -50,6 +53,7 @@
             <a [routerLink]="routes.staff.root" (click)="closeMobileMenu()">Panel</a>
             <a [routerLink]="routes.staff.devices" (click)="closeMobileMenu()">Mis TVs</a>
             <a [routerLink]="routes.account" (click)="closeMobileMenu()">Mi cuenta</a>
+            <a routerLink="/account/negocio" (click)="closeMobileMenu()">Mi negocio</a>
             <button class="top-logout" type="button" (click)="signOut()">Cerrar sesión</button>
           </div>
         </div>

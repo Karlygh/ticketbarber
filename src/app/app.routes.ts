@@ -171,11 +171,35 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'account/perfil',
+    canActivate: [staffAuthGuard],
+    loadComponent: () =>
+      import('./features/account/profile/account-profile-page.component').then(
+        (m) => m.AccountProfilePageComponent
+      )
+  },
+  {
+    path: 'account/negocio',
+    canActivate: [staffAuthGuard],
+    loadComponent: () =>
+      import('./features/account/shop/account-shop-page.component').then(
+        (m) => m.AccountShopPageComponent
+      )
+  },
+  {
     path: 'account/seguridad',
     canActivate: [staffAuthGuard],
     loadComponent: () =>
       import('./features/account/security/account-security-page.component').then(
         (m) => m.AccountSecurityPageComponent
+      )
+  },
+  {
+    path: 'account/privacidad',
+    canActivate: [staffAuthGuard],
+    loadComponent: () =>
+      import('./features/account/privacy/account-privacy-page.component').then(
+        (m) => m.AccountPrivacyPageComponent
       )
   },
   {

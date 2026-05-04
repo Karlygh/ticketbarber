@@ -4,6 +4,17 @@ import { StripeService } from '../services/stripe.service';
 import { AuthStore } from './auth.store';
 import { UserService } from '../services/user.service';
 
+export type SubscriptionStatus =
+  | 'loading'
+  | 'free'             // nunca tuvo suscripción, trial expirado
+  | 'trial-active'     // dentro del período de prueba gratuita
+  | 'trial-expired'    // trial expirado, sin suscripción Stripe
+  | 'pro-active'       // Stripe: active
+  | 'pro-trialing'     // Stripe: trialing
+  | 'pro-canceling'    // Stripe: active + cancelAtPeriodEnd = true
+  | 'pro-past-due'     // Stripe: past_due
+  | 'pro-expired';     // Stripe: canceled | unpaid | incomplete_expired | paused
+
 const TRIAL_DAYS = 7;
 
 /** Convierte un valor Firestore Timestamp, número ms o segundos a milisegundos */
@@ -89,6 +100,57 @@ export class SubscriptionStore {
 
   /** true cuando el perfil de Firestore ya fue leído (necesario para el guard) */
   readonly profileReady = computed(() => this._profileReady());
+
+  /** true si el trial gratuito expiró y no hay suscripción Stripe */
+  readonly isTrialExpired = computed(() => {
+    if (!this._profileReady()) return false;
+    if (this.isPro()) return false;
+    const expires = this._trialExpiresAt();
+    if (!expires) return false;
+    return Date.now() >= expires.getTime();
+  });
+
+  /** true si la suscripción Stripe tiene pago fallido */
+  readonly isPastDue = computed(() => this._subscription()?.status === 'past_due');
+
+  /** true si la suscripción Stripe está activa pero se cancela al final del período */
+  readonly isCanceling = computed(() => {
+    const sub = this._subscription();
+    return sub !== null && sub !== undefined && sub.cancelAtPeriodEnd === true;
+  });
+
+  /** true si la suscripción Stripe está en estado terminal (cancelada, impagada, etc.) */
+  readonly isExpired = computed(() => {
+    const status = this._subscription()?.status;
+    return status === 'canceled' || status === 'unpaid' || status === 'incomplete_expired' || status === 'paused';
+  });
+
+  /**
+   * Estado único derivado de todos los signals. Usar este en los componentes
+   * en lugar de combinar isPro() + isTrialActive() manualmente.
+   */
+  readonly subscriptionStatus = computed((): SubscriptionStatus => {
+    if (this._loading() || this._subscription() === undefined) return 'loading';
+
+    const sub = this._subscription();
+
+    // Suscripción Stripe presente
+    if (sub !== null && sub !== undefined) {
+      if (sub.status === 'past_due') return 'pro-past-due';
+      if (sub.status === 'canceled' || sub.status === 'unpaid' ||
+          sub.status === 'incomplete_expired' || sub.status === 'paused') return 'pro-expired';
+      if (sub.status === 'trialing') return 'pro-trialing';
+      if (sub.cancelAtPeriodEnd) return 'pro-canceling';
+      return 'pro-active';
+    }
+
+    // Sin suscripción Stripe — evaluar trial gratuito
+    if (!this._profileReady()) return 'loading';
+    if (this.isTrialActive()) return 'trial-active';
+    const expires = this._trialExpiresAt();
+    if (expires && Date.now() >= expires.getTime()) return 'trial-expired';
+    return 'free';
+  });
 
   constructor() {
     effect(() => {

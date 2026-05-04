@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Avatar personal del usuario ──────────────────────────────────────
+    // Solo el propietario puede leer y escribir su avatar.
+    // Permitimos solo imágenes de hasta 5 MB.
+    match /users/{userId}/avatar {
+      allow read:  if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── Logo del negocio ─────────────────────────────────────────────────
+    // Lectura pública (para el kiosk/TV sin autenticar).
+    // Escritura solo del propietario, imágenes ≤ 5 MB.
+    match /users/{userId}/logo {
+      allow read:  if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── Denegar todo lo demás ────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

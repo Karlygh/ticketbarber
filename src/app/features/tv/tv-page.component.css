@@ -21,8 +21,21 @@
 .tv-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.tv-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tv-brand-logo {
+  height: 2.2rem;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .brand {

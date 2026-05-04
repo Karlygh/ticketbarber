@@ -1,7 +1,10 @@
 <main class="kiosk-shell">
   <section class="kiosk-card">
     <header class="kiosk-head">
-      <p class="eyebrow">TicketBarber</p>
+      @if (shopLogoUrl()) {
+        <img class="kiosk-logo" [src]="shopLogoUrl()" alt="Logo del negocio" />
+      }
+      <p class="eyebrow">{{ shopName() || 'TicketBarber' }}</p>
       <h1>Apuntate a la lista</h1>
       <p class="subtitle">Deja tu nombre, elige servicio y te avisamos en pantalla.</p>
     </header>

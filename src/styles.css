@@ -112,12 +112,12 @@
   --section-kiosk-border: rgba(6, 182, 212, 0.28);
   --section-kiosk-glow:   rgba(6, 182, 212, 0.22);
 
-  /* Account → Indigo */
-  --section-account:        var(--indigo-500);
-  --section-account-light:  var(--indigo-400);
-  --section-account-subtle: rgba(99, 102, 241, 0.11);
-  --section-account-border: rgba(99, 102, 241, 0.28);
-  --section-account-glow:   rgba(99, 102, 241, 0.22);
+  /* Account → Cyan */
+  --section-account:        var(--cyan-500);
+  --section-account-light:  var(--cyan-300);
+  --section-account-subtle: rgba(6, 182, 212, 0.11);
+  --section-account-border: rgba(6, 182, 212, 0.28);
+  --section-account-glow:   rgba(6, 182, 212, 0.22);
 
   /* Pricing / PRO → Amber */
   --section-pricing:        var(--amber-500);

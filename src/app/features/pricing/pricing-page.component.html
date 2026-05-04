@@ -38,7 +38,7 @@
         <strong>Necesitas un plan activo</strong> para acceder a esa sección.
       </div>
     </div>
-  } @else if (subscriptionStore.isTrialActive()) {
+  } @else if (subscriptionStore.subscriptionStatus() === 'trial-active') {
     <div class="access-banner access-banner--trial" role="status">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <div>
@@ -49,6 +49,13 @@
       <button class="btn-continue-trial" type="button" (click)="continueTrial()">
         Continuar con mi prueba
       </button>
+    </div>
+  } @else if (subscriptionStore.subscriptionStatus() === 'pro-past-due') {
+    <div class="access-banner access-banner--expired" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <strong>Pago pendiente.</strong> Actualiza tu método de pago para mantener el acceso Pro.
+      </div>
     </div>
   }
 
@@ -130,7 +137,7 @@
                   }
                 </ul>
 
-                @if (subscriptionStore.isPro()) {
+                @if (subscriptionStore.isPro() || subscriptionStore.subscriptionStatus() === 'pro-past-due') {
                   <button
                     class="btn-primary"
                     [disabled]="portalLoading()"

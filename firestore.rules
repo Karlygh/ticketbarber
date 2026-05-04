@@ -94,6 +94,9 @@ service cloud.firestore {
     // ── Tienda (shop) ──────────────────────────────────────────────────────
     match /shops/{shopId} {
       allow read: if true;
+      // Solo el propietario puede crear/actualizar el perfil del negocio
+      allow create, update: if isOwner(shopId);
+      allow delete: if false;
 
       match /settings/{document=**} {
         allow read: if true;
@@ -160,6 +163,13 @@ service cloud.firestore {
     match /contactos/{contactId} {
       allow read: if false;  // Solo admin desde Console
       allow write: if false; // Solo Cloud Functions (server-side)
+    }
+
+    // ── Motivos de cancelación de suscripción ────────────────────────────
+    // El propietario escribe al cancelar; nadie puede leer desde el cliente.
+    match /cancellation_feedback/{userId} {
+      allow create, update: if isOwner(userId);
+      allow read, delete: if false;
     }
 
     // ── Denegar todo lo demás por defecto ─────────────────────────────────

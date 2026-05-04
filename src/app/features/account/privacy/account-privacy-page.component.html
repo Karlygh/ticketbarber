@@ -1,0 +1,99 @@
+<app-header></app-header>
+
+<section class="privacy-page">
+
+  <nav class="breadcrumb" aria-label="Navegación">
+    <a routerLink="/account">Mi cuenta</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span>Privacidad y datos</span>
+  </nav>
+
+  <h1>Privacidad y datos</h1>
+  <p class="page-lead">
+    Aquí puedes descargar una copia de tus datos o eliminar tu cuenta de forma permanente.
+  </p>
+
+  <!-- ── Exportar datos ─────────────────────────────── -->
+  <div class="form-section">
+    <h2 class="section-title">Exportar mis datos</h2>
+    <p class="section-note">
+      Descarga un archivo JSON con tu perfil personal, historial de pagos e historial de tickets de la cola.
+    </p>
+
+    @if (exportError()) {
+      <p class="field-error">{{ exportError() }}</p>
+    }
+
+    <button
+      type="button"
+      class="btn-secondary"
+      [class.btn-loading]="exporting()"
+      [disabled]="exporting()"
+      (click)="exportData()">
+      @if (exporting()) {
+        <span class="spinner" aria-hidden="true"></span> Preparando descarga…
+      } @else {
+        Descargar mis datos
+      }
+    </button>
+  </div>
+
+  <!-- ── Eliminar cuenta ────────────────────────────── -->
+  <div class="form-section danger-section">
+    <h2 class="section-title danger-title">Eliminar mi cuenta</h2>
+    <p class="section-note">
+      Esta acción elimina permanentemente tu cuenta, tus datos del negocio, el historial de tickets y cancela tu suscripción activa.
+      <strong>No se puede deshacer.</strong>
+    </p>
+
+    @if (deleteStep() === 'idle' || deleteStep() === 'error') {
+
+      @if (deleteError()) {
+        <p class="field-error">{{ deleteError() }}</p>
+      }
+
+      <button type="button" class="btn-danger-outline" (click)="openDeleteConfirm()">
+        Eliminar mi cuenta permanentemente
+      </button>
+
+    } @else if (deleteStep() === 'confirm') {
+
+      <div class="confirm-box" role="alertdialog" aria-labelledby="confirm-title">
+        <p id="confirm-title" class="confirm-warning">
+          ⚠️ Para confirmar, escribe <strong>ELIMINAR</strong> en el campo de abajo:
+        </p>
+        <form [formGroup]="confirmForm" (ngSubmit)="confirmDelete()" novalidate>
+          <input
+            type="text"
+            class="field-input"
+            [class.field-input--error]="confirmForm.get('confirmText')!.invalid && confirmForm.get('confirmText')!.touched"
+            formControlName="confirmText"
+            placeholder="ELIMINAR"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="confirm-actions">
+            <button type="button" class="btn-ghost" (click)="cancelDelete()">Cancelar</button>
+            <button
+              type="submit"
+              class="btn-danger"
+              [disabled]="confirmForm.invalid">
+              Confirmar eliminación
+            </button>
+          </div>
+        </form>
+      </div>
+
+    } @else if (deleteStep() === 'deleting') {
+
+      <div class="deleting-state">
+        <span class="spinner spinner--danger" aria-hidden="true"></span>
+        <p>Eliminando tu cuenta…</p>
+      </div>
+
+    }
+  </div>
+
+</section>
+
+<app-footer></app-footer>

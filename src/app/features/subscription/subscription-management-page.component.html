@@ -1,6 +1,13 @@
 <app-header></app-header>
 
 <section class="management-page">
+
+  <nav class="breadcrumb" aria-label="Navegación">
+    <a routerLink="/account">Mi cuenta</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span>Mi suscripción</span>
+  </nav>
+
   <h1>Mi suscripción</h1>
 
   @if (subscriptionStore.loading()) {
@@ -11,55 +18,182 @@
       <p class="error-detail">{{ subscriptionStore.error() }}</p>
       <button class="btn-secondary" type="button" (click)="goToPlans()">Ver planes</button>
     </div>
-  } @else if (subscriptionStore.isPro()) {
-    <div class="sub-card">
-      <div class="sub-header">
-        <span class="badge badge-active">● Activo</span>
-        @if (subscriptionStore.isTrialing()) {
-          <span class="badge badge-trial">Período de prueba</span>
-        }
-      </div>
-
-      <dl class="sub-details">
-        <dt>Estado</dt>
-        <dd>{{ statusLabel(subscriptionStore.subscription()!.status) }}</dd>
-
-        <dt>Precio ID</dt>
-        <dd class="mono">{{ subscriptionStore.subscription()!.priceId }}</dd>
-
-        <dt>Inicio del período</dt>
-        <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
-
-        <dt>Fin del período / renovación</dt>
-        <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
-
-        @if (subscriptionStore.subscription()!.cancelAtPeriodEnd) {
-          <dt>Cancelación</dt>
-          <dd class="warning">Se cancelará el {{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
-        }
-
-        @if (subscriptionStore.subscription()!.trialEnd) {
-          <dt>Fin de prueba</dt>
-          <dd>{{ (subscriptionStore.subscription()!.trialEnd! * 1000) | date:'longDate':'':'es' }}</dd>
-        }
-      </dl>
-
-      <div class="actions">
-        <!-- El Portal de Stripe permite gestionar facturas, cancelar, cambiar tarjeta, etc. -->
-        <!-- Para habilitarlo, configura el Customer Portal en: https://dashboard.stripe.com/test/settings/billing/portal -->
-        <p class="portal-note">
-          Para cancelar, cambiar plan o actualizar el método de pago, usa el
-          <strong>Portal de cliente de Stripe</strong> (configúralo en tu dashboard).
-        </p>
-        <button class="btn-secondary" routerLink="/staff">Volver al panel</button>
-      </div>
-    </div>
   } @else {
-    <div class="no-sub">
-      <p>No tienes ningún plan activo. ¡Hazte Pro para desbloquear todas las funciones!</p>
-      <button class="btn-primary" (click)="goToPlans()">Ver planes</button>
-    </div>
+    @switch (subscriptionStore.subscriptionStatus()) {
+
+      @case ('pro-active') {
+        <div class="sub-card">
+          <div class="sub-header">
+            <span class="badge badge-active">● Activo</span>
+          </div>
+          <dl class="sub-details">
+            <dt>Inicio del período</dt>
+            <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+            <dt>Próxima renovación</dt>
+            <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+          </dl>
+          @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+          <div class="actions">
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Gestionar facturación }
+            </button>
+            <button class="btn-secondary" type="button" (click)="goToPlans()">Cambiar plan</button>
+            <button class="btn-ghost-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
+          </div>
+        </div>
+      }
+
+      @case ('pro-trialing') {
+        <div class="sub-card">
+          <div class="sub-header">
+            <span class="badge badge-active">● Activo</span>
+            <span class="badge badge-trial">Período de prueba</span>
+          </div>
+          <dl class="sub-details">
+            <dt>Fin de prueba</dt>
+            <dd>{{ (subscriptionStore.subscription()!.trialEnd! * 1000) | date:'longDate':'':'es' }}</dd>
+            <dt>Primera renovación</dt>
+            <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+          </dl>
+          @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+          <div class="actions">
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Gestionar facturación }
+            </button>
+            <button class="btn-ghost-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
+          </div>
+        </div>
+      }
+
+      @case ('pro-canceling') {
+        <div class="sub-card">
+          <div class="sub-header">
+            <span class="badge badge-active">● Activo</span>
+            <span class="badge badge-cancel">Cancelación programada</span>
+          </div>
+          <dl class="sub-details">
+            <dt>Acceso hasta</dt>
+            <dd class="warning">{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+          </dl>
+          @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+          <div class="actions">
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Reactivar suscripción }
+            </button>
+            <button class="btn-secondary" type="button" (click)="goToPlans()">Ver planes</button>
+          </div>
+        </div>
+      }
+
+      @case ('pro-past-due') {
+        <div class="sub-card">
+          <div class="sub-header">
+            <span class="badge badge-cancel">● Pago pendiente</span>
+          </div>
+          <p class="trial-msg">Tu último pago no pudo procesarse. Actualiza tu método de pago para evitar la cancelación.</p>
+          @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
+          <div class="actions">
+            <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
+              @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Actualizar método de pago }
+            </button>
+          </div>
+        </div>
+      }
+
+      @case ('pro-expired') {
+        <div class="no-sub">
+          <p><strong>Tu suscripción ha finalizado.</strong></p>
+          <p>Elige un plan para recuperar el acceso a todas las funciones.</p>
+          <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+        </div>
+      }
+
+      @case ('trial-active') {
+        <div class="trial-card">
+          <p>Estás en el período de prueba gratuita. Te quedan
+            <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong>.
+          </p>
+          <p class="trial-expires">Acceso gratuito hasta {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.</p>
+          <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
+        </div>
+      }
+
+      @case ('trial-expired') {
+        <div class="no-sub">
+          <p>Tu período de prueba ha terminado. Elige un plan para seguir usando TicketBarber.</p>
+          <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+        </div>
+      }
+
+      @default {
+        <div class="no-sub">
+          <p>No tienes ningún plan activo. ¡Hazte Pro para desbloquear todas las funciones!</p>
+          <button class="btn-primary" (click)="goToPlans()">Ver planes</button>
+        </div>
+      }
+
+    }
   }
+
 </section>
 
+<!-- ── Modal cancelación ─────────────────────────────── -->
+@if (cancelModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCancelModal()" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2 id="cancel-modal-title">¿Por qué quieres cancelar?</h2>
+      <p class="modal-lead">
+        Tu respuesta nos ayuda a mejorar. Después de enviar el motivo te redirigiremos al portal para completar la cancelación.
+      </p>
+
+      <form [formGroup]="cancelForm" (ngSubmit)="submitCancelFeedback()" novalidate>
+        <div class="field">
+          <label class="field-label" for="reason">Motivo *</label>
+          <select
+            id="reason"
+            class="field-input"
+            formControlName="reason">
+            <option value="" disabled>Selecciona un motivo</option>
+            @for (reason of cancelReasons; track reason) {
+              <option [value]="reason">{{ reason }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="comment">¿Quieres añadir algo? (opcional)</label>
+          <textarea
+            id="comment"
+            class="field-input field-textarea"
+            formControlName="comment"
+            rows="3"
+            placeholder="Cuéntanos más…"
+            maxlength="300"
+          ></textarea>
+        </div>
+
+        @if (cancelError()) {
+          <p class="field-error">{{ cancelError() }}</p>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="closeCancelModal()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn-danger"
+            [class.btn-loading]="cancelSending()"
+            [disabled]="cancelSending() || cancelForm.invalid">
+            @if (cancelSending()) {
+              <span class="spinner" aria-hidden="true"></span> Enviando…
+            } @else {
+              Continuar con la cancelación
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
 <app-footer></app-footer>
+
