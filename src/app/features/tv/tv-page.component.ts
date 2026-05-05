@@ -1,12 +1,8 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
-  AfterViewInit,
   Component,
-  ElementRef,
   OnDestroy,
   OnInit,
-  QueryList,
-  ViewChildren,
   computed,
   inject,
   signal
@@ -27,8 +23,6 @@ interface BarberTvGroup {
   current: TvQueueRow | null;
   upcomingAll: TvQueueRow[];
   upcomingVisible: TvQueueRow[];
-  queueMode: 'two' | 'many';
-  autoScrollEnabled: boolean;
 }
 
 interface GlobalWaitingRow {
@@ -44,7 +38,7 @@ interface GlobalWaitingRow {
   templateUrl: './tv-page.component.html',
   styleUrl: './tv-page.component.css'
 })
-export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TvPageComponent implements OnInit, OnDestroy {
   private readonly barberColors = ['#22d3ee', '#fb7185', '#f59e0b', '#a78bfa', '#34d399', '#60a5fa'];
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -71,14 +65,9 @@ export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly groups = computed(() => this.buildGroups(this.now()));
   readonly globalWaitingRows = computed(() => this.buildGlobalWaitingRows(this.groups()));
 
-  @ViewChildren('autoScrollList') private readonly autoScrollLists?: QueryList<ElementRef<HTMLElement>>;
-
   private readonly subs: Subscription[] = [];
   private readonly clockInterval = window.setInterval(() => this.now.set(Date.now()), 1000);
   private heartbeatInterval?: number;
-  private autoScrollFrame?: number;
-  private lastAutoScrollTs = 0;
-  private readonly autoScrollDirection = new WeakMap<HTMLElement, number>();
 
   async ngOnInit(): Promise<void> {
     const shopIdFromRoute = this.route.snapshot.params['shopId'] as string | undefined;
@@ -116,17 +105,9 @@ export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  ngAfterViewInit(): void {
-    this.startAutoScrollLoop();
-    this.subs.push(
-      this.autoScrollLists?.changes.subscribe(() => this.resetAutoScrollDirections()) ?? new Subscription()
-    );
-  }
-
   ngOnDestroy(): void {
     window.clearInterval(this.clockInterval);
     if (this.heartbeatInterval) window.clearInterval(this.heartbeatInterval);
-    if (this.autoScrollFrame) window.cancelAnimationFrame(this.autoScrollFrame);
     this.subs.forEach((s) => s.unsubscribe());
   }
 
@@ -161,15 +142,12 @@ export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
       const rows = this.queueForBarber(barber.id, nowMs);
       const current = rows.find((row) => row.ticket.status === 'current') ?? null;
       const upcomingAll = rows.filter((row) => row.ticket.status !== 'current');
-      const queueMode = this.resolveQueueMode(upcomingAll.length);
-      const visibleCount = queueMode === 'two' ? 2 : 5;
+      const visibleCount = Math.min(upcomingAll.length, 2);
       return {
         barber,
         current,
         upcomingAll,
-        upcomingVisible: upcomingAll.slice(0, visibleCount),
-        queueMode,
-        autoScrollEnabled: queueMode === 'many' && upcomingAll.length > 6
+        upcomingVisible: upcomingAll.slice(0, visibleCount)
       };
     });
   }
@@ -188,7 +166,7 @@ export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
     const rowsByBarber = groups.map((group) => ({
       barberId: group.barber.id,
       barberName: group.barber.name,
-      rows: group.upcomingAll.slice(group.upcomingVisible.length)
+      rows: group.upcomingAll.slice(2)
     }));
 
     const result: GlobalWaitingRow[] = [];
@@ -206,56 +184,6 @@ export class TvPageComponent implements OnInit, AfterViewInit, OnDestroy {
       index += 1;
     }
     return result;
-  }
-
-  private resolveQueueMode(upcomingCount: number): 'two' | 'many' {
-    if (upcomingCount >= 3) return 'many';
-    return 'two';
-  }
-
-  private startAutoScrollLoop(): void {
-    const tick = (ts: number) => {
-      const deltaMs = this.lastAutoScrollTs ? ts - this.lastAutoScrollTs : 16;
-      this.lastAutoScrollTs = ts;
-      this.animateAutoScroll(deltaMs);
-      this.autoScrollFrame = window.requestAnimationFrame(tick);
-    };
-    this.autoScrollFrame = window.requestAnimationFrame(tick);
-  }
-
-  private animateAutoScroll(deltaMs: number): void {
-    const list = this.autoScrollLists?.toArray() ?? [];
-    const speedPxPerMs = 0.018;
-
-    for (const elRef of list) {
-      const el = elRef.nativeElement;
-      const enabled = el.dataset['scrollEnabled'] === 'true';
-      const maxScroll = Math.max(0, el.scrollHeight - el.clientHeight);
-      if (!enabled || maxScroll <= 0) {
-        el.scrollTop = 0;
-        this.autoScrollDirection.set(el, 1);
-        continue;
-      }
-
-      let direction = this.autoScrollDirection.get(el) ?? 1;
-      const nextScrollTop = el.scrollTop + direction * deltaMs * speedPxPerMs;
-      if (nextScrollTop <= 0) {
-        el.scrollTop = 0;
-        direction = 1;
-      } else if (nextScrollTop >= maxScroll) {
-        el.scrollTop = maxScroll;
-        direction = -1;
-      } else {
-        el.scrollTop = nextScrollTop;
-      }
-      this.autoScrollDirection.set(el, direction);
-    }
-  }
-
-  private resetAutoScrollDirections(): void {
-    for (const elRef of this.autoScrollLists?.toArray() ?? []) {
-      this.autoScrollDirection.set(elRef.nativeElement, 1);
-    }
   }
 
   private queueForBarber(barberId: string, nowMs: number): TvQueueRow[] {

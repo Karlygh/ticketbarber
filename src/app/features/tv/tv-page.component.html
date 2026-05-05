@@ -85,10 +85,7 @@
     } @else {
       <section class="multi-grid" [class]="layoutClass()">
         @for (group of groups(); track group.barber.id) {
-          <article
-            class="tv-card"
-            [ngClass]="'mode-' + group.queueMode"
-            [style.--barber-accent]="barberAccent(group.barber.id)">
+          <article class="tv-card" [style.--barber-accent]="barberAccent(group.barber.id)">
             <header class="card-head">
               <div class="barber-head">
                 @if (group.barber.photoUrl) {
@@ -117,16 +114,15 @@
 
             <div class="next-box">
               <p class="pill-label">Siguientes ({{ group.upcomingAll.length }})</p>
-              <ul
-                #autoScrollList
-                class="next-list"
-                [attr.data-scroll-enabled]="group.autoScrollEnabled ? 'true' : 'false'">
+              <ul class="next-list">
                 @for (row of group.upcomingVisible; track row.ticket.id) {
                   <li>
                     <span class="position">{{ row.ticket.position }}</span>
                     <div class="next-copy">
-                      <strong>{{ row.ticket.displayName }}</strong>
-                      <small>{{ row.ticket.serviceNameSnapshot }}</small>
+                      <div class="next-main">
+                        <strong>{{ row.ticket.displayName }}</strong>
+                        <small>{{ row.ticket.serviceNameSnapshot }}</small>
+                      </div>
                     </div>
                     <div class="next-eta">
                       <strong>{{ formatWait(row.waitMin) }}</strong>
@@ -145,8 +141,8 @@
       @if (globalWaitingRows().length > 0) {
       <section class="waiting-board">
         <header class="waiting-head">
-          <p class="pill-label">En espera</p>
           <p class="waiting-title">Proximos clientes</p>
+          <p class="pill-label">En espera</p>
         </header>
 
         <div class="waiting-list">
@@ -154,8 +150,10 @@
             <article class="waiting-item">
               <span class="position">{{ item.row.ticket.position }}</span>
               <div class="waiting-copy">
-                <strong>{{ item.row.ticket.displayName }}</strong>
-                <small>{{ item.row.ticket.serviceNameSnapshot }}</small>
+                <div class="waiting-main">
+                  <strong>{{ item.row.ticket.displayName }}</strong>
+                  <small>{{ item.row.ticket.serviceNameSnapshot }}</small>
+                </div>
                 <small class="waiting-barber">Barbero: {{ item.barberName }}</small>
               </div>
               <div class="waiting-eta">
