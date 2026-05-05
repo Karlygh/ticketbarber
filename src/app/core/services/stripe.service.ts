@@ -258,12 +258,20 @@ export class StripeService {
         returnUrl: `${window.location.origin}/subscription/manage`
       });
 
-      window.location.assign(result.data.url);
+      const url = result.data?.url;
+      console.info('[Stripe] Portal link response received', {
+        hasUrl: typeof url === 'string' && url.length > 0
+      });
+
+      if (!url || typeof url !== 'string') {
+        throw new Error('La función de portal respondió sin URL válida.');
+      }
+
+      window.location.assign(url);
     } catch (err) {
-      console.error('Error al crear portal de cliente:', err);
-      throw new Error(
-        'No se pudo abrir el portal de gestión. Asegúrate de que el Customer Portal de Stripe está configurado.'
-      );
+      console.error('[Stripe] Error al crear portal de cliente:', err);
+      const message = err instanceof Error ? err.message : 'Error desconocido al abrir el portal.';
+      throw new Error(`No se pudo abrir el portal de gestión: ${message}`);
     }
   }
 

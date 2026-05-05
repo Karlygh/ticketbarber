@@ -169,7 +169,7 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     this.billingCycle.set(cycle);
   }
 
-  async buy(price: StripePrice): Promise<void> {
+  async buy(_price: StripePrice): Promise<void> {
     this.checkoutError.set(null);
     const expectedPrice = this.selectedPrice();
     if (!expectedPrice) {
@@ -180,10 +180,7 @@ export class PricingPageComponent implements OnInit, OnDestroy {
       );
       return;
     }
-    if (price.id !== expectedPrice.id) {
-      this.checkoutError.set('El plan seleccionado cambió. Vuelve a intentarlo.');
-      return;
-    }
+    const price = expectedPrice;
 
     if (this.subscriptionStore.isPro()) {
       await this.openPortal();
@@ -193,7 +190,7 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     const uid = this.authStore.user()?.uid;
     if (!uid) {
       sessionStorage.setItem('pendingPriceId', price.id);
-      this.router.navigate(['/staff/login'], {
+      this.router.navigate(['/staff/register'], {
         queryParams: { reason: 'auth-required', returnUrl: '/pricing' }
       });
       return;
@@ -216,11 +213,14 @@ export class PricingPageComponent implements OnInit, OnDestroy {
   }
 
   async openPortal(): Promise<void> {
+    this.checkoutError.set(null);
+    if (this.portalLoading()) return;
     this.portalLoading.set(true);
     try {
       await this.stripeService.createPortalSession();
-    } catch {
-      // Portal se abre en nueva pestaña; error no crítico
+    } catch (err) {
+      console.error('[Pricing] Portal error:', err);
+      this.checkoutError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {
       this.portalLoading.set(false);
     }
