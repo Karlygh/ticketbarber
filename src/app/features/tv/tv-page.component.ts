@@ -17,6 +17,7 @@ import { DEFAULT_QUEUE_SETTINGS, QueueSettings } from '../../core/models/setting
 import { Ticket } from '../../core/models/ticket.model';
 import { BarberProfile } from '../../core/models/barber.model';
 import { TvQueueRow } from '../../core/stores/queue.store';
+import { formatOpeningHoursForToday } from '../../core/utils/opening-hours.util';
 
 interface BarberTvGroup {
   barber: BarberProfile;
@@ -52,6 +53,7 @@ export class TvPageComponent implements OnInit, OnDestroy {
   readonly shopLogoUrl = signal<string>('');
   readonly shopAddress = signal<string>('');
   readonly shopPhone = signal<string>('');
+  readonly todayHours = signal<string>('Cerrado');
   private readonly tickets = signal<Ticket[]>([]);
   private readonly settings = signal<QueueSettings>(DEFAULT_QUEUE_SETTINGS);
   private readonly barbers = signal<BarberProfile[]>([]);
@@ -95,6 +97,7 @@ export class TvPageComponent implements OnInit, OnDestroy {
         this.shopLogoUrl.set(profile.logoUrl || '');
         this.shopAddress.set(profile.address || '');
         this.shopPhone.set(profile.phone || '');
+        this.todayHours.set(formatOpeningHoursForToday(profile.openingHours, new Date(), 'Europe/Madrid'));
       }
     });
 

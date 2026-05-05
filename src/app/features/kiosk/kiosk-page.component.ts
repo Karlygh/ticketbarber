@@ -9,6 +9,7 @@ import { ShopService } from '../../core/services/shop.service';
 import { TicketReceipt } from '../../core/models/ticket.model';
 import { BarberService } from '../../core/services/barber.service';
 import { BarberProfile } from '../../core/models/barber.model';
+import { formatOpeningHoursForToday } from '../../core/utils/opening-hours.util';
 
 @Component({
   selector: 'app-kiosk-page',
@@ -26,6 +27,7 @@ export class KioskPageComponent implements OnInit {
 
   readonly shopName = signal<string>('');
   readonly shopLogoUrl = signal<string>('');
+  readonly todayHours = signal<string>('Cerrado');
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
   readonly receipt = signal<TicketReceipt | null>(null);
@@ -52,6 +54,7 @@ export class KioskPageComponent implements OnInit {
         if (profile) {
           this.shopName.set(profile.shopName || '');
           this.shopLogoUrl.set(profile.logoUrl || '');
+          this.todayHours.set(formatOpeningHoursForToday(profile.openingHours, new Date(), 'Europe/Madrid'));
         }
       });
     }

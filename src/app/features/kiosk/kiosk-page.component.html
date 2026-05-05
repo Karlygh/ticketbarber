@@ -5,6 +5,7 @@
         <img class="kiosk-logo" [src]="shopLogoUrl()" alt="Logo del negocio" />
       }
       <p class="eyebrow">{{ shopName() || 'TicketBarber' }}</p>
+      <p class="kiosk-hours">Horario hoy: {{ todayHours() }}</p>
       <h1>Elige tu barbero y coge turno</h1>
       <p class="subtitle">Selecciona a quien prefieres, el servicio y deja tus datos para entrar en su cola.</p>
     </header>

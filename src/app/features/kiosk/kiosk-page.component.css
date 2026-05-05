@@ -69,6 +69,19 @@
   max-width: 48rem;
 }
 
+.kiosk-hours {
+  margin: 0.25rem 0 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(8, 22, 40, 0.42);
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
 .ticket-form {
   margin-top: 1.5rem;
   display: grid;

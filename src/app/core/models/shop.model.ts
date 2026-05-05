@@ -1,6 +1,17 @@
-export interface OpeningHoursDay {
+export interface OpeningHoursSlot {
   opens: string;   // 'HH:mm'
   closes: string;  // 'HH:mm'
+}
+
+export interface OpeningHoursDay {
+  closed: boolean;
+  slots: OpeningHoursSlot[]; // max 2 (manana/tarde)
+}
+
+// Legacy format kept for backward compatibility when reading old Firestore docs.
+export interface LegacyOpeningHoursDay {
+  opens: string;
+  closes: string;
   closed: boolean;
 }
 
@@ -22,8 +33,7 @@ export interface ShopProfile {
 
 export function defaultOpeningHours(): OpeningHoursDay[] {
   return WEEK_DAYS.map((_, i) => ({
-    opens: '09:00',
-    closes: '19:00',
+    slots: [{ opens: '09:00', closes: '19:00' }],
     closed: i === 6  // Domingo cerrado por defecto
   }));
 }

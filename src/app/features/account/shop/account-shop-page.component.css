@@ -245,8 +245,8 @@
 
 .hours-row {
   display: grid;
-  grid-template-columns: 90px 100px 1fr;
-  align-items: center;
+  grid-template-columns: 140px 1fr;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -285,8 +285,49 @@
 
 .hours-times {
   display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.slot-row {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.slot-label {
+  min-width: 58px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.slot-row--secondary {
+  margin-top: 0.1rem;
+}
+
+.hours-times-wrap {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.hours-error {
+  margin-top: 0.15rem;
+}
+
+.btn-slot-action {
+  border: 1px solid var(--section-account-border);
+  background: transparent;
+  color: var(--section-account-light);
+  border-radius: var(--r-md);
+  padding: 0.35rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.btn-slot-action:hover {
+  background: rgba(99, 102, 241, 0.08);
 }
 
 .times-sep {

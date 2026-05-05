@@ -171,25 +171,36 @@
     <div class="form-section">
       <form [formGroup]="hoursForm" (ngSubmit)="saveHours()" novalidate>
         <h2 class="section-title">Horario de apertura</h2>
-        <p class="section-note">Se muestra en la pantalla TV cuando la jornada está abierta.</p>
+        <p class="section-note">Este horario único se aplica a toda la semana y se muestra en TV y kiosk.</p>
 
-        <div class="hours-grid" formArrayName="openingHours">
-          @for (day of hoursArray.controls; track $index; let i = $index) {
-            <div class="hours-row" [formGroupName]="i">
-              <span class="hours-day">{{ weekDays[i] }}</span>
-              <label class="hours-toggle">
-                <input type="checkbox" formControlName="closed" />
-                <span class="toggle-label">{{ day.get('closed')!.value ? 'Cerrado' : 'Abierto' }}</span>
-              </label>
-              @if (!day.get('closed')!.value) {
-                <div class="hours-times">
+        <div class="hours-grid">
+          <div class="hours-row">
+            <span class="hours-day">Horario general</span>
+            <div class="hours-times-wrap">
+              <div class="hours-times" formArrayName="slots">
+                <div class="slot-row" [formGroupName]="0">
+                  <span class="slot-label">Mañana</span>
                   <input type="time" class="field-input field-input--time" formControlName="opens" />
                   <span class="times-sep">–</span>
                   <input type="time" class="field-input field-input--time" formControlName="closes" />
                 </div>
+                @if (slotsArray.length > 1) {
+                  <div class="slot-row slot-row--secondary" [formGroupName]="1">
+                    <span class="slot-label">Tarde</span>
+                    <input type="time" class="field-input field-input--time" formControlName="opens" />
+                    <span class="times-sep">–</span>
+                    <input type="time" class="field-input field-input--time" formControlName="closes" />
+                    <button type="button" class="btn-slot-action" (click)="removeSecondSlot()">Quitar tramo</button>
+                  </div>
+                } @else {
+                  <button type="button" class="btn-slot-action" (click)="addSecondSlot()">+ Añadir tramo de tarde</button>
+                }
+              </div>
+              @if (globalHoursError()) {
+                <p class="field-error hours-error">{{ globalHoursError() }}</p>
               }
             </div>
-          }
+          </div>
         </div>
         @if (hoursSaveError()) {
           <p class="save-error">{{ hoursSaveError() }}</p>
