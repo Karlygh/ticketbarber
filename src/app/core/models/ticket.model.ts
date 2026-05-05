@@ -2,6 +2,9 @@ export type TicketStatus = 'waiting' | 'current' | 'done';
 
 export interface Ticket {
   id: string;
+  barberId: string;
+  barberNameSnapshot: string;
+  barberPhotoUrlSnapshot?: string;
   customerName: string;
   displayName: string;
   serviceId: string;
@@ -16,6 +19,7 @@ export interface Ticket {
 }
 
 export interface CreateTicketInput {
+  barberId: string;
   customerName: string;
   serviceId: string;
   phone?: string;

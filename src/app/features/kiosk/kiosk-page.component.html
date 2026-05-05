@@ -5,8 +5,8 @@
         <img class="kiosk-logo" [src]="shopLogoUrl()" alt="Logo del negocio" />
       }
       <p class="eyebrow">{{ shopName() || 'TicketBarber' }}</p>
-      <h1>Apuntate a la lista</h1>
-      <p class="subtitle">Deja tu nombre, elige servicio y te avisamos en pantalla.</p>
+      <h1>Elige tu barbero y coge turno</h1>
+      <p class="subtitle">Selecciona a quien prefieres, el servicio y deja tus datos para entrar en su cola.</p>
     </header>
 
     @if (!queueStore.settings().isOpen) {
@@ -14,29 +14,81 @@
         <h2>Jornada cerrada</h2>
         <p>Ahora mismo no se aceptan nuevos tickets.</p>
       </div>
+    } @else if (availableBarbers().length === 0) {
+      <div class="notice closed">
+        <h2>Sin barberos disponibles</h2>
+        <p>El negocio todavia no ha activado ningun barbero para la jornada.</p>
+      </div>
     } @else {
       <form [formGroup]="form" (ngSubmit)="submitTicket()" class="ticket-form">
-        <label>
-          <span>Nombre</span>
-          <input formControlName="customerName" type="text" autocomplete="off" placeholder="Ej: Carlos" />
-        </label>
+        <div class="step-block">
+          <div class="step-head">
+            <span class="step-number">1</span>
+            <div>
+              <h2>Elige barbero</h2>
+              <p>Solo se muestran los que estan disponibles ahora mismo.</p>
+            </div>
+          </div>
 
-        <label>
-          <span>Servicio</span>
-          <select formControlName="serviceId">
-            <option value="" disabled selected>Selecciona un servicio</option>
-            @for (service of queueStore.services(); track service.id) {
-              <option [value]="service.id">{{ service.name }} ({{ service.durationMin }} min)</option>
+          <div class="barber-grid">
+            @for (barber of availableBarbers(); track barber.id) {
+              <button
+                type="button"
+                class="barber-card"
+                [class.selected]="form.controls.barberId.value === barber.id"
+                (click)="selectBarber(barber.id)">
+                @if (barber.photoUrl) {
+                  <img [src]="barber.photoUrl" [alt]="barber.name" />
+                } @else {
+                  <div class="barber-avatar-fallback">{{ initials(barber.name) }}</div>
+                }
+                <strong>{{ barber.name }}</strong>
+              </button>
             }
-          </select>
-        </label>
+          </div>
+        </div>
 
-        <label>
-          <span>Pon tu teléfono por si te mueves o necesitamos contactarte (opcional)</span>
-          <input formControlName="phone" type="tel" inputmode="numeric" pattern="[0-9]{9,15}" maxlength="15" autocomplete="tel" placeholder="Ej: 612345678" />
-        </label>
+        <div class="step-block">
+          <div class="step-head">
+            <span class="step-number">2</span>
+            <div>
+              <h2>Elige servicio</h2>
+              <p>Todos los servicios del negocio estan disponibles en esta fase.</p>
+            </div>
+          </div>
 
-        <button type="submit" [disabled]="isSubmitting()">
+          <label>
+            <span>Servicio</span>
+            <select formControlName="serviceId">
+              <option value="" disabled selected>Selecciona un servicio</option>
+              @for (service of queueStore.services(); track service.id) {
+                <option [value]="service.id">{{ service.name }} ({{ service.durationMin }} min)</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="step-block">
+          <div class="step-head">
+            <span class="step-number">3</span>
+            <div>
+              <h2>Tus datos</h2>
+              <p>Nombre obligatorio y telefono opcional.</p>
+            </div>
+          </div>
+
+          <label>
+            <span>Nombre</span>
+            <input formControlName="customerName" type="text" autocomplete="off" placeholder="Ej: Carlos" />
+          </label>
+
+          <label>
+            <span>Telefono (opcional)</span>
+            <input formControlName="phone" type="tel" inputmode="numeric" pattern="[0-9]{9,15}" maxlength="15" autocomplete="tel" placeholder="Ej: 612345678" />
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Generando ticket...' : 'Coger turno' }}
         </button>
       </form>

@@ -35,7 +35,7 @@ export class QueueStore {
     this.activeQueue().filter((ticket) => ticket.status === 'waiting').sort((a, b) => a.position - b.position)
   );
 
-  readonly canMovePrevious = computed(() => Boolean(this.settings().lastAdvance));
+  readonly activeBarberIds = computed(() => this.settings().activeBarberIds);
 
   async bootstrap(): Promise<void> {
     await this.settingsStore.bootstrap();
@@ -45,12 +45,12 @@ export class QueueStore {
     return this.repository.createTicket(input);
   }
 
-  async moveNext(): Promise<void> {
-    await this.repository.moveNext();
+  async moveNext(barberId: string): Promise<void> {
+    await this.repository.moveNext(barberId);
   }
 
-  async movePrevious(): Promise<void> {
-    await this.repository.movePrevious();
+  async movePrevious(barberId: string): Promise<void> {
+    await this.repository.movePrevious(barberId);
   }
 
   async deleteTicket(ticketId: string): Promise<void> {
@@ -61,8 +61,28 @@ export class QueueStore {
     await this.settingsStore.closeDay();
   }
 
-  async openDay(): Promise<void> {
-    await this.settingsStore.openDay();
+  async openDay(activeBarberIds: string[]): Promise<void> {
+    await this.settingsStore.openDay(activeBarberIds);
+  }
+
+  async cancelTicketsForBarber(barberId: string): Promise<void> {
+    await this.repository.cancelTicketsForBarber(barberId);
+  }
+
+  ticketsForBarber(barberId: string): Ticket[] {
+    return this.activeQueue().filter((ticket) => ticket.barberId === barberId);
+  }
+
+  currentTicketForBarber(barberId: string): Ticket | null {
+    return this.ticketsForBarber(barberId).find((ticket) => ticket.status === 'current') ?? null;
+  }
+
+  waitingTicketsForBarber(barberId: string): Ticket[] {
+    return this.ticketsForBarber(barberId).filter((ticket) => ticket.status === 'waiting');
+  }
+
+  canMovePreviousForBarber(barberId: string): boolean {
+    return Boolean(this.settings().barberStates[barberId]?.lastAdvance);
   }
 
   queueForTv(nowMs: number): TvQueueRow[] {

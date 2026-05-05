@@ -5,16 +5,21 @@ export interface LastAdvanceAction {
   promotedId: string | null;
 }
 
+export interface BarberQueueState {
+  currentTicketId: string | null;
+  lastAdvance: LastAdvanceAction | null;
+}
+
 export interface QueueSettings {
   isOpen: boolean;
-  currentTicketId: string | null;
   updatedAtMs: number;
-  lastAdvance: LastAdvanceAction | null;
+  activeBarberIds: string[];
+  barberStates: Record<string, BarberQueueState>;
 }
 
 export const DEFAULT_QUEUE_SETTINGS: QueueSettings = {
   isOpen: true,
-  currentTicketId: null,
   updatedAtMs: 0,
-  lastAdvance: null
+  activeBarberIds: [],
+  barberStates: {}
 };

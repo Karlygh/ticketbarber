@@ -5,11 +5,12 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DeviceDoc, TvAuthService } from '../../../../core/services/tv-auth.service';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
 @Component({
   selector: 'app-devices-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, HeaderComponent],
   templateUrl: './devices-management.component.html',
   styleUrl: './devices-management.component.css'
 })

@@ -1,191 +1,312 @@
-<main class="staff-shell">
-  <header class="staff-head">
-    <div>
-      <p class="eyebrow">Control de cola</p>
-      <h1>Panel barberos</h1>
-      <p class="user">{{ authStore.user()?.displayName || authStore.user()?.email }}</p>
+<main class="staff-layout">
+  <aside class="sidebar">
+    <div class="brand-block">
+      <p class="brand-title">Autotickets</p>
+      <p class="brand-subtitle">Barberia</p>
     </div>
-    <button class="secondary" (click)="requestLogout()" [disabled]="isBusy()">Salir</button>
-  </header>
 
-  @switch (subscriptionStore.subscriptionStatus()) {
-    @case ('trial-active') {
-      <div
-        class="trial-warning"
-        [class.trial-warning--urgent]="subscriptionStore.trialDaysLeft() <= 2"
-        role="status">
-        ⏱ Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong> de prueba gratuita.
-        <a routerLink="/pricing">Suscríbete ahora</a>
+    <nav class="sidebar-nav">
+      <p class="nav-label">General</p>
+      <a routerLink="/staff">Panel de control</a>
+      <a [routerLink]="routes.kiosk">Agenda</a>
+      <a [routerLink]="tvQueueRoute()">Pantalla TV</a>
+      <a [routerLink]="routes.staff.devices">Dispositivos</a>
+
+      <p class="nav-label">Configuracion</p>
+      <a routerLink="/account/negocio">Negocio</a>
+      <a [routerLink]="routes.account">Mi cuenta</a>
+      <a [routerLink]="routes.subscriptionManage">Suscripcion</a>
+      <a [routerLink]="routes.pricing">Planes</a>
+      <a [routerLink]="routes.staff.tvSetup">Guia TV</a>
+      <a [routerLink]="routes.home">Volver a la web</a>
+    </nav>
+
+    <button class="sidebar-logout" type="button" (click)="requestLogout()" [disabled]="isBusy()">Cerrar sesion</button>
+  </aside>
+
+  <section class="content">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Staff</p>
+        <h1>Panel de staff</h1>
+        <p class="hero-copy">Gestiona a tus barberos, abre jornada y controla cada cola desde un solo sitio.</p>
       </div>
-    }
-    @case ('trial-expired') {
-      <div class="trial-warning trial-warning--urgent" role="alert">
-        ⚠️ Tu prueba gratuita ha expirado.
-        <a routerLink="/pricing">Ver planes Pro</a>
+
+      <div class="hero-actions">
+        <button class="ghost-btn" type="button" (click)="openAvailabilityModal()" [disabled]="isBusy()">Abrir jornada</button>
+        <button class="primary-btn" type="button" (click)="openCreateBarberModal()" [disabled]="isBusy()">+ Agregar barbero</button>
       </div>
-    }
-    @case ('pro-past-due') {
-      <div class="trial-warning trial-warning--urgent" role="alert">
-        💳 Pago pendiente — actualiza tu método de pago para mantener el acceso.
-        <a routerLink="/subscription/manage">Gestionar pago</a>
-      </div>
-    }
-  }
+    </header>
 
-  @if (error()) {
-    <div class="error">{{ error() }}</div>
-  }
-
-  <section class="status">
-    <div>
-      <p>Jornada</p>
-      <strong>{{ queueStore.settings().isOpen ? 'Abierta' : 'Cerrada' }}</strong>
-    </div>
-    <div>
-      <p>Turno actual</p>
-      <strong>{{ queueStore.currentTicket()?.displayName || 'Sin turno activo' }}</strong>
-    </div>
-    <div>
-      <p>En espera</p>
-      <strong>{{ queueStore.waitingTickets().length }}</strong>
-    </div>
-  </section>
-
-  <section class="actions">
-    <button (click)="movePrevious()" [disabled]="isBusy() || !queueStore.canMovePrevious()">Anterior</button>
-    <button class="primary" (click)="moveNext()" [disabled]="isBusy()">Siguiente</button>
-    <button class="danger" (click)="closeDay()" [disabled]="isBusy() || !queueStore.settings().isOpen">
-      Cerrar jornada
-    </button>
-    <button class="secondary" (click)="openDay()" [disabled]="isBusy() || queueStore.settings().isOpen">
-      Abrir jornada
-    </button>
-  </section>
-
-  <section class="queue">
-    <h2>Cola activa</h2>
-    <ul>
-      @for (ticket of queueStore.activeQueue(); track ticket.id) {
-        <li [class.current]="ticket.status === 'current'">
-          <span class="position">{{ ticket.position }}</span>
-          <span class="name">
-            <span class="name-text clickable" (click)="openCustomerModal(ticket)">
-              {{ ticket.displayName }}
-              @if (ticket.phone) { <span class="phone-icon" title="Tiene teléfono">📞</span> }
-            </span>
-            <span class="arrival-time">Llegada: {{ formatArrivalTime(ticket.createdAtMs) }}</span>
-          </span>
-          <span class="service">{{ ticket.serviceNameSnapshot }}</span>
-          <!-- El teléfono solo se muestra en el modal -->
-          <span class="badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
-          <button
-            class="danger ticket-remove"
-            type="button"
-            (click)="deleteTicket(ticket.id, ticket.displayName, ticket.status)"
-            [disabled]="isBusy()"
-          >
-            Eliminar
-          </button>
-        </li>
-      } @empty {
-        <li class="empty">No hay tickets activos.</li>
+    @switch (subscriptionStore.subscriptionStatus()) {
+      @case ('trial-active') {
+        <div class="trial-warning" [class.trial-warning--urgent]="subscriptionStore.trialDaysLeft() <= 2" role="status">
+          Te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} dias</strong> de prueba gratuita.
+          <a routerLink="/pricing">Suscribete ahora</a>
+        </div>
       }
-    </ul>
-
-    @if (showCustomerModal && selectedCustomer) {
-      <app-customer-detail-modal
-        [customer]="selectedCustomer"
-        (closed)="closeCustomerModal()"
-      ></app-customer-detail-modal>
+      @case ('trial-expired') {
+        <div class="trial-warning trial-warning--urgent" role="alert">
+          Tu prueba gratuita ha expirado.
+          <a routerLink="/pricing">Ver planes Pro</a>
+        </div>
+      }
+      @case ('pro-past-due') {
+        <div class="trial-warning trial-warning--urgent" role="alert">
+          Pago pendiente.
+          <a routerLink="/subscription/manage">Gestionar pago</a>
+        </div>
+      }
     }
-  </section>
 
-  <nav class="quick-links">
-    <a [routerLink]="routes.kiosk">← Kiosk / Agenda</a>
-    <a [routerLink]="tvQueueRoute()">Ver pantalla TV</a>
-    <a [routerLink]="routes.tvPair">Vincular TV</a>
-    <a [routerLink]="routes.activateTv">Ingresar código TV</a>
-    <a [routerLink]="routes.staff.devices">🖥️ Mis pantallas</a>
-    <a [routerLink]="routes.staff.tvSetup">Guía TV</a>
-    <a [routerLink]="routes.account">Mi cuenta</a>
-    <a routerLink="/account/negocio">✂️ Mi negocio</a>
-    <a [routerLink]="routes.subscriptionManage">Mi suscripción</a>
-    <a [routerLink]="routes.pricing">Ver planes</a>
-    <a [routerLink]="routes.home">Volver a la web</a>
-  </nav>
+    @if (error()) {
+      <div class="error-banner">{{ error() }}</div>
+    }
 
+    <section class="metrics-grid">
+      <article class="metric-card">
+        <p>Total barberos</p>
+        <strong>{{ barbers().length }}</strong>
+        <span>Registrados</span>
+      </article>
+      <article class="metric-card success">
+        <p>En linea</p>
+        <strong>{{ activeBarbers().length }}</strong>
+        <span>Activos hoy</span>
+      </article>
+      <article class="metric-card warning">
+        <p>Turnos actuales</p>
+        <strong>{{ currentTurnCount() }}</strong>
+        <span>Atendiendo ahora</span>
+      </article>
+      <article class="metric-card muted">
+        <p>En cola</p>
+        <strong>{{ totalWaiting() }}</strong>
+        <span>Esperando</span>
+      </article>
+    </section>
 
-<!-- Modal de confirmación para acciones destructivas -->
-@if (destructiveAction()) {
-  <div class="danger-backdrop" (click)="cancelDestructiveAction()">
-    <div class="danger-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-      <div class="danger-modal__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
+    <section class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Equipo de barberos</h2>
+        <p>
+          Jornada:
+          <strong>{{ queueStore.settings().isOpen ? 'Abierta' : 'Cerrada' }}</strong>
+          · Disponibles hoy:
+          <strong>{{ availableTodayCount() }}</strong>
+        </p>
       </div>
 
-      <p class="danger-modal__title">{{ destructiveTitle() }}</p>
-      <p class="danger-modal__sub">{{ destructiveMessage() }}</p>
-      <p class="danger-modal__warning">Esta acción no se puede deshacer.</p>
+      <div class="toolbar-actions">
+        <button class="ghost-btn" type="button" (click)="openAvailabilityModal()" [disabled]="isBusy()">
+          Seleccionar disponibles
+        </button>
+        <button class="danger-btn" type="button" (click)="closeDay()" [disabled]="isBusy() || !queueStore.settings().isOpen">
+          Cerrar jornada
+        </button>
+      </div>
+    </section>
 
-      <div class="danger-modal__actions">
-        <button class="danger-modal__cancel" type="button" (click)="cancelDestructiveAction()" [disabled]="isBusy()">
-          Cancelar
-        </button>
-        <button class="danger-modal__confirm" type="button" (click)="confirmDestructiveAction()" [disabled]="isBusy()">
-          {{ destructiveConfirmLabel() }}
-        </button>
+    <section class="barber-table" (click)="closeActionsMenu()">
+      <div class="table-head">
+        <span>Barbero</span>
+        <span>Estado</span>
+        <span>En cola</span>
+        <span>Turno actual</span>
+        <span>Acciones</span>
+      </div>
+
+      @for (barber of barbers(); track barber.id) {
+        <article class="table-row">
+          <div class="barber-cell">
+            @if (barber.photoUrl) {
+              <img class="avatar-image" [src]="barber.photoUrl" [alt]="barber.name" />
+            } @else {
+              <div class="avatar-fallback">{{ initials(barber.name) }}</div>
+            }
+            <div>
+              <strong>{{ barber.name }}</strong>
+              <p>{{ barber.isAvailableToday ? 'Disponible hoy' : 'No disponible hoy' }}</p>
+            </div>
+          </div>
+
+          <div>
+            <span class="status-pill" [class.available]="barber.status === 'available'" [class.break]="barber.status === 'break'" [class.hidden]="barber.status === 'hidden'">
+              {{ barberStatusLabel(barber.status) }}
+            </span>
+          </div>
+
+          <div>{{ barberWaitingCount(barber.id) }}</div>
+          <div>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</div>
+
+          <div class="row-actions" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="mini-btn actions-trigger"
+              (click)="toggleActionsMenu(barber.id)"
+              [disabled]="isBusy()"
+              [attr.aria-expanded]="isActionsMenuOpen(barber.id)"
+            >
+              Estado
+            </button>
+
+            @if (isActionsMenuOpen(barber.id)) {
+              <div class="actions-menu" role="menu">
+                <button type="button" class="actions-menu-item" (click)="setBarberStatus(barber.id, 'available')" [disabled]="isBusy()">Disponible</button>
+                <button type="button" class="actions-menu-item" (click)="setBarberStatus(barber.id, 'break')" [disabled]="isBusy()">Descanso</button>
+                <button type="button" class="actions-menu-item" (click)="setBarberStatus(barber.id, 'hidden')" [disabled]="isBusy()">Ocultar</button>
+                <button type="button" class="actions-menu-item danger-text" (click)="requestDeleteBarber(barber)" [disabled]="isBusy()">Borrar</button>
+              </div>
+            }
+          </div>
+        </article>
+      } @empty {
+        <div class="empty-panel">
+          <p class="empty-title">Todavia no has creado barberos.</p>
+          <p class="empty-copy">Crea el primero para que aparezca en kiosk y luego puedas activarlo en la jornada.</p>
+        </div>
+      }
+    </section>
+
+    <section class="queues-grid">
+      @for (barber of activeBarbers(); track barber.id) {
+        <article class="queue-card">
+          <header class="queue-card-head">
+            <div class="barber-mini">
+              @if (barber.photoUrl) {
+                <img class="avatar-image small" [src]="barber.photoUrl" [alt]="barber.name" />
+              } @else {
+                <div class="avatar-fallback small">{{ initials(barber.name) }}</div>
+              }
+              <div>
+                <h3>{{ barber.name }}</h3>
+                <p>{{ barberWaitingCount(barber.id) }} esperando</p>
+              </div>
+            </div>
+
+            <div class="queue-card-actions">
+              <button type="button" class="mini-btn" (click)="movePrevious(barber.id)" [disabled]="isBusy() || !queueStore.canMovePreviousForBarber(barber.id)">Anterior</button>
+              <button type="button" class="mini-btn primary" (click)="moveNext(barber.id)" [disabled]="isBusy()">Siguiente</button>
+            </div>
+          </header>
+
+          <div class="current-banner">
+            <span>Turno actual</span>
+            <strong>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</strong>
+          </div>
+
+          <ul class="ticket-list">
+            @for (ticket of barberTickets(barber.id); track ticket.id) {
+              <li [class.current]="ticket.status === 'current'">
+                <div class="ticket-main">
+                  <span class="ticket-position">{{ ticket.position }}</span>
+                  <div>
+                    <button type="button" class="ticket-name" (click)="openCustomerModal(ticket)">
+                      {{ ticket.displayName }}
+                    </button>
+                    <p>{{ ticket.serviceNameSnapshot }} · Llegada {{ formatArrivalTime(ticket.createdAtMs) }}</p>
+                  </div>
+                </div>
+
+                <div class="ticket-side">
+                  <span class="ticket-badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
+                  <button type="button" class="mini-btn danger-text" (click)="deleteTicket(ticket.id)" [disabled]="isBusy()">Eliminar</button>
+                </div>
+              </li>
+            } @empty {
+              <li class="empty-ticket">No hay tickets en esta cola.</li>
+            }
+          </ul>
+        </article>
+      } @empty {
+        <article class="queue-card empty-state-card">
+          <h3>Sin barberos activos en la jornada</h3>
+          <p>Abre jornada y marca al menos un barbero disponible para ver sus colas aqui.</p>
+        </article>
+      }
+    </section>
+  </section>
+</main>
+
+@if (showCustomerModal() && selectedCustomer()) {
+  <app-customer-detail-modal [customer]="selectedCustomer()" (closed)="closeCustomerModal()"></app-customer-detail-modal>
+}
+
+@if (showCreateBarberModal()) {
+  <div class="overlay" (click)="closeCreateBarberModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Agregar barbero</h3>
+      <label class="field">
+        <span>Nombre</span>
+        <input type="text" [ngModel]="pendingBarberName()" (ngModelChange)="pendingBarberName.set($event)" placeholder="Ej: Mauricio" />
+      </label>
+
+      <label class="field">
+        <span>Foto</span>
+        <input type="file" accept="image/*" (change)="onBarberPhotoSelected($event)" />
+      </label>
+
+      @if (pendingPhotoFileName()) {
+        <p class="helper-text">Foto cargada: {{ pendingPhotoFileName() }}</p>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" (click)="closeCreateBarberModal()" [disabled]="isBusy()">Cancelar</button>
+        <button type="button" class="primary-btn" (click)="createBarber()" [disabled]="isBusy() || !pendingBarberName().trim()">Guardar</button>
       </div>
     </div>
   </div>
 }
 
-<!-- Modal de confirmación de logout -->
-@if (logoutState() === 'confirm' || logoutState() === 'loading') {
-  <div class="logout-backdrop" (click)="logoutState() === 'confirm' && cancelLogout()">
-    <div class="logout-modal" role="dialog" aria-modal="true"
-         (click)="$event.stopPropagation()">
+@if (showOpenDayModal()) {
+  <div class="overlay" (click)="showOpenDayModal.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Selecciona los barberos disponibles</h3>
+      <p class="helper-text">Solo los seleccionados apareceran en kiosk y en la TV de hoy.</p>
 
-      <div class="logout-modal__icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
+      <div class="availability-list">
+        @for (barber of barbers(); track barber.id) {
+          <label class="availability-row">
+            <input type="checkbox" [checked]="openDaySelection()[barber.id]" (change)="toggleOpenDaySelection(barber.id)" />
+            <span>{{ barber.name }}</span>
+          </label>
+        }
       </div>
 
-      <p class="logout-modal__title">¿Cerrar sesión?</p>
-      <p class="logout-modal__sub">Seras redirigido a la pantalla de inicio de sesión.</p>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" (click)="showOpenDayModal.set(false)" [disabled]="isBusy()">Cancelar</button>
+        <button type="button" class="primary-btn" (click)="confirmOpenDay()" [disabled]="isBusy()">Abrir jornada</button>
+      </div>
+    </div>
+  </div>
+}
 
+@if (barberToDelete(); as barber) {
+  <div class="overlay" (click)="cancelDeleteBarber()">
+    <div class="modal-card danger-modal" (click)="$event.stopPropagation()">
+      <h3>Borrar barbero</h3>
+      <p>Vas a borrar a <strong>{{ barber.name }}</strong>. Sus tickets pendientes se cancelaran.</p>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" (click)="cancelDeleteBarber()" [disabled]="isBusy()">Cancelar</button>
+        <button type="button" class="danger-btn" (click)="confirmDeleteBarber()" [disabled]="isBusy()">Si, borrar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (logoutState() === 'confirm' || logoutState() === 'loading') {
+  <div class="overlay" (click)="logoutState() === 'confirm' && cancelLogout()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Cerrar sesion</h3>
+      <p>Seras redirigido a la pantalla de inicio de sesion.</p>
       @if (logoutState() === 'confirm') {
-        <div class="logout-modal__actions">
-          <button class="logout-modal__cancel" (click)="cancelLogout()">Cancelar</button>
-          <button class="logout-modal__confirm" (click)="confirmLogout()">Sí, salir</button>
+        <div class="modal-actions">
+          <button type="button" class="ghost-btn" (click)="cancelLogout()">Cancelar</button>
+          <button type="button" class="primary-btn" (click)="confirmLogout()">Si, salir</button>
         </div>
       } @else {
-        <div class="logout-spinner" aria-label="Cerrando sesión"></div>
-        <p class="logout-modal__sub">Cerrando sesión...</p>
+        <p class="helper-text">Cerrando sesion...</p>
       }
-
     </div>
-  </div>
-}
-
-<!-- Toast de éxito -->
-@if (logoutState() === 'success') {
-  <div class="logout-toast" role="status" aria-live="polite">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-         fill="none" stroke="currentColor" stroke-width="2.5"
-         stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-    <span>Sesión cerrada correctamente</span>
   </div>
 }

@@ -5,9 +5,17 @@ import { Subscription } from 'rxjs';
 import { QueueRepository } from '../../core/data/queue.repository';
 import { TvAuthService } from '../../core/services/tv-auth.service';
 import { ShopService } from '../../core/services/shop.service';
+import { BarberService } from '../../core/services/barber.service';
 import { DEFAULT_QUEUE_SETTINGS, QueueSettings } from '../../core/models/settings.model';
 import { Ticket } from '../../core/models/ticket.model';
+import { BarberProfile } from '../../core/models/barber.model';
 import { TvQueueRow } from '../../core/stores/queue.store';
+
+interface BarberTvGroup {
+  barber: BarberProfile;
+  current: TvQueueRow | null;
+  upcoming: TvQueueRow[];
+}
 
 @Component({
   selector: 'app-tv-page',
@@ -22,21 +30,23 @@ export class TvPageComponent implements OnInit, OnDestroy {
   private readonly repository = inject(QueueRepository);
   private readonly tvAuthService = inject(TvAuthService);
   private readonly shopService = inject(ShopService);
+  private readonly barberService = inject(BarberService);
 
   readonly now = signal(Date.now());
   readonly shopName = signal<string>('');
   readonly shopLogoUrl = signal<string>('');
+  readonly shopAddress = signal<string>('');
+  readonly shopPhone = signal<string>('');
   private readonly tickets = signal<Ticket[]>([]);
   private readonly settings = signal<QueueSettings>(DEFAULT_QUEUE_SETTINGS);
+  private readonly barbers = signal<BarberProfile[]>([]);
 
-  readonly currentTicket = computed(() =>
-    this.tickets()
-      .filter(t => t.status !== 'done')
-      .find(t => t.status === 'current') ?? null
+  readonly activeBarbers = computed(() =>
+    this.barbers().filter((barber) => this.settings().activeBarberIds.includes(barber.id))
   );
-
-  readonly rows = computed(() => this.queueForTv(this.now()));
-  readonly upcomingRows = computed(() => this.rows().filter(r => r.ticket.status !== 'current'));
+  readonly layoutClass = computed(() => `count-${Math.min(Math.max(this.activeBarbers().length, 1), 4)}`);
+  readonly singleBarberMode = computed(() => this.activeBarbers().length <= 1);
+  readonly groups = computed(() => this.buildGroups(this.now()));
 
   private readonly subs: Subscription[] = [];
   private readonly clockInterval = window.setInterval(() => this.now.set(Date.now()), 1000);
@@ -57,14 +67,17 @@ export class TvPageComponent implements OnInit, OnDestroy {
     }
 
     this.subs.push(
-      this.repository.observeTicketsForShop(shopId).subscribe(t => this.tickets.set(t)),
-      this.repository.observeSettingsForShop(shopId).subscribe(s => this.settings.set(s))
+      this.repository.observeTicketsForShop(shopId).subscribe((t) => this.tickets.set(t)),
+      this.repository.observeSettingsForShop(shopId).subscribe((s) => this.settings.set(s)),
+      this.barberService.observeBarbersForShop(shopId).subscribe((barbers) => this.barbers.set(barbers))
     );
 
     void this.shopService.getShopProfile(shopId).then(profile => {
       if (profile) {
         this.shopName.set(profile.shopName || '');
         this.shopLogoUrl.set(profile.logoUrl || '');
+        this.shopAddress.set(profile.address || '');
+        this.shopPhone.set(profile.phone || '');
       }
     });
 
@@ -78,7 +91,16 @@ export class TvPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     window.clearInterval(this.clockInterval);
     if (this.heartbeatInterval) window.clearInterval(this.heartbeatInterval);
-    this.subs.forEach(s => s.unsubscribe());
+    this.subs.forEach((s) => s.unsubscribe());
+  }
+
+  initials(name: string): string {
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('');
   }
 
   formatWait(minutes: number): string {
@@ -90,17 +112,29 @@ export class TvPageComponent implements OnInit, OnDestroy {
   }
 
   formatApproxTime(timestampMs: number): string {
-    const formatter = new Intl.DateTimeFormat('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: false 
+    const formatter = new Intl.DateTimeFormat('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
     });
-    return `Aprox. ${formatter.format(new Date(timestampMs))}`;
+    return formatter.format(new Date(timestampMs));
   }
 
-  private queueForTv(nowMs: number): TvQueueRow[] {
+  private buildGroups(nowMs: number): BarberTvGroup[] {
+    return this.activeBarbers().slice(0, 4).map((barber) => {
+      const rows = this.queueForBarber(barber.id, nowMs);
+      const current = rows.find((row) => row.ticket.status === 'current') ?? null;
+      return {
+        barber,
+        current,
+        upcoming: rows.filter((row) => row.ticket.status !== 'current').slice(0, 4)
+      };
+    });
+  }
+
+  private queueForBarber(barberId: string, nowMs: number): TvQueueRow[] {
     const active = this.tickets()
-      .filter(t => t.status !== 'done')
+      .filter((t) => t.barberId === barberId && t.status !== 'done')
       .sort((a, b) => a.position - b.position || a.createdAtMs - b.createdAtMs);
 
     if (!active.length) return [];
@@ -110,12 +144,12 @@ export class TvPageComponent implements OnInit, OnDestroy {
     active.forEach((ticket, index) => {
       if (index === 0 && ticket.status === 'current') {
         const remaining = this.remainingMin(ticket, nowMs);
-        const etaAtMs = nowMs + (remaining * 60000);
+        const etaAtMs = nowMs + remaining * 60000;
         rows.push({ ticket, waitMin: remaining, etaAtMs });
         carry = remaining;
         return;
       }
-      const etaAtMs = nowMs + (carry * 60000);
+      const etaAtMs = nowMs + carry * 60000;
       rows.push({ ticket, waitMin: carry, etaAtMs });
       carry += ticket.estimatedDurationMin;
     });

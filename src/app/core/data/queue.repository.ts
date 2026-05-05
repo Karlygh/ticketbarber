@@ -13,7 +13,13 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { DEFAULT_QUEUE_SETTINGS, LastAdvanceAction, QueueSettings } from '../models/settings.model';
+import { BarberProfile } from '../models/barber.model';
+import {
+  BarberQueueState,
+  DEFAULT_QUEUE_SETTINGS,
+  LastAdvanceAction,
+  QueueSettings
+} from '../models/settings.model';
 import { DEFAULT_SERVICES, BarberService } from '../models/service.model';
 import { CreateTicketInput, Ticket, TicketReceipt } from '../models/ticket.model';
 import { AuthStore } from '../stores/auth.store';
@@ -42,6 +48,10 @@ export class QueueRepository {
 
   private ticketsColPath(): string {
     return `shops/${this.shopId}/tickets`;
+  }
+
+  private barbersColPath(): string {
+    return `shops/${this.shopId}/barbers`;
   }
 
   private servicesCollectionRef() {
@@ -75,40 +85,11 @@ export class QueueRepository {
   }
 
   observeTickets(): Observable<Ticket[]> {
-    return this.runInInjectionContext(() => collectionData(query(this.ticketsCollectionRef()), { idField: 'id' })).pipe(
-      map((rows) =>
-        rows
-          .map((row) => this.toTicket(row as Ticket))
-          .sort((a, b) => {
-            if (a.status === 'done' && b.status !== 'done') {
-              return 1;
-            }
-            if (a.status !== 'done' && b.status === 'done') {
-              return -1;
-            }
-            return a.position - b.position || a.createdAtMs - b.createdAtMs;
-          })
-      ),
-      catchError(() => of([]))
-    );
+    return this.observeTicketsForShop(this.shopId);
   }
 
   observeSettings(): Observable<QueueSettings> {
-    return this.runInInjectionContext(() => docData(this.settingsDocRef(), { idField: 'id' })).pipe(
-      map((row) => {
-        const raw = row as Partial<QueueSettings> | undefined;
-        if (!raw) {
-          return DEFAULT_QUEUE_SETTINGS;
-        }
-        return {
-          isOpen: raw.isOpen ?? true,
-          currentTicketId: raw.currentTicketId ?? null,
-          updatedAtMs: raw.updatedAtMs ?? 0,
-          lastAdvance: raw.lastAdvance ?? null
-        };
-      }),
-      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
-    );
+    return this.observeSettingsForShop(this.shopId);
   }
 
   async bootstrapDefaults(): Promise<void> {
@@ -127,23 +108,24 @@ export class QueueRepository {
 
     await this.runInInjectionContext(() =>
       setDoc(
-      settingsRef,
-      {
-        ...DEFAULT_QUEUE_SETTINGS,
-        updatedAtMs: Date.now()
-      },
-      { merge: true }
+        settingsRef,
+        {
+          ...DEFAULT_QUEUE_SETTINGS,
+          updatedAtMs: Date.now()
+        },
+        { merge: true }
       )
     );
   }
 
   async createTicket(input: CreateTicketInput): Promise<TicketReceipt> {
     const nowMs = Date.now();
-    const settingsRef = this.settingsDocRef();
-    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
-    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    const settings = await this.getSettings();
     if (!settings.isOpen) {
       throw new Error('La jornada esta cerrada');
+    }
+    if (!settings.activeBarberIds.includes(input.barberId)) {
+      throw new Error('Ese barbero no esta disponible en este momento');
     }
 
     const serviceRef = this.runInInjectionContext(() => doc(this.firestore, `${this.servicesColPath()}/${input.serviceId}`));
@@ -153,14 +135,23 @@ export class QueueRepository {
     }
     const service = serviceSnap.data() as BarberService;
 
+    const barberRef = this.runInInjectionContext(() => doc(this.firestore, `${this.barbersColPath()}/${input.barberId}`));
+    const barberSnap = await this.runInInjectionContext(() => getDoc(barberRef));
+    if (!barberSnap.exists()) {
+      throw new Error('Barbero no valido');
+    }
+    const barber = barberSnap.data() as BarberProfile;
+
     const tickets = await this.fetchTickets();
-    const active = this.activeQueue(tickets);
+    const active = this.activeQueueForBarber(tickets, input.barberId);
     const hasCurrent = active.some((ticket) => ticket.status === 'current');
     const estimatedWaitMin = this.estimateWaitForNewTicket(active, nowMs);
     const position = active.length + 1;
     const newTicketRef = this.runInInjectionContext(() => doc(this.ticketsCollectionRef()));
 
     const payload: TicketRecord = {
+      barberId: input.barberId,
+      barberNameSnapshot: barber.name,
       customerName: input.customerName.trim(),
       displayName: input.customerName.trim(),
       serviceId: input.serviceId,
@@ -171,22 +162,27 @@ export class QueueRepository {
       createdAtMs: nowMs,
       startedAtMs: hasCurrent ? null : nowMs,
       completedAtMs: null,
+      ...(barber.photoUrl ? { barberPhotoUrlSnapshot: barber.photoUrl } : {}),
       ...(input.phone ? { phone: input.phone } : {})
     };
 
+    const nextState = this.ensureBarberState(settings, input.barberId);
     const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
     batch.set(newTicketRef, payload);
-    if (!hasCurrent) {
-      batch.set(
-        settingsRef,
-        {
-          currentTicketId: newTicketRef.id,
-          lastAdvance: null,
-          updatedAtMs: nowMs
+    batch.set(
+      this.settingsDocRef(),
+      {
+        barberStates: {
+          ...settings.barberStates,
+          [input.barberId]: {
+            currentTicketId: hasCurrent ? nextState.currentTicketId : newTicketRef.id,
+            lastAdvance: null
+          }
         },
-        { merge: true }
-      );
-    }
+        updatedAtMs: nowMs
+      },
+      { merge: true }
+    );
     await batch.commit();
 
     return {
@@ -196,16 +192,12 @@ export class QueueRepository {
     };
   }
 
-  async moveNext(): Promise<void> {
+  async moveNext(barberId: string): Promise<void> {
     const nowMs = Date.now();
-    const settingsRef = this.settingsDocRef();
-    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
-    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    const settings = await this.getSettings();
     const tickets = await this.fetchTickets();
-    const active = this.activeQueue(tickets);
-    if (!active.length) {
-      return;
-    }
+    const active = this.activeQueueForBarber(tickets, barberId);
+    if (!active.length) return;
 
     const current = active.find((ticket) => ticket.status === 'current') ?? null;
     const waiting = active.filter((ticket) => ticket.status === 'waiting').sort((a, b) => a.position - b.position);
@@ -246,11 +238,15 @@ export class QueueRepository {
     };
 
     batch.set(
-      settingsRef,
+      this.settingsDocRef(),
       {
-        ...settings,
-        currentTicketId: promoted?.id ?? null,
-        lastAdvance,
+        barberStates: {
+          ...settings.barberStates,
+          [barberId]: {
+            currentTicketId: promoted?.id ?? null,
+            lastAdvance
+          }
+        },
         updatedAtMs: nowMs
       },
       { merge: true }
@@ -259,19 +255,19 @@ export class QueueRepository {
     await batch.commit();
   }
 
-  async movePrevious(): Promise<void> {
+  async movePrevious(barberId: string): Promise<void> {
     const nowMs = Date.now();
-    const settingsRef = this.settingsDocRef();
-    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
-    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
-    const last = settings.lastAdvance;
-    if (!last) {
-      return;
-    }
+    const settings = await this.getSettings();
+    const last = this.ensureBarberState(settings, barberId).lastAdvance;
+    if (!last) return;
 
     const ticketMap = new Map<string, Ticket>();
     const tickets = await this.fetchTickets();
-    tickets.forEach((ticket) => ticketMap.set(ticket.id, ticket));
+    tickets.forEach((ticket) => {
+      if (ticket.barberId === barberId) {
+        ticketMap.set(ticket.id, ticket);
+      }
+    });
 
     const promoted = last.promotedId ? ticketMap.get(last.promotedId) ?? null : null;
     const previousCurrent = last.previousCurrentId ? ticketMap.get(last.previousCurrentId) ?? null : null;
@@ -308,10 +304,15 @@ export class QueueRepository {
     });
 
     batch.set(
-      settingsRef,
+      this.settingsDocRef(),
       {
-        currentTicketId,
-        lastAdvance: null,
+        barberStates: {
+          ...settings.barberStates,
+          [barberId]: {
+            currentTicketId,
+            lastAdvance: null
+          }
+        },
         updatedAtMs: nowMs
       },
       { merge: true }
@@ -322,19 +323,16 @@ export class QueueRepository {
 
   async deleteTicket(ticketId: string): Promise<void> {
     const nowMs = Date.now();
-    const settingsRef = this.settingsDocRef();
-    const settingsSnap = await this.runInInjectionContext(() => getDoc(settingsRef));
-    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    const settings = await this.getSettings();
     const tickets = await this.fetchTickets();
     const ticketToDelete = tickets.find((ticket) => ticket.id === ticketId);
-    if (!ticketToDelete) {
-      return;
-    }
+    if (!ticketToDelete) return;
 
+    const barberId = ticketToDelete.barberId;
     const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
     batch.delete(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticketId}`)));
 
-    const remainingActive = this.activeQueue(tickets.filter((ticket) => ticket.id !== ticketId));
+    const remainingActive = this.activeQueueForBarber(tickets.filter((ticket) => ticket.id !== ticketId), barberId);
     let currentTicket = remainingActive.find((ticket) => ticket.status === 'current') ?? null;
 
     if (!currentTicket) {
@@ -356,15 +354,6 @@ export class QueueRepository {
       }
     }
 
-    if (currentTicket) {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${currentTicket.id}`)), {
-        status: 'current',
-        position: 1,
-        startedAtMs: currentTicket.startedAtMs ?? nowMs,
-        completedAtMs: null
-      });
-    }
-
     const waiting = remainingActive.filter((ticket) => ticket.id !== currentTicket?.id);
     const waitingStartPosition = currentTicket ? 2 : 1;
     waiting.forEach((ticket, index) => {
@@ -376,11 +365,15 @@ export class QueueRepository {
     });
 
     batch.set(
-      settingsRef,
+      this.settingsDocRef(),
       {
-        ...settings,
-        currentTicketId: currentTicket?.id ?? null,
-        lastAdvance: null,
+        barberStates: {
+          ...settings.barberStates,
+          [barberId]: {
+            currentTicketId: currentTicket?.id ?? null,
+            lastAdvance: null
+          }
+        },
         updatedAtMs: nowMs
       },
       { merge: true }
@@ -397,8 +390,8 @@ export class QueueRepository {
       this.settingsDocRef(),
       {
         isOpen: false,
-        currentTicketId: null,
-        lastAdvance: null,
+        activeBarberIds: [],
+        barberStates: {},
         updatedAtMs: Date.now()
       },
       { merge: true }
@@ -406,13 +399,18 @@ export class QueueRepository {
     await batch.commit();
   }
 
-  async openDay(): Promise<void> {
+  async openDay(activeBarberIds: string[]): Promise<void> {
+    const barberStates = activeBarberIds.reduce<Record<string, BarberQueueState>>((acc, barberId) => {
+      acc[barberId] = { currentTicketId: null, lastAdvance: null };
+      return acc;
+    }, {});
     await this.runInInjectionContext(() =>
       setDoc(
         this.settingsDocRef(),
         {
           isOpen: true,
-          lastAdvance: null,
+          activeBarberIds,
+          barberStates,
           updatedAtMs: Date.now()
         },
         { merge: true }
@@ -420,9 +418,47 @@ export class QueueRepository {
     );
   }
 
+  async cancelTicketsForBarber(barberId: string): Promise<void> {
+    const tickets = await this.fetchTickets();
+    const pending = tickets.filter((ticket) => ticket.barberId === barberId && ticket.status !== 'done');
+    for (const ticket of pending) {
+      await this.deleteTicket(ticket.id);
+    }
+  }
+
+  observeTicketsForShop(shopId: string): Observable<Ticket[]> {
+    const ref = this.runInInjectionContext(() => collection(this.firestore, `shops/${shopId}/tickets`));
+    return this.runInInjectionContext(() => collectionData(query(ref), { idField: 'id' })).pipe(
+      map((rows) =>
+        rows
+          .map((row) => this.toTicket(row as Ticket))
+          .sort((a, b) => {
+            if (a.status === 'done' && b.status !== 'done') return 1;
+            if (a.status !== 'done' && b.status === 'done') return -1;
+            if (a.barberId !== b.barberId) return a.barberNameSnapshot.localeCompare(b.barberNameSnapshot);
+            return a.position - b.position || a.createdAtMs - b.createdAtMs;
+          })
+      ),
+      catchError(() => of([]))
+    );
+  }
+
+  observeSettingsForShop(shopId: string): Observable<QueueSettings> {
+    const ref = this.runInInjectionContext(() => doc(this.firestore, `shops/${shopId}/settings/queue`));
+    return this.runInInjectionContext(() => docData(ref, { idField: 'id' })).pipe(
+      map((row) => this.toSettings(row as Partial<QueueSettings> | undefined)),
+      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
+    );
+  }
+
   private async fetchTickets(): Promise<Ticket[]> {
     const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
     return ticketsSnap.docs.map((ticketDoc) => this.toTicket({ id: ticketDoc.id, ...ticketDoc.data() } as Ticket));
+  }
+
+  private async getSettings(): Promise<QueueSettings> {
+    const settingsSnap = await this.runInInjectionContext(() => getDoc(this.settingsDocRef()));
+    return this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
   }
 
   private runInInjectionContext<T>(callback: () => T): T {
@@ -435,15 +471,18 @@ export class QueueRepository {
     }
     return {
       isOpen: value.isOpen ?? true,
-      currentTicketId: value.currentTicketId ?? null,
       updatedAtMs: value.updatedAtMs ?? 0,
-      lastAdvance: value.lastAdvance ?? null
+      activeBarberIds: Array.isArray(value.activeBarberIds) ? value.activeBarberIds : [],
+      barberStates: value.barberStates ?? {}
     };
   }
 
   private toTicket(value: Ticket): Ticket {
     return {
       id: value.id,
+      barberId: value.barberId,
+      barberNameSnapshot: value.barberNameSnapshot ?? '',
+      barberPhotoUrlSnapshot: value.barberPhotoUrlSnapshot ?? undefined,
       customerName: value.customerName,
       displayName: value.displayName ?? value.customerName,
       serviceId: value.serviceId,
@@ -458,70 +497,17 @@ export class QueueRepository {
     };
   }
 
-  // ── Métodos públicos para la TV (sin auth, shopId explícito) ─────────────
-
-  observeTicketsForShop(shopId: string): Observable<Ticket[]> {
-    const ref = this.runInInjectionContext(() =>
-      collection(this.firestore, `shops/${shopId}/tickets`)
-    );
-    return this.runInInjectionContext(() => collectionData(query(ref), { idField: 'id' })).pipe(
-      map((rows) =>
-        rows
-          .map((row) => this.toTicket(row as Ticket))
-          .sort((a, b) => {
-            if (a.status === 'done' && b.status !== 'done') return 1;
-            if (a.status !== 'done' && b.status === 'done') return -1;
-            return a.position - b.position || a.createdAtMs - b.createdAtMs;
-          })
-      ),
-      catchError(() => of([]))
-    );
-  }
-
-  observeServicesForShop(shopId: string): Observable<BarberService[]> {
-    const ref = this.runInInjectionContext(() =>
-      collection(this.firestore, `shops/${shopId}/services`)
-    );
-    return this.runInInjectionContext(() => collectionData(ref, { idField: 'id' })).pipe(
-      map((rows) =>
-        rows
-          .map((row) => {
-            const service = row as BarberService;
-            return {
-              ...service,
-              durationMin: Number(service.durationMin ?? 0),
-              active: Boolean(service.active)
-            };
-          })
-          .sort((a, b) => a.name.localeCompare(b.name))
-      ),
-      catchError(() => of([]))
-    );
-  }
-
-  observeSettingsForShop(shopId: string): Observable<QueueSettings> {
-    const ref = this.runInInjectionContext(() =>
-      doc(this.firestore, `shops/${shopId}/settings/queue`)
-    );
-    return this.runInInjectionContext(() => docData(ref, { idField: 'id' })).pipe(
-      map((row) => {
-        const raw = row as Partial<QueueSettings> | undefined;
-        if (!raw) return DEFAULT_QUEUE_SETTINGS;
-        return {
-          isOpen: raw.isOpen ?? true,
-          currentTicketId: raw.currentTicketId ?? null,
-          updatedAtMs: raw.updatedAtMs ?? 0,
-          lastAdvance: raw.lastAdvance ?? null
-        };
-      }),
-      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
-    );
-  }
-
-  private activeQueue(tickets: Ticket[]): Ticket[] {
+  private activeQueueForBarber(tickets: Ticket[], barberId: string): Ticket[] {
     return tickets
-      .filter((ticket) => ticket.status !== 'done')
+      .filter((ticket) => ticket.barberId === barberId && ticket.status !== 'done')
       .sort((a, b) => a.position - b.position || a.createdAtMs - b.createdAtMs);
+  }
+
+  private ensureBarberState(settings: QueueSettings, barberId: string): BarberQueueState {
+    return settings.barberStates[barberId] ?? {
+      currentTicketId: null,
+      lastAdvance: null
+    };
   }
 
   private estimateWaitForNewTicket(active: Ticket[], nowMs: number): number {

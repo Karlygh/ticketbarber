@@ -25,6 +25,14 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');
     }
 
+    match /shops/{shopId}/barbers/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == shopId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
     // ── Denegar todo lo demás ────────────────────────────────────────────
     match /{allPaths=**} {
       allow read, write: if false;

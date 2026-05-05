@@ -98,26 +98,31 @@ service cloud.firestore {
       allow create, update: if isOwner(shopId);
       allow delete: if false;
 
+      match /barbers/{barberId} {
+        allow read: if true;
+        allow write: if isOwner(shopId);
+      }
+
       match /settings/{document=**} {
         allow read: if true;
-        allow write: if request.auth != null;
+        allow write: if isOwner(shopId);
       }
 
       match /services/{document=**} {
         allow read: if true;
-        allow write: if request.auth != null;
+        allow write: if isOwner(shopId);
       }
 
       match /tickets/{ticketId} {
         allow create: if true;
         allow read:   if true;
-        allow update: if request.auth != null;
-        allow delete: if request.auth != null;
+        allow update: if isOwner(shopId);
+        allow delete: if isOwner(shopId);
       }
 
       match /queue/{document=**} {
         allow read:  if true;
-        allow write: if request.auth != null;
+        allow write: if isOwner(shopId);
       }
     }
 

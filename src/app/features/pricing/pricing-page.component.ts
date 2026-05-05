@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal
 } from '@angular/core';
@@ -45,8 +46,26 @@ export class PricingPageComponent implements OnInit, OnDestroy {
   readonly loadingPriceId = signal<string | null>(null);
   readonly checkoutError = signal<string | null>(null);
   readonly portalLoading = signal(false);
+  readonly billingCycle = signal<'month' | 'year'>('month');
   /** Razón de llegada desde el guard: 'trial-expired' | 'subscription-required' | '' */
   readonly reason = signal('');
+  readonly featuredProduct = computed(() => this.products().find((p) => p.active) ?? this.products()[0] ?? null);
+  readonly validPrices = computed(() =>
+    (this.featuredProduct()?.prices ?? []).filter(
+      (p) => p.active && p.type === 'recurring' && (p.interval === 'month' || p.interval === 'year')
+    )
+  );
+  readonly monthlyPrice = computed(() =>
+    this.validPrices().find((p) => p.interval === 'month') ?? null
+  );
+  readonly yearlyPrice = computed(() =>
+    this.validPrices().find((p) => p.interval === 'year') ?? null
+  );
+  readonly selectedPrice = computed(() => {
+    const cycle = this.billingCycle();
+    if (cycle === 'year') return this.yearlyPrice();
+    return this.monthlyPrice();
+  });
 
   ngOnInit(): void {
     const r = this.route.snapshot.queryParamMap.get('reason') ?? '';
@@ -66,6 +85,11 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     this.productsSub = this.stripeService.getProducts().subscribe({
       next: (prods) => {
         this.products.set(prods as PricingProduct[]);
+        if (!this.monthlyPrice() && this.yearlyPrice()) {
+          this.billingCycle.set('year');
+        } else if (!this.yearlyPrice() && this.monthlyPrice()) {
+          this.billingCycle.set('month');
+        }
         this.loading.set(false);
         this.triggerPendingCheckout();
       },
@@ -123,8 +147,43 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     return `Ahorras ${(savings / 100).toFixed(0)} €`;
   }
 
+  yearlySavingsPercent(): number | null {
+    const monthly = this.monthlyPrice();
+    const yearly = this.yearlyPrice();
+    if (!monthly || !yearly) return null;
+    const annualEquivalent = monthly.unit_amount * 12;
+    if (annualEquivalent <= yearly.unit_amount) return null;
+    return Math.round(((annualEquivalent - yearly.unit_amount) / annualEquivalent) * 100);
+  }
+
+  setBillingCycle(cycle: 'month' | 'year'): void {
+    if (cycle === 'month' && !this.monthlyPrice()) {
+      this.checkoutError.set('Ahora mismo no hay plan mensual disponible.');
+      return;
+    }
+    if (cycle === 'year' && !this.yearlyPrice()) {
+      this.checkoutError.set('Ahora mismo no hay plan anual disponible.');
+      return;
+    }
+    this.checkoutError.set(null);
+    this.billingCycle.set(cycle);
+  }
+
   async buy(price: StripePrice): Promise<void> {
     this.checkoutError.set(null);
+    const expectedPrice = this.selectedPrice();
+    if (!expectedPrice) {
+      this.checkoutError.set(
+        this.billingCycle() === 'year'
+          ? 'No hay plan anual disponible en este momento.'
+          : 'No hay plan mensual disponible en este momento.'
+      );
+      return;
+    }
+    if (price.id !== expectedPrice.id) {
+      this.checkoutError.set('El plan seleccionado cambió. Vuelve a intentarlo.');
+      return;
+    }
 
     if (this.subscriptionStore.isPro()) {
       await this.openPortal();

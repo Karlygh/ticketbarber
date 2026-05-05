@@ -140,6 +140,9 @@
               placeholder="+34 600 000 000"
               maxlength="20"
             />
+            <p class="field-hint" style="text-align:left; margin-top:0.45rem;">
+              Cola TV: <a [href]="tvQueueUrl" target="_blank" rel="noopener noreferrer">{{ tvQueueUrl }}</a>
+            </p>
           </div>
         </div>
         @if (basicSaveError()) {

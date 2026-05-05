@@ -90,19 +90,41 @@ export class StripeService {
             const pricesRef = collection(this.firestore, `products/${productDoc.id}/prices`);
             const pq = query(pricesRef, where('active', '==', true));
             const priceUnsub = onSnapshot(pq, (priceSnap) => {
-              product.prices = priceSnap.docs.map((d) => {
-                const p = d.data();
-                return {
-                  id: d.id,
-                  active: p['active'] ?? true,
-                  currency: p['currency'] ?? 'eur',
-                  unit_amount: p['unit_amount'] ?? 0,
-                  type: p['type'] ?? 'recurring',
-                  interval: p['interval'] ?? 'month',
-                  interval_count: p['interval_count'] ?? 1,
-                  product: p['product'] ?? productDoc.id
-                } as StripePrice;
-              });
+              const normalized = priceSnap.docs
+                .map((d) => {
+                  const p = d.data();
+                  const recurring = p['recurring'] as Record<string, unknown> | undefined;
+                  const resolvedInterval =
+                    (p['interval'] as 'month' | 'year' | undefined) ??
+                    (recurring?.['interval'] as 'month' | 'year' | undefined) ??
+                    'month';
+                  const resolvedIntervalCount =
+                    (p['interval_count'] as number | undefined) ??
+                    (recurring?.['interval_count'] as number | undefined) ??
+                    1;
+                  return {
+                    id: d.id,
+                    active: p['active'] ?? true,
+                    currency: p['currency'] ?? 'eur',
+                    unit_amount: p['unit_amount'] ?? 0,
+                    type: p['type'] ?? 'recurring',
+                    interval: resolvedInterval,
+                    interval_count: resolvedIntervalCount,
+                    product: p['product'] ?? productDoc.id
+                  } as StripePrice;
+                })
+                .filter(
+                  (price) =>
+                    price.active &&
+                    price.type === 'recurring' &&
+                    (price.interval === 'month' || price.interval === 'year')
+                )
+                .sort((a, b) => {
+                  if (a.interval !== b.interval) return a.interval.localeCompare(b.interval);
+                  if (a.unit_amount !== b.unit_amount) return a.unit_amount - b.unit_amount;
+                  return a.id.localeCompare(b.id);
+                });
+              product.prices = normalized;
               pending--;
               if (pending <= 0) {
                 subscriber.next([...products]);

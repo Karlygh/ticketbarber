@@ -1,213 +1,141 @@
 <app-header></app-header>
 
 <main class="pricing-shell">
-  <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-  </a>
-  <div class="bg-blur blur-a"></div>
-  <div class="bg-blur blur-b"></div>
   <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-a"></div>
+  <div class="bg-glow bg-glow-b"></div>
 
-  <!-- Hero -->
-  <section class="pricing-hero">
-    <div class="eyebrow"><span>Planes y precios</span></div>
-    <h1>Todo lo que necesita<br>tu barberia, en un solo plan</h1>
-    <p class="subtitle">Cola digital, pantalla TV, panel de staff y mucho mas.<br>Sin permanencia. Cancela cuando quieras.</p>
-    <div class="trust-bar">
-      <span class="trust-item"><span class="trust-dot"></span>Sin comisiones</span>
-      <span class="trust-sep"></span>
-      <span class="trust-item"><span class="trust-dot"></span>Soporte incluido</span>
-      <span class="trust-sep"></span>
-      <span class="trust-item"><span class="trust-dot"></span>14 dias de garantia</span>
+  <section class="pricing-main">
+    <div class="pricing-copy">
+      <div class="eyebrow">Planes y precios</div>
+      <h1>Todo lo que necesita<br>tu barbería, en un solo plan</h1>
+      <p>Cola digital, pantalla TV, panel de staff y mucho más.<br>Sin permanencia. Cancela cuando quieras.</p>
+
+      <div class="trust-bar">
+        <span>Sin comisiones</span>
+        <span>Soporte incluido</span>
+        <span>14 días de garantía</span>
+      </div>
+
+      <div class="billing-switch" role="group" aria-label="Tipo de facturación">
+        <button type="button" [class.active]="billingCycle() === 'month'" [disabled]="!monthlyPrice()" (click)="setBillingCycle('month')">
+          Mensual
+        </button>
+        <button type="button" [class.active]="billingCycle() === 'year'" [disabled]="!yearlyPrice()" (click)="setBillingCycle('year')">
+          Anual
+          @if (yearlySavingsPercent(); as savingsPct) {
+            <span class="save-pill">Ahorra {{ savingsPct }}%</span>
+          }
+        </button>
+      </div>
+
+      <p class="billing-note">
+        @if (billingCycle() === 'year') { Pago único anual. Sin sorpresas. } @else { Pago mensual. Cancela cuando quieras. }
+      </p>
     </div>
+
+    @if (loading()) {
+      <article class="price-card skeleton"></article>
+    } @else if (productsError()) {
+      <div class="checkout-error" role="alert">
+        <strong>No hemos podido cargar los planes.</strong> {{ productsError() }}
+        <button class="btn-secondary" type="button" (click)="loadProducts()">Reintentar</button>
+      </div>
+    } @else if (featuredProduct() && selectedPrice(); as price) {
+      <article class="price-card">
+        <div class="card-top">
+          <h2>Suscripción Oro</h2>
+          <span class="top-badge">Mejor elección</span>
+        </div>
+
+        <p class="card-subtitle">
+          @if (billingCycle() === 'year') { Facturación anual } @else { Facturación mensual }
+        </p>
+
+        <div class="card-price">
+          <span class="currency">€</span>
+          <span class="amount">{{ price.unit_amount / 100 | currency:'EUR':'':'1.0-2':'es' }}</span>
+          <span class="interval">/ {{ intervalLabel(price.interval) }}</span>
+        </div>
+
+        @if (billingCycle() === 'year' && monthlyPrice()) {
+          <p class="price-meta">
+            Equivale a {{ (price.unit_amount / 100) / 12 | currency:'EUR':'':'1.2-2':'es' }} EUR/mes
+          </p>
+        }
+
+        <ul class="feature-list">
+          @for (feat of parseFeatures(featuredProduct()!); track feat) {
+            <li><span class="check"></span>{{ feat }}</li>
+          }
+        </ul>
+
+        @if (subscriptionStore.isPro() || subscriptionStore.subscriptionStatus() === 'pro-past-due') {
+          <button class="btn-primary" [disabled]="portalLoading()" (click)="openPortal()">
+            @if (portalLoading()) { <span class="spinner"></span> } @else { Gestionar suscripción }
+          </button>
+        } @else {
+          <button
+            class="btn-primary"
+            [class.btn-loading]="loadingPriceId() === price.id"
+            [disabled]="loadingPriceId() !== null"
+            (click)="buy(price)">
+            @if (loadingPriceId() === price.id) { <span class="spinner"></span> } @else { Empezar ahora }
+          </button>
+        }
+
+        <p class="guarantee">14 días de reembolso garantizado</p>
+      </article>
+    } @else {
+      <div class="checkout-error" role="alert">
+        <strong>No hay un plan válido para la facturación seleccionada.</strong>
+        Cambia entre mensual/anual o revisa la configuración de precios en Stripe.
+      </div>
+    }
   </section>
 
-  <!-- Banners contextuales según estado/razón de llegada -->
   @if (reason() === 'trial-expired') {
     <div class="access-banner access-banner--expired" role="alert">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div>
-        <strong>Tu prueba de 7 días ha expirado.</strong>
-        Elige un plan para seguir usando TicketBarber sin interrupciones.
-      </div>
+      <strong>Tu prueba de 7 días ha expirado.</strong> Elige un plan para seguir usando TicketBarber.
     </div>
   } @else if (reason() === 'subscription-required') {
     <div class="access-banner access-banner--info" role="status">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      <div>
-        <strong>Necesitas un plan activo</strong> para acceder a esa sección.
-      </div>
+      <strong>Necesitas un plan activo</strong> para acceder a esa sección.
     </div>
   } @else if (subscriptionStore.subscriptionStatus() === 'trial-active') {
     <div class="access-banner access-banner--trial" role="status">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <div>
-        <strong>Estás en tu prueba gratuita</strong> — te quedan
-        <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong>.
-        Suscríbete ahora o continúa explorando.
-      </div>
-      <button class="btn-continue-trial" type="button" (click)="continueTrial()">
-        Continuar con mi prueba
-      </button>
+      <span><strong>Estás en tu prueba gratuita</strong> — te quedan <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong>.</span>
+      <button class="btn-continue-trial" type="button" (click)="continueTrial()">Continuar con mi prueba</button>
     </div>
   } @else if (subscriptionStore.subscriptionStatus() === 'pro-past-due') {
     <div class="access-banner access-banner--expired" role="alert">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div>
-        <strong>Pago pendiente.</strong> Actualiza tu método de pago para mantener el acceso Pro.
-      </div>
+      <strong>Pago pendiente.</strong> Actualiza tu método de pago para mantener el acceso Pro.
     </div>
-  }
-
-  <!-- Skeleton -->
-  @if (loading()) {
-    <div class="cards-grid">
-      <div class="price-card skeleton"></div>
-      <div class="price-card skeleton"></div>
-    </div>
-  }
-
-  <!-- Tarjetas -->
-  @if (!loading()) {
-    @if (productsError()) {
-      <div class="checkout-error" role="alert">
-        <strong>No hemos podido cargar los planes.</strong> {{ productsError() }}
-        <button class="btn-outline retry-inline" type="button" (click)="loadProducts()">Reintentar</button>
-      </div>
-    } @else if (products().length === 0) {
-      <p class="empty-msg">No hay planes disponibles en este momento.</p>
-    } @else {
-      @for (product of products(); track product.id) {
-        <div class="cards-grid">
-          @for (price of product.prices; track price.id) {
-            @if (price.active) {
-              <div
-                class="price-card"
-                [class.annual]="price.interval === 'year'"
-                [class.monthly]="price.interval === 'month'">
-
-                @if (price.interval === 'year') {
-                  <div class="card-badge">
-                    <span class="badge-dot"></span>
-                    Mas popular
-                  </div>
-                }
-
-                <div class="card-header">
-                  <div class="plan-label">
-                    @if (price.interval === 'year') {
-                      <span class="plan-icon annual-icon"></span>
-                    } @else {
-                      <span class="plan-icon monthly-icon"></span>
-                    }
-                    <h2 class="plan-name">{{ product.name }}</h2>
-                  </div>
-                  <p class="plan-tag">
-                    @if (price.interval === 'year') { Facturacion anual - maximo ahorro } @else { Facturacion mensual }
-                  </p>
-                </div>
-
-                <div class="price-block">
-                  <div class="card-price">
-                    <span class="currency-sym">&#8364;</span>
-                    <span class="amount">{{ price.unit_amount / 100 | currency:'EUR':'':'1.0-2':'es' }}</span>
-                    <span class="interval">/ {{ intervalLabel(price.interval) }}</span>
-                  </div>
-                  @if (price.interval === 'year') {
-                    <p class="price-equivalent">
-                      Solo {{ price.unit_amount / 100 / 12 | currency:'EUR':'':'1.2-2':'es' }} EUR/mes facturado anualmente
-                    </p>
-                  }
-                  @if (savingsLabel(product, price); as savings) {
-                    <div class="savings-badge">
-                      <span class="savings-icon"></span>
-                      {{ savings }} respecto al mensual
-                    </div>
-                  }
-                </div>
-
-                <div class="card-divider"></div>
-
-                <ul class="feature-list">
-                  @for (feat of parseFeatures(product); track feat; let i = $index) {
-                    <li [class.feat-primary]="i < 3" [class.feat-secondary]="i >= 3">
-                      <span class="checkmark" aria-hidden="true"></span>
-                      {{ feat }}
-                    </li>
-                  }
-                </ul>
-
-                @if (subscriptionStore.isPro() || subscriptionStore.subscriptionStatus() === 'pro-past-due') {
-                  <button
-                    class="btn-primary"
-                    [disabled]="portalLoading()"
-                    (click)="openPortal()">
-                    @if (portalLoading()) { <span class="spinner"></span> }
-                    @else { Gestionar suscripcion }
-                  </button>
-                } @else if (price.interval === 'year') {
-                  <button
-                    class="btn-primary"
-                    [class.btn-loading]="loadingPriceId() === price.id"
-                    [disabled]="loadingPriceId() !== null"
-                    (click)="buy(price)">
-                    @if (loadingPriceId() === price.id) { <span class="spinner"></span> }
-                    @else { Activar plan anual }
-                  </button>
-                } @else {
-                  <button
-                    class="btn-outline"
-                    [class.btn-loading]="loadingPriceId() === price.id"
-                    [disabled]="loadingPriceId() !== null"
-                    (click)="buy(price)">
-                    @if (loadingPriceId() === price.id) { <span class="spinner"></span> }
-                    @else { Empezar ahora }
-                  </button>
-                }
-
-                <p class="guarantee">
-                  <span class="shield-icon" aria-hidden="true"></span>
-                  14 dias de reembolso garantizado
-                </p>
-
-              </div>
-            }
-          }
-        </div>
-      }
-    }
   }
 
   @if (checkoutError()) {
     <p class="checkout-error">{{ checkoutError() }}</p>
   }
 
-  <div class="bottom-trust">
-    <p class="bottom-trust-title">Por que confiar en Ticketbarber</p>
-    <div class="bottom-trust-items">
-      <div class="bt-item">
-        <span class="bt-icon shield-icon-lg"></span>
-        <strong>Pago 100% seguro</strong>
-        <span>Gestionado por Stripe, el estandar mundial en pagos online.</span>
-      </div>
-      <div class="bt-item">
-        <span class="bt-icon calendar-icon"></span>
-        <strong>Sin permanencia</strong>
-        <span>Cancela en cualquier momento desde tu panel, sin penalizaciones.</span>
-      </div>
-      <div class="bt-item">
-        <span class="bt-icon support-icon"></span>
-        <strong>Soporte real</strong>
-        <span>Te ayudamos a configurar todo desde el primer dia.</span>
-      </div>
-    </div>
-  </div>
+  <section class="benefits-grid">
+    <article class="benefit-card">
+      <h3>Pago 100% seguro</h3>
+      <p>Gestionado por Stripe, el estándar mundial en pagos online.</p>
+    </article>
+    <article class="benefit-card">
+      <h3>Sin permanencia</h3>
+      <p>Cancela en cualquier momento desde tu panel, sin penalizaciones.</p>
+    </article>
+    <article class="benefit-card">
+      <h3>Soporte real</h3>
+      <p>Te ayudamos a configurar todo desde el primer día.</p>
+    </article>
+  </section>
 
   <p class="legal">
     Al suscribirte aceptas nuestros
-    <a routerLink="/legal/terminos">Terminos de servicio</a> y
-    <a routerLink="/legal/privacidad">Politica de privacidad</a>.
-    Pagos gestionados de forma segura por Stripe.
+    <a routerLink="/legal/terminos">Términos de servicio</a> y
+    <a routerLink="/legal/privacidad">Política de privacidad</a>.
   </p>
 </main>
 

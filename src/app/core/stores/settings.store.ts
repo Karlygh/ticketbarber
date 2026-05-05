@@ -31,7 +31,7 @@ export class SettingsStore {
     await this.repository.closeDay();
   }
 
-  async openDay(): Promise<void> {
-    await this.repository.openDay();
+  async openDay(activeBarberIds: string[]): Promise<void> {
+    await this.repository.openDay(activeBarberIds);
   }
 }

@@ -51,6 +51,14 @@ export class AccountShopPageComponent implements OnInit {
     phone: ''
   };
   private initialOpeningHours: OpeningHoursDay[] = defaultOpeningHours();
+  readonly tvPath = '/tv';
+
+  get tvQueueUrl(): string {
+    const uid = this.authStore.user()?.uid;
+    if (!uid) return this.tvPath;
+    if (typeof window === 'undefined') return `${this.tvPath}/${uid}`;
+    return `${window.location.origin}${this.tvPath}/${uid}`;
+  }
 
   get hoursArray(): FormArray {
     return this.hoursForm.get('openingHours') as FormArray;
