@@ -39,21 +39,55 @@
   margin: 0;
 }
 
+.kiosk-head {
+  position: relative;
+  padding-right: 3rem;
+}
+
+.back-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--section-kiosk-light);
+  background: rgba(7, 22, 37, 0.7);
+  border: 1px solid rgba(103, 232, 249, 0.18);
+  text-decoration: none;
+}
+
+.kiosk-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
 .kiosk-logo {
   height: 3rem;
   width: auto;
   object-fit: contain;
-  margin-bottom: 0.75rem;
   border-radius: 8px;
 }
 
+.kiosk-meta-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
 .eyebrow {
-  margin: 0 0 0.35rem;
+  margin: 0;
   color: var(--section-kiosk);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .subtitle,
@@ -70,7 +104,7 @@
 }
 
 .kiosk-hours {
-  margin: 0.25rem 0 0.5rem;
+  margin: 0;
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.6rem;
@@ -205,6 +239,12 @@ select {
   cursor: wait;
 }
 
+.ticket-reminder {
+  margin: 0.2rem 0 0;
+  font-size: 0.84rem;
+  color: rgba(226, 232, 240, 0.78);
+}
+
 .notice {
   margin-top: 1.2rem;
   border-radius: 1rem;
@@ -248,9 +288,87 @@ select {
   font-weight: 600;
 }
 
+.kiosk-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 10, 22, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.kiosk-modal {
+  width: min(520px, 100%);
+  border-radius: 1.1rem;
+  padding: 1rem 1rem 0.9rem;
+  background: rgba(8, 22, 40, 0.95);
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  box-shadow: var(--glass-shadow);
+}
+
+.kiosk-modal h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.02rem;
+}
+
+.kiosk-modal p {
+  margin: 0;
+  color: var(--text-copy);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.kiosk-modal-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.modal-btn {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.58rem 0.92rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-btn.ghost {
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.modal-btn.solid {
+  border-color: rgba(6, 182, 212, 0.45);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--cyan-600), var(--cyan-500));
+}
+
 @media (max-width: 720px) {
   .kiosk-card {
     padding: 1.2rem;
+  }
+
+  .back-btn {
+    position: static;
+    margin-bottom: 0.75rem;
+  }
+
+  .kiosk-head {
+    padding-right: 0;
+  }
+
+  .kiosk-brand-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .kiosk-meta-row {
+    flex-wrap: wrap;
   }
 
   .barber-grid {

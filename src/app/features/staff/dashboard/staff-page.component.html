@@ -8,16 +8,15 @@
     <nav class="sidebar-nav">
       <p class="nav-label">General</p>
       <a routerLink="/staff">Panel de control</a>
+      <a [routerLink]="routes.staff.barbers">Barberos</a>
       <a [routerLink]="routes.kiosk">Agenda</a>
       <a [routerLink]="tvQueueRoute()">Pantalla TV</a>
+      <a routerLink="/staff/tv/generate-code">Generar codigo TV</a>
       <a [routerLink]="routes.staff.devices">Dispositivos</a>
 
       <p class="nav-label">Configuracion</p>
       <a routerLink="/account/negocio">Negocio</a>
       <a [routerLink]="routes.account">Mi cuenta</a>
-      <a [routerLink]="routes.subscriptionManage">Suscripcion</a>
-      <a [routerLink]="routes.pricing">Planes</a>
-      <a [routerLink]="routes.staff.tvSetup">Guia TV</a>
       <a [routerLink]="routes.home">Volver a la web</a>
     </nav>
 
@@ -25,6 +24,34 @@
   </aside>
 
   <section class="content">
+    <header class="mobile-topbar">
+      <button class="icon-btn icon-btn--back" type="button" [routerLink]="routes.home" aria-label="Volver a la web">←</button>
+      <p class="mobile-topbar-title">Panel de staff</p>
+      <div class="mobile-topbar-actions">
+        <button
+          class="icon-btn icon-btn--play"
+          [class.icon-btn--play-open]="queueStore.settings().isOpen || isBusy()"
+          type="button"
+          (click)="openAvailabilityModal()"
+          [disabled]="isBusy() || queueStore.settings().isOpen"
+          aria-label="Abrir jornada"
+        >
+          ▶
+        </button>
+        <button
+          class="icon-btn icon-btn--danger"
+          [class.icon-btn--danger-ready]="queueStore.settings().isOpen"
+          [class.icon-btn--danger-inactive]="!queueStore.settings().isOpen"
+          type="button"
+          (click)="requestCloseDay()"
+          [disabled]="isBusy()"
+          aria-label="Cerrar jornada"
+        >
+          ⏻
+        </button>
+      </div>
+    </header>
+
     <header class="hero">
       <div>
         <p class="eyebrow">Staff</p>
@@ -33,10 +60,29 @@
       </div>
 
       <div class="hero-actions">
-        <button class="ghost-btn" type="button" (click)="openAvailabilityModal()" [disabled]="isBusy()">Abrir jornada</button>
+        <button
+          class="ghost-btn"
+          [class.open-day-btn--ready]="!queueStore.settings().isOpen"
+          [class.open-day-btn--inactive]="queueStore.settings().isOpen"
+          type="button"
+          (click)="openAvailabilityModal()"
+          [disabled]="isBusy() || queueStore.settings().isOpen"
+        >
+          Abrir jornada
+        </button>
         <button class="primary-btn" type="button" (click)="openCreateBarberModal()" [disabled]="isBusy()">+ Agregar barbero</button>
       </div>
     </header>
+
+    <div
+      class="day-state-pill"
+      [class.day-state-pill--open]="queueStore.settings().isOpen"
+      [class.day-state-pill--closed]="!queueStore.settings().isOpen"
+      role="status"
+      aria-live="polite"
+    >
+      {{ queueStore.settings().isOpen ? 'Jornada abierta' : 'Jornada cerrada' }}
+    </div>
 
     @switch (subscriptionStore.subscriptionStatus()) {
       @case ('trial-active') {
@@ -61,6 +107,11 @@
 
     @if (error()) {
       <div class="error-banner">{{ error() }}</div>
+    }
+    @if (showWarningToast()) {
+      <div class="staff-warning-toast" role="alert" aria-live="assertive">
+        {{ warningToastMessage() }}
+      </div>
     }
 
     <section class="metrics-grid">
@@ -98,10 +149,17 @@
       </div>
 
       <div class="toolbar-actions">
-        <button class="ghost-btn" type="button" (click)="openAvailabilityModal()" [disabled]="isBusy()">
+        <button class="primary-btn" type="button" (click)="openAvailabilityModal()" [disabled]="isBusy()">
           Seleccionar disponibles
         </button>
-        <button class="danger-btn" type="button" (click)="closeDay()" [disabled]="isBusy() || !queueStore.settings().isOpen">
+        <button
+          class="danger-btn"
+          [class.close-day-btn--ready]="queueStore.settings().isOpen"
+          [class.close-day-btn--inactive]="!queueStore.settings().isOpen"
+          type="button"
+          (click)="requestCloseDay()"
+          [disabled]="isBusy()"
+        >
           Cerrar jornada
         </button>
       </div>
@@ -113,11 +171,12 @@
         <span>Estado</span>
         <span>En cola</span>
         <span>Turno actual</span>
+        <span>Turno</span>
         <span>Acciones</span>
       </div>
 
       @for (barber of barbers(); track barber.id) {
-        <article class="table-row">
+        <article class="table-row" (click)="openBarberDetailModal(barber)">
           <div class="barber-cell">
             @if (barber.photoUrl) {
               <img class="avatar-image" [src]="barber.photoUrl" [alt]="barber.name" />
@@ -138,6 +197,27 @@
 
           <div>{{ barberWaitingCount(barber.id) }}</div>
           <div>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</div>
+
+          <div class="row-turn-actions" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="mini-btn turn-btn"
+              [class.turn-btn--blocked]="!queueStore.settings().isOpen"
+              (click)="movePrevious(barber.id)"
+              [disabled]="isBusy() || (queueStore.settings().isOpen && !queueStore.canMovePreviousForBarber(barber.id))"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              class="mini-btn primary turn-btn"
+              [class.turn-btn--blocked]="!queueStore.settings().isOpen"
+              (click)="moveNext(barber.id)"
+              [disabled]="isBusy() || (queueStore.settings().isOpen && !isBarberActive(barber.id))"
+            >
+              Siguiente
+            </button>
+          </div>
 
           <div class="row-actions" (click)="$event.stopPropagation()">
             <button
@@ -168,65 +248,96 @@
       }
     </section>
 
-    <section class="queues-grid">
-      @for (barber of activeBarbers(); track barber.id) {
-        <article class="queue-card">
-          <header class="queue-card-head">
-            <div class="barber-mini">
-              @if (barber.photoUrl) {
-                <img class="avatar-image small" [src]="barber.photoUrl" [alt]="barber.name" />
-              } @else {
-                <div class="avatar-fallback small">{{ initials(barber.name) }}</div>
-              }
-              <div>
-                <h3>{{ barber.name }}</h3>
-                <p>{{ barberWaitingCount(barber.id) }} esperando</p>
-              </div>
-            </div>
-
-            <div class="queue-card-actions">
-              <button type="button" class="mini-btn" (click)="movePrevious(barber.id)" [disabled]="isBusy() || !queueStore.canMovePreviousForBarber(barber.id)">Anterior</button>
-              <button type="button" class="mini-btn primary" (click)="moveNext(barber.id)" [disabled]="isBusy()">Siguiente</button>
-            </div>
-          </header>
-
-          <div class="current-banner">
-            <span>Turno actual</span>
-            <strong>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</strong>
-          </div>
-
-          <ul class="ticket-list">
-            @for (ticket of barberTickets(barber.id); track ticket.id) {
-              <li [class.current]="ticket.status === 'current'">
-                <div class="ticket-main">
-                  <span class="ticket-position">{{ ticket.position }}</span>
-                  <div>
-                    <button type="button" class="ticket-name" (click)="openCustomerModal(ticket)">
-                      {{ ticket.displayName }}
-                    </button>
-                    <p>{{ ticket.serviceNameSnapshot }} · Llegada {{ formatArrivalTime(ticket.createdAtMs) }}</p>
-                  </div>
-                </div>
-
-                <div class="ticket-side">
-                  <span class="ticket-badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
-                  <button type="button" class="mini-btn danger-text" (click)="deleteTicket(ticket.id)" [disabled]="isBusy()">Eliminar</button>
-                </div>
-              </li>
-            } @empty {
-              <li class="empty-ticket">No hay tickets en esta cola.</li>
-            }
-          </ul>
-        </article>
-      } @empty {
-        <article class="queue-card empty-state-card">
-          <h3>Sin barberos activos en la jornada</h3>
-          <p>Abre jornada y marca al menos un barbero disponible para ver sus colas aqui.</p>
-        </article>
-      }
-    </section>
+    <nav class="mobile-bottom-nav" aria-label="Navegacion principal staff">
+      <a routerLink="/staff" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Panel de control</a>
+      <a [routerLink]="routes.staff.barbers" routerLinkActive="active">Barberos</a>
+      <a [routerLink]="routes.kiosk" routerLinkActive="active">Agenda</a>
+      <a [routerLink]="tvQueueRoute()" routerLinkActive="active">Pantalla TV</a>
+      <a routerLink="/staff/tv/generate-code" routerLinkActive="active">Generar codigo TV</a>
+      <a [routerLink]="routes.staff.devices" routerLinkActive="active">Dispositivos</a>
+      <a routerLink="/account/negocio" routerLinkActive="active">Negocio</a>
+      <a [routerLink]="routes.account" routerLinkActive="active">Mi cuenta</a>
+      <a [routerLink]="routes.home">Volver a la web</a>
+      <button type="button" class="mobile-bottom-logout" (click)="requestLogout()" [disabled]="isBusy()">Cerrar sesion</button>
+    </nav>
   </section>
 </main>
+
+@if (showBarberDetailModal() && selectedBarber(); as barber) {
+  <div class="overlay" (click)="closeBarberDetailModal()">
+    <div class="modal-card barber-detail-modal" (click)="$event.stopPropagation()">
+      <header class="barber-detail-head">
+        <div class="barber-mini">
+          @if (barber.photoUrl) {
+            <img class="avatar-image small" [src]="barber.photoUrl" [alt]="barber.name" />
+          } @else {
+            <div class="avatar-fallback small">{{ initials(barber.name) }}</div>
+          }
+          <div>
+            <h3>{{ barber.name }}</h3>
+            <p>{{ barberWaitingCount(barber.id) }} esperando</p>
+          </div>
+        </div>
+        <button type="button" class="ghost-btn" (click)="closeBarberDetailModal()">Cerrar</button>
+      </header>
+
+      <section class="detail-section">
+        <h4>Cola activa</h4>
+        <div class="current-banner">
+          <span>Turno actual</span>
+          <strong>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</strong>
+        </div>
+
+        <ul class="ticket-list">
+          @for (ticket of activeTicketsForBarber(barber.id); track ticket.id) {
+            <li [class.current]="ticket.status === 'current'">
+              <div class="ticket-main">
+                <span class="ticket-position">{{ ticket.position }}</span>
+                <div>
+                  <button type="button" class="ticket-name" (click)="openCustomerModal(ticket)">
+                    {{ ticket.displayName }}
+                  </button>
+                  <p>{{ ticket.serviceNameSnapshot }} · Llegada {{ formatArrivalTime(ticket.createdAtMs) }}</p>
+                </div>
+              </div>
+
+              <div class="ticket-side">
+                <span class="ticket-badge">{{ ticket.status === 'current' ? 'En curso' : 'En espera' }}</span>
+                <button type="button" class="mini-btn danger-text" (click)="deleteTicket(ticket.id)" [disabled]="isBusy()">Eliminar</button>
+              </div>
+            </li>
+          } @empty {
+            <li class="empty-ticket">No hay tickets en esta cola.</li>
+          }
+        </ul>
+      </section>
+
+      <section class="detail-section">
+        <h4>Historial del dia</h4>
+        <ul class="ticket-list ticket-list-history">
+          @for (ticket of doneTicketsForBarber(barber.id); track ticket.id) {
+            <li>
+              <div class="ticket-main">
+                <span class="ticket-position done">OK</span>
+                <div>
+                  <button type="button" class="ticket-name" (click)="openCustomerModal(ticket)">
+                    {{ ticket.displayName }}
+                  </button>
+                  <p>{{ ticket.serviceNameSnapshot }} · Finalizado {{ formatArrivalTime(ticket.completedAtMs ?? ticket.createdAtMs) }}</p>
+                </div>
+              </div>
+              <div class="ticket-side">
+                <span class="ticket-badge">Atendido</span>
+              </div>
+            </li>
+          } @empty {
+            <li class="empty-ticket">Todavia no hay clientes atendidos hoy.</li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+}
 
 @if (showCustomerModal() && selectedCustomer()) {
   <app-customer-detail-modal [customer]="selectedCustomer()" (closed)="closeCustomerModal()"></app-customer-detail-modal>
@@ -276,6 +387,19 @@
       <div class="modal-actions">
         <button type="button" class="ghost-btn" (click)="showOpenDayModal.set(false)" [disabled]="isBusy()">Cancelar</button>
         <button type="button" class="primary-btn" (click)="confirmOpenDay()" [disabled]="isBusy()">Abrir jornada</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCloseDayConfirmModal()) {
+  <div class="overlay" (click)="cancelCloseDay()">
+    <div class="modal-card danger-modal" (click)="$event.stopPropagation()">
+      <h3>Cerrar jornada</h3>
+      <p>Estas seguro de cerrar la jornada? Esta accion eliminara los datos de la jornada completa y la cola de clientes.</p>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" (click)="cancelCloseDay()" [disabled]="isBusy()">Cancelar</button>
+        <button type="button" class="danger-btn" (click)="closeDay()" [disabled]="isBusy()">Si, cerrar jornada</button>
       </div>
     </div>
   </div>

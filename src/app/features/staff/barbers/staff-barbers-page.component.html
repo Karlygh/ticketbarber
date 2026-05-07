@@ -1,0 +1,98 @@
+<main class="staff-barbers-page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Staff</p>
+      <h1>Barberos</h1>
+      <p class="subtitle">Edita nombre e imagen de tus barberos y elimina perfiles de forma definitiva.</p>
+    </div>
+
+    <div class="head-actions">
+      <a class="ghost-btn" [routerLink]="routes.staff.root">Volver al panel</a>
+      <a class="primary-btn" [routerLink]="'/staff/tv/generate-code'">Generar codigo TV</a>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="error-banner" role="alert">{{ error() }}</div>
+  }
+
+  @if (success()) {
+    <div class="success-banner" role="status">{{ success() }}</div>
+  }
+
+  <section class="barbers-list">
+    @for (barber of barbers(); track barber.id) {
+      <article class="barber-card">
+        <div class="barber-main">
+          @if (barber.photoUrl) {
+            <img class="avatar-image" [src]="barber.photoUrl" [alt]="barber.name" />
+          } @else {
+            <div class="avatar-fallback">{{ initials(barber.name) }}</div>
+          }
+
+          <div class="barber-copy">
+            <strong>{{ barber.name }}</strong>
+            <p>{{ barber.isAvailableToday ? 'Disponible hoy' : 'No disponible hoy' }}</p>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          @if (!isEditing(barber.id)) {
+            <button type="button" class="ghost-btn" (click)="startEdit(barber)" [disabled]="isBusy()">Editar</button>
+            <button type="button" class="danger-btn" (click)="requestDelete(barber)" [disabled]="isBusy()">Eliminar</button>
+          }
+        </div>
+
+        @if (isEditing(barber.id)) {
+          <div class="editor-panel">
+            <label class="field">
+              <span>Nombre</span>
+              <input
+                type="text"
+                [ngModel]="editingName()"
+                (ngModelChange)="editingName.set($event)"
+                [disabled]="isBusy()"
+                placeholder="Ej: Mauricio"
+              />
+            </label>
+
+            <label class="field">
+              <span>Foto</span>
+              <input type="file" accept="image/*" (change)="onPhotoSelected($event)" [disabled]="isBusy()" />
+            </label>
+
+            @if (pendingPhotoFileName()) {
+              <p class="helper-text">Foto cargada: {{ pendingPhotoFileName() }}</p>
+            }
+
+            <div class="editor-actions">
+              <button type="button" class="ghost-btn" (click)="cancelEdit()" [disabled]="isBusy()">Cancelar</button>
+              <button type="button" class="primary-btn" (click)="saveEdit(barber)" [disabled]="isBusy() || !editingName().trim()">Guardar cambios</button>
+            </div>
+          </div>
+        }
+      </article>
+    } @empty {
+      <div class="empty-panel">
+        <p class="empty-title">Todavia no hay barberos.</p>
+        <p class="empty-copy">Crea tu primer barbero desde el panel principal para poder editarlo aqui.</p>
+      </div>
+    }
+  </section>
+</main>
+
+@if (barberToDelete(); as barber) {
+  <div class="overlay" (click)="cancelDelete()">
+    <div class="modal-card danger-modal" (click)="$event.stopPropagation()">
+      <h3>Eliminar barbero</h3>
+      <p>
+        Vas a eliminar definitivamente a <strong>{{ barber.name }}</strong>. Antes se cancelaran sus tickets pendientes.
+      </p>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" (click)="cancelDelete()" [disabled]="isBusy()">Cancelar</button>
+        <button type="button" class="danger-btn" (click)="confirmDelete()" [disabled]="isBusy()">Si, eliminar</button>
+      </div>
+    </div>
+  </div>
+}

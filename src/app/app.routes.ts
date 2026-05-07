@@ -67,6 +67,12 @@ export const routes: Routes = [
       import('./features/staff/tv/devices/devices-management.component').then(m => m.DevicesManagementComponent)
   },
   {
+    path: 'staff/barberos',
+    canActivate: [staffAuthGuard, proGuard],
+    loadComponent: () =>
+      import('./features/staff/barbers/staff-barbers-page.component').then((m) => m.StaffBarbersPageComponent)
+  },
+  {
     path: 'guia-tv',
     loadComponent: () =>
       import('./features/staff/tv/setup/staff-tv-setup-page.component').then(

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { SubscriptionStore } from '../../../core/stores/subscription.store';
 import { QueueStore } from '../../../core/stores/queue.store';
@@ -15,7 +15,7 @@ import { Ticket } from '../../../core/models/ticket.model';
 @Component({
   selector: 'app-staff-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, CustomerDetailModalComponent, FormsModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, CustomerDetailModalComponent, FormsModule],
   templateUrl: './staff-page.component.html',
   styleUrl: './staff-page.component.css'
 })
@@ -63,8 +63,14 @@ export class StaffPageComponent {
   readonly pendingPhotoUrl = signal<string | null>(null);
   readonly pendingPhotoFileName = signal('');
   readonly openDaySelection = signal<Record<string, boolean>>({});
+  readonly showCloseDayConfirmModal = signal(false);
   readonly barberToDelete = signal<BarberProfile | null>(null);
   readonly openActionsBarberId = signal<string | null>(null);
+  readonly showBarberDetailModal = signal(false);
+  readonly selectedBarber = signal<BarberProfile | null>(null);
+  readonly warningToastMessage = signal('');
+  readonly showWarningToast = signal(false);
+  private warningToastTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     void this.queueStore.bootstrap();
@@ -74,12 +80,36 @@ export class StaffPageComponent {
     return this.queueStore.ticketsForBarber(barberId);
   }
 
+  activeTicketsForBarber(barberId: string): Ticket[] {
+    return this.queueStore.tickets()
+      .filter((ticket) => ticket.barberId === barberId && ticket.status !== 'done')
+      .sort((a, b) => {
+        if (a.status === 'current' && b.status !== 'current') return -1;
+        if (a.status !== 'current' && b.status === 'current') return 1;
+        return a.position - b.position || a.createdAtMs - b.createdAtMs;
+      });
+  }
+
+  doneTicketsForBarber(barberId: string): Ticket[] {
+    return this.queueStore.tickets()
+      .filter((ticket) => ticket.barberId === barberId && ticket.status === 'done')
+      .sort((a, b) => {
+        const aTime = a.completedAtMs ?? a.createdAtMs;
+        const bTime = b.completedAtMs ?? b.createdAtMs;
+        return bTime - aTime;
+      });
+  }
+
   barberCurrent(barberId: string): Ticket | null {
     return this.queueStore.currentTicketForBarber(barberId);
   }
 
   barberWaitingCount(barberId: string): number {
     return this.queueStore.waitingTicketsForBarber(barberId).length;
+  }
+
+  isBarberActive(barberId: string): boolean {
+    return this.queueStore.activeBarberIds().includes(barberId);
   }
 
   barberStatusLabel(status: BarberStatus): string {
@@ -210,14 +240,37 @@ export class StaffPageComponent {
   }
 
   async closeDay(): Promise<void> {
+    this.showCloseDayConfirmModal.set(false);
     await this.runAction(() => this.queueStore.closeDay());
   }
 
+  requestCloseDay(): void {
+    if (this.isBusy()) return;
+    if (!this.queueStore.settings().isOpen) {
+      this.showCloseDayWithoutOpenWarning();
+      return;
+    }
+    this.showCloseDayConfirmModal.set(true);
+  }
+
+  cancelCloseDay(): void {
+    if (this.isBusy()) return;
+    this.showCloseDayConfirmModal.set(false);
+  }
+
   async moveNext(barberId: string): Promise<void> {
+    if (!this.queueStore.settings().isOpen) {
+      this.showClosedDayWarning();
+      return;
+    }
     await this.runAction(() => this.queueStore.moveNext(barberId));
   }
 
   async movePrevious(barberId: string): Promise<void> {
+    if (!this.queueStore.settings().isOpen) {
+      this.showClosedDayWarning();
+      return;
+    }
     await this.runAction(() => this.queueStore.movePrevious(barberId));
   }
 
@@ -263,6 +316,17 @@ export class StaffPageComponent {
     this.openActionsBarberId.set(null);
   }
 
+  openBarberDetailModal(barber: BarberProfile): void {
+    this.closeActionsMenu();
+    this.selectedBarber.set(barber);
+    this.showBarberDetailModal.set(true);
+  }
+
+  closeBarberDetailModal(): void {
+    this.showBarberDetailModal.set(false);
+    this.selectedBarber.set(null);
+  }
+
   private async runAction(action: () => Promise<void>): Promise<void> {
     this.error.set('');
     this.isBusy.set(true);
@@ -286,5 +350,26 @@ export class StaffPageComponent {
       return 'Permiso denegado en Firebase. Revisa que estas con la cuenta duena del negocio y que las reglas esten desplegadas en el proyecto activo ticketbarber-7c16d.';
     }
     return raw || fallback;
+  }
+
+  private showClosedDayWarning(): void {
+    this.warningToastMessage.set('Para cambiar la direccion de la jornada, abre jornada primero.');
+    this.showWarningToastWithAutoClose();
+  }
+
+  private showCloseDayWithoutOpenWarning(): void {
+    this.warningToastMessage.set('Para cerrar jornada, primero tienes que iniciar una jornada activa.');
+    this.showWarningToastWithAutoClose();
+  }
+
+  private showWarningToastWithAutoClose(): void {
+    this.showWarningToast.set(true);
+    if (this.warningToastTimeoutId) {
+      clearTimeout(this.warningToastTimeoutId);
+    }
+    this.warningToastTimeoutId = setTimeout(() => {
+      this.showWarningToast.set(false);
+      this.warningToastTimeoutId = null;
+    }, 2800);
   }
 }

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { QueueStore } from '../../core/stores/queue.store';
 import { AuthStore } from '../../core/stores/auth.store';
 import { ShopService } from '../../core/services/shop.service';
@@ -20,10 +20,12 @@ import { formatOpeningHoursForToday } from '../../core/utils/opening-hours.util'
 })
 export class KioskPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
   readonly authStore = inject(AuthStore);
   readonly queueStore = inject(QueueStore);
   private readonly shopService = inject(ShopService);
   private readonly barberService = inject(BarberService);
+  readonly navConfirmTarget = signal<'staff' | 'tv' | null>(null);
 
   readonly shopName = signal<string>('');
   readonly shopLogoUrl = signal<string>('');
@@ -72,6 +74,44 @@ export class KioskPageComponent implements OnInit {
   selectBarber(barberId: string): void {
     this.form.controls.barberId.setValue(barberId);
     this.form.controls.barberId.markAsDirty();
+  }
+
+  openStaffConfirm(): void {
+    this.navConfirmTarget.set('staff');
+  }
+
+  openTvConfirm(): void {
+    this.navConfirmTarget.set('tv');
+  }
+
+  closeNavConfirm(): void {
+    this.navConfirmTarget.set(null);
+  }
+
+  async proceedWithNavigation(): Promise<void> {
+    const target = this.navConfirmTarget();
+    if (!target) {
+      return;
+    }
+
+    this.navConfirmTarget.set(null);
+    if (target === 'staff') {
+      await this.router.navigate(['/staff']);
+      return;
+    }
+
+    await this.router.navigate(this.tvQueueRoute());
+  }
+
+  navConfirmTitle(): string {
+    return this.navConfirmTarget() === 'staff' ? 'Acceso al panel staff' : 'Abrir pantalla TV';
+  }
+
+  navConfirmMessage(): string {
+    if (this.navConfirmTarget() === 'staff') {
+      return 'Vas a entrar al panel staff de barberos. Esta zona es de uso interno y no esta pensada para clientes.';
+    }
+    return 'Vas a abrir la pantalla TV del negocio. Esta vista es para mostrar turnos y no para registrar tickets de clientes.';
   }
 
   async submitTicket(): Promise<void> {

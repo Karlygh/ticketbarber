@@ -241,13 +241,15 @@
 
 .single-ticket h3 {
   font-size: clamp(2.1rem, 6vw, 5rem);
-  margin-top: 0.2rem;
+  margin-top: 0;
   line-height: 1;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .single-ticket p {
-  margin: 0.3rem 0 0;
+  margin: 0;
   color: var(--text-copy);
 }
 
@@ -383,10 +385,12 @@
 }
 
 .current-box h3 {
-  margin-top: 0.25rem;
+  margin-top: 0;
   font-size: clamp(2rem, 4.2vw, 3.4rem);
   line-height: 1.04;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tv-shell.dense .current-box h3 {
@@ -398,6 +402,33 @@
 .tv-shell.dense .next-eta small {
   font-size: clamp(0.7rem, 1.15vh, 0.84rem);
   line-height: 1.1;
+}
+
+.current-main {
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.single-ticket .current-main {
+  margin-top: 0.2rem;
+}
+
+.current-main h3 {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.current-main p {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+  text-align: right;
 }
 
 .next-list {

@@ -140,6 +140,13 @@ export class TvPageComponent implements OnInit, OnDestroy {
     return formatter.format(new Date(timestampMs));
   }
 
+  capitalizeFirst(value: string | null | undefined): string {
+    if (!value) return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    return trimmed[0].toUpperCase() + trimmed.slice(1);
+  }
+
   private buildGroups(nowMs: number): BarberTvGroup[] {
     return this.activeBarbers().slice(0, 4).map((barber) => {
       const rows = this.queueForBarber(barber.id, nowMs);

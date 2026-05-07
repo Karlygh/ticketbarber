@@ -1,11 +1,19 @@
 <main class="kiosk-shell">
   <section class="kiosk-card">
     <header class="kiosk-head">
-      @if (shopLogoUrl()) {
-        <img class="kiosk-logo" [src]="shopLogoUrl()" alt="Logo del negocio" />
-      }
-      <p class="eyebrow">{{ shopName() || 'TicketBarber' }}</p>
-      <p class="kiosk-hours">Horario hoy: {{ todayHours() }}</p>
+      <button type="button" class="back-btn" aria-label="Volver al panel de barberos" (click)="openStaffConfirm()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+
+      <div class="kiosk-brand-row">
+        @if (shopLogoUrl()) {
+          <img class="kiosk-logo" [src]="shopLogoUrl()" alt="Logo del negocio" />
+        }
+        <div class="kiosk-meta-row">
+          <p class="eyebrow">{{ shopName() || 'TicketBarber' }}</p>
+          <p class="kiosk-hours">Horario hoy: {{ todayHours() }}</p>
+        </div>
+      </div>
       <h1>Elige tu barbero y coge turno</h1>
       <p class="subtitle">Selecciona a quien prefieres, el servicio y deja tus datos para entrar en su cola.</p>
     </header>
@@ -92,6 +100,7 @@
         <button type="submit" class="submit-btn" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Generando ticket...' : 'Coger turno' }}
         </button>
+        <p class="ticket-reminder">Para coger tu ticket, completa al menos barbero, servicio y nombre.</p>
       </form>
     }
 
@@ -109,7 +118,20 @@
   </section>
 
   <nav class="quick-links">
-    <a [routerLink]="tvQueueRoute()">Ver pantalla TV</a>
-    <a routerLink="/staff">Panel barberos</a>
+    <button type="button" class="quick-link-btn" (click)="openTvConfirm()">Ver pantalla TV</button>
+    <button type="button" class="quick-link-btn" (click)="openStaffConfirm()">Panel barberos</button>
   </nav>
 </main>
+
+@if (navConfirmTarget()) {
+  <div class="kiosk-modal-overlay" (click)="closeNavConfirm()" role="dialog" aria-modal="true" [attr.aria-label]="navConfirmTitle()">
+    <div class="kiosk-modal" (click)="$event.stopPropagation()">
+      <h2>{{ navConfirmTitle() }}</h2>
+      <p>{{ navConfirmMessage() }}</p>
+      <div class="kiosk-modal-actions">
+        <button type="button" class="modal-btn ghost" (click)="closeNavConfirm()">Cancelar</button>
+        <button type="button" class="modal-btn solid" (click)="proceedWithNavigation()">Continuar</button>
+      </div>
+    </div>
+  </div>
+}

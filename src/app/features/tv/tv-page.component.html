@@ -51,8 +51,10 @@
             @if (group.current) {
               <div class="single-ticket">
                 <p class="pill-label">Turno actual</p>
-                <h3>{{ group.current.ticket.displayName }}</h3>
-                <p>{{ group.current.ticket.serviceNameSnapshot }}</p>
+                <div class="current-main">
+                  <h3>{{ capitalizeFirst(group.current.ticket.displayName) }}</h3>
+                  <p>{{ group.current.ticket.serviceNameSnapshot }}</p>
+                </div>
                 <strong>Termina aprox. en {{ formatWait(group.current.waitMin) }}</strong>
               </div>
             } @else {
@@ -104,8 +106,10 @@
             <div class="current-box">
               <p class="pill-label">Turno actual</p>
               @if (group.current) {
-                <h3>{{ group.current.ticket.displayName }}</h3>
-                <p>{{ group.current.ticket.serviceNameSnapshot }}</p>
+                <div class="current-main">
+                  <h3>{{ capitalizeFirst(group.current.ticket.displayName) }}</h3>
+                  <p>{{ group.current.ticket.serviceNameSnapshot }}</p>
+                </div>
                 <strong>{{ formatWait(group.current.waitMin) }}</strong>
               } @else {
                 <h3>Sin turno</h3>
@@ -126,7 +130,7 @@
                       </div>
                     </div>
                     <div class="next-eta">
-                      <strong>{{ formatWait(row.waitMin) }}</strong>
+                      <strong>{{ row.waitMin }} min para corte</strong>
                       <small>{{ formatApproxTime(row.etaAtMs) }}</small>
                     </div>
                   </li>
