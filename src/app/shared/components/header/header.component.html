@@ -30,14 +30,6 @@
     <div class="top-actions">
       @if (authStore.isAuthenticated()) {
         <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
-        @switch (subscriptionStore.subscriptionStatus()) {
-          @case ('pro-active') { <span class="badge-pro">PRO</span> }
-          @case ('pro-trialing') { <span class="badge-pro">PRO</span> }
-          @case ('pro-canceling') { <span class="badge-pro">PRO</span> }
-          @case ('pro-past-due') { <span class="badge-trial">Pago pendiente</span> }
-          @case ('trial-active') { <span class="badge-trial">{{ subscriptionStore.trialDaysLeft() }}d prueba</span> }
-          @case ('trial-expired') { <span class="badge-expired">Sin plan</span> }
-        }
         <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
           <button
             class="user-trigger"
@@ -46,11 +38,25 @@
             aria-label="Abrir menú de usuario"
             (click)="toggleUserMenu()">
             <span class="top-account">{{ accountLabel }}</span>
+            @switch (subscriptionStore.subscriptionStatus()) {
+              @case ('pro-active') { <span class="badge-pro badge-pro--in-trigger">PRO</span> }
+              @case ('pro-trialing') { <span class="badge-pro badge-pro--in-trigger">PRO</span> }
+              @case ('pro-canceling') { <span class="badge-pro badge-pro--in-trigger">PRO</span> }
+            }
             <span class="user-gear" aria-hidden="true">⚙</span>
           </button>
 
+          @switch (subscriptionStore.subscriptionStatus()) {
+            @case ('pro-past-due') { <span class="badge-trial">Pago pendiente</span> }
+            @case ('trial-active') { <span class="badge-trial">{{ subscriptionStore.trialDaysLeft() }}d prueba</span> }
+            @case ('trial-expired') { <span class="badge-expired">Sin plan</span> }
+          }
+
           <div class="user-dropdown">
-            <a [routerLink]="routes.staff.root" (click)="closeMobileMenu()">Panel</a>
+            <a [routerLink]="routes.staff.root" class="important-route" (click)="closeMobileMenu()">
+              <span>Panel</span>
+              <span class="important-route-star" aria-hidden="true">★</span>
+            </a>
             <a [routerLink]="routes.staff.devices" (click)="closeMobileMenu()">Mis TVs</a>
             <a [routerLink]="routes.account" (click)="closeMobileMenu()">Mi cuenta</a>
             <a routerLink="/account/negocio" (click)="closeMobileMenu()">Mi negocio</a>

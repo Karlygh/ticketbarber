@@ -15,8 +15,10 @@
               <p>{{ shopAddress() }}</p>
             }
             @if (shopPhone()) {
-              <p>{{ shopPhone() }}</p>
-              <a class="tv-back-inline" routerLink="/staff" aria-label="Volver al panel">←</a>
+              <span class="brand-phone-inline">
+                <p>{{ shopPhone() }}</p>
+                <a class="tv-back-inline" routerLink="/staff" aria-label="Volver al panel">←</a>
+              </span>
             }
           </div>
         }

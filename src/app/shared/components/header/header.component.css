@@ -90,6 +90,9 @@
 
 .user-menu {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .user-trigger {
@@ -160,6 +163,19 @@
   color: var(--text-primary);
 }
 
+.important-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.important-route-star {
+  color: #facc15;
+  font-size: 0.96rem;
+  line-height: 1;
+}
+
 .menu-toggle {
   display: none;
   width: 44px;
@@ -214,6 +230,10 @@
   text-transform: uppercase;
 }
 
+.badge-pro--in-trigger {
+  flex-shrink: 0;
+}
+
 .badge-trial {
   font-size: 0.7rem;
   font-weight: 800;
@@ -238,17 +258,25 @@
 
 /* Nombre/cuenta */
 .top-account {
-  color: var(--text-copy);
+  display: inline-block;
+  color: #d9f7ff;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.28) 0%, rgba(14, 116, 144, 0.2) 100%);
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  font-weight: 700;
+  line-height: 1.2;
   font-size: 0.88rem;
   max-width: 210px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.15s;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
 }
 
 .top-account:hover {
-  color: var(--accent-light);
+  filter: brightness(1.08);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.16);
 }
 
 .top-logout {
@@ -362,15 +390,13 @@
 
   .user-trigger {
     justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
   }
 
   .user-dropdown {
     position: static;
     margin-top: 0.6rem;
-  }
-
-  .badge-pro {
-    align-self: center;
   }
 }
 
