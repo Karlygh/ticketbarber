@@ -1,194 +1,341 @@
 <app-header></app-header>
 
 <main class="home-shell" id="inicio">
-  <div class="bg-blur blur-a"></div>
-  <div class="bg-blur blur-b"></div>
-  <div class="bg-grid"></div>
+  <div class="page-aura page-aura--left"></div>
+  <div class="page-aura page-aura--right"></div>
+  <div class="page-grid"></div>
 
-  <section class="hero">
-    <div class="hero-copy-block">
-      <p class="eyebrow">Auto tickets para barberias</p>
-      <h1>Gestiona los turnos de tu barbería</h1>
-      <p class="hero-copy">
-        Ticketbarber profesionaliza la gestion de turnos para barberias que quieren diferenciarse,
-        atender mejor y transmitir confianza desde el primer contacto.
+  <section class="hero section-frame">
+    <div class="hero-copy">
+      <p class="eyebrow-pill">La app Nº1 para tickets de barberias y peluquerías</p>
+      <h1>
+        Gestiona turnos.
+        <span>Mejora la experiencia.</span>
+        Haz crecer tu peluquería.
+      </h1>
+      <p class="hero-text">
+        TicketBarber te ayuda a organizar tu barberia, reducir tiempos de espera y
+        ofrecer un servicio de primera clase. Tus clientes lo notaran. Tu negocio crecera.
       </p>
 
       <div class="hero-actions">
         @if (authStore.isAuthenticated()) {
-          <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
+          <a class="cta-primary" routerLink="/staff">Ir al panel</a>
         } @else {
-          <a class="primary-cta" routerLink="/staff/start">Empieza gratis 7 dias</a>
+          <a class="cta-primary" routerLink="/staff/start">Prueba 7 dias gratis</a>
         }
-        <a class="secondary-cta" routerLink="/contacto">Contactar con el equipo</a>
+        <a class="cta-secondary" href="assets/video-home.mp4">Ver video</a>
       </div>
 
-      <div class="hero-chips">
-        <span>Gestion de turnos barberia sin caos</span>
-        <span>Imagen premium para tu negocio</span>
-        <span>Clientes informados en tiempo real</span>
-      </div>
+      <p class="hero-note">Sin tarjeta de credito • Cancelas cuando quieras</p>
 
+      <div class="hero-metrics">
+        <div class="hero-avatars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        @for (metric of heroMetrics; track metric.label) {
+          <article class="metric-card">
+            <strong>{{ metric.value }}</strong>
+            <span>{{ metric.label }}</span>
+          </article>
+        }
+      </div>
     </div>
 
-    <div class="hero-preview">
-      <article class="preview-card">
-        <header>
-          <p class="eyebrow">Vista de cola</p>
-          <span>En directo</span>
-        </header>
-        <ul>
-          <li class="queue-item queue-item--active">
-            <div class="queue-item__meta">
-              <strong class="queue-item__label">Turno actual</strong>
-              <strong class="queue-item__name">Carlos</strong>
-            </div>
-            <span>Corte clasico · 6 min restantes</span>
-          </li>
-          <li class="queue-item queue-item--next">
-            <div class="queue-item__meta">
-              <strong class="queue-item__label">Siguiente</strong>
-              <strong class="queue-item__name">Miguel</strong>
-            </div>
-            <span>Arreglo de barba · 12 min aprox.</span>
-          </li>
-          <li class="queue-item queue-item--waiting">
-            <div class="queue-item__meta">
-              <strong class="queue-item__label">En espera</strong>
-            </div>
-            <span>5 clientes activos</span>
-          </li>
-        </ul>
-      </article>
+    <div class="hero-visual">
+      <div class="hero-scene">
+        <img src="assets/barberosheader.png" alt="Vista principal de TicketBarber" />
+        <div class="hero-overlay"></div>
+      </div>
+
+      <aside class="status-panel">
+        <div class="status-heading">
+          <span class="status-dot"></span>
+          <span>Estado en tiempo real</span>
+        </div>
+
+        <article class="status-card status-card--success">
+          <div>
+            <p>En atencion</p>
+            <strong>Carlos</strong>
+            <span>Corte clasico • 10 min</span>
+          </div>
+          <button type="button" aria-label="Ver turno en atencion">›</button>
+        </article>
+
+        <article class="status-card status-card--info">
+          <div>
+            <p>Siguiente</p>
+            <strong>Miguel</strong>
+            <span>Arreglo de barba • 15 min</span>
+          </div>
+          <button type="button" aria-label="Ver siguiente turno">›</button>
+        </article>
+
+        <article class="status-card status-card--warning">
+          <div>
+            <p>En espera</p>
+            <strong>5 clientes</strong>
+            <span>Tiempo aprox. 25 min</span>
+          </div>
+          <button type="button" aria-label="Ver clientes en espera">›</button>
+        </article>
+
+        <div class="status-footer">
+          <span class="status-live"></span>
+          <span>Clientes siempre informados</span>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section class="section final-cta">
-    <div>
-      <p class="eyebrow">Listo para modernizar tu barberia?</p>
-      <h2>Prueba Ticketbarber 7 dias <span class="highlight-gratis">GRATIS</span> cancela cuando quieras</h2>
+  <section class="benefit-strip section-frame" id="beneficios">
+    @for (benefit of quickBenefits; track benefit.title) {
+      <article class="strip-item">
+        <div class="strip-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4zm0 5.25a2.75 2.75 0 100 5.5 2.75 2.75 0 000-5.5zm0 6.5c-1.84 0-3.46.78-4.59 2.02"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <strong>{{ benefit.title }}</strong>
+          <span>{{ benefit.description }}</span>
+        </div>
+      </article>
+    }
+  </section>
+
+  <section class="experience section-frame" id="funciones">
+    <div class="section-intro">
+      <p class="section-kicker">Experiencia moderna para tus clientes</p>
+      <h2>Una experiencia simple, <span>rapida y profesional</span></h2>
       <p>
-        Si quieres evaluar si encaja con tu negocio, te ayudamos a empezar con una ruta clara y sin fricción.
+        Tus clientes pueden unirse a la fila desde el dispositivo, ver su turno en la TV.Clientes y barberías gestionan su tiempo. Asi de facil.
       </p>
     </div>
-    <div class="final-cta__actions">
-      @if (authStore.isAuthenticated()) {
-        <a class="primary-cta" routerLink="/staff">Ir al panel →</a>
-      } @else {
-        <a class="primary-cta" routerLink="/staff/start">Empieza gratis 7 dias</a>
-      }
-      <a class="secondary-cta" routerLink="/contacto">Enviar consulta</a>
-    </div>
-  </section>
 
-  <section class="section benefits" id="beneficios">
-    <div class="section-head">
-      <p class="eyebrow">Beneficios para negocio</p>
-      <h2>Pon el orden que le hace falta a tu barbería.</h2>
-    </div>
+    <div class="experience-layout">
+      <div class="phone-showcase">
+        <div class="tablet-frame">
+          <img src="assets/tabletticket.png" alt="Vista de TicketBarber en tablet" />
+        </div>
+      </div>
 
-    <div class="benefits-layout">
-      <article class="benefits-lead-card">
-        <h3>Una barberia moderna no solo corta bien: tambien gestiona mejor</h3>
-        <p>
-          Ticketbarber te ayuda a ordenar la operacion diaria y elevar la experiencia de cliente,
-          para que tu negocio se vea profesional en cada punto de contacto.
-        </p>
-      </article>
-
-      <div class="benefits-grid">
-        @for (benefit of benefits; track benefit.title) {
-          <article class="benefit-card">
-            <h3>{{ benefit.title }}</h3>
-            <p>{{ benefit.description }}</p>
-            <span class="metric-chip">{{ benefit.metric }}</span>
+      <div class="experience-points">
+        @for (feature of experienceFeatures; track feature.title) {
+          <article class="feature-point">
+            <div class="feature-point__icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 5v14m-7-7h14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </div>
           </article>
         }
       </div>
     </div>
   </section>
 
-  <section class="section flow" id="flujo">
-    <div class="section-head">
-      <p class="eyebrow">Como funciona</p>
-      <h2>Implementacion para barberias</h2>
+  <section class="tools section-frame">
+    <div class="section-intro section-intro--center">
+      <p class="section-kicker">Todo lo que tu barberia necesita</p>
+      <h2>Herramientas que te hacen la vida mas facil</h2>
     </div>
 
-    <div class="flow-grid">
-      @for (step of flow; track step.title) {
-        <article class="flow-step">
-          <span class="flow-step__kicker">{{ step.step }}</span>
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.description }}</p>
+    <div class="tools-grid">
+      @for (tool of toolFeatures; track tool.title) {
+        <article class="tool-card">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M5 19h14M7 16V8m5 8V5m5 11v-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>{{ tool.title }}</h3>
+          <p>{{ tool.description }}</p>
         </article>
+      }
+    </div>
+
+    <div class="section-action">
+      <a class="cta-secondary" routerLink="/pricing">Ver todas las funciones</a>
+    </div>
+  </section>
+
+  <section class="stories section-frame">
+    <div class="section-intro section-intro--center">
+      <p class="section-kicker">Barberos que ya confian en TicketBarber</p>
+      <h2>Historias reales, resultados reales</h2>
+    </div>
+
+    <div class="testimonial-shell">
+      <button
+        class="testimonial-nav testimonial-nav--prev"
+        type="button"
+        (click)="prevTestimonial()"
+        aria-label="Testimonio anterior">
+        ‹
+      </button>
+
+      <article class="testimonial-card">
+        <div class="testimonial-badge">
+          <div class="testimonial-logo">
+            <span>The</span>
+            <span>Classic</span>
+            <span>Cut</span>
+          </div>
+        </div>
+
+        <div class="testimonial-copy">
+          <div class="testimonial-stars">★★★★★</div>
+          <p>"{{ testimonials[testimonialIndex].quote }}"</p>
+          <strong>{{ testimonials[testimonialIndex].business }}</strong>
+          <span>{{ testimonials[testimonialIndex].location }}</span>
+        </div>
+      </article>
+
+      <button
+        class="testimonial-nav testimonial-nav--next"
+        type="button"
+        (click)="nextTestimonial()"
+        aria-label="Siguiente testimonio">
+        ›
+      </button>
+    </div>
+
+    <div class="testimonial-dots" aria-label="Selector de testimonios">
+      @for (testimonial of testimonials; track testimonial.business; let i = $index) {
+        <button
+          type="button"
+          class="testimonial-dot"
+          [class.testimonial-dot--active]="i === testimonialIndex"
+          (click)="goToTestimonial(i)"
+          [attr.aria-label]="'Ver testimonio ' + (i + 1)"></button>
       }
     </div>
   </section>
 
-  <!-- ── App Showcase Carousel ────────────────────────────────────────────── -->
-  <section class="section app-showcase" id="showcase">
-    <div class="section-head">
-      <p class="eyebrow">La app por dentro</p>
-      <h2>Diseñada para el dia a dia de tu barberia</h2>
-    </div>
+  <section class="steps section-frame">
+    <div class="steps-copy">
+      <p class="section-kicker">Puesta en marcha en 3 pasos</p>
+      <h2>Asi de facil es empezar</h2>
 
-    <div class="carousel">
-      <div class="carousel-frame">
-        <img
-          [src]="carouselImages[currentIndex]"
-          [alt]="'Captura de la app ' + (currentIndex + 1)"
-          [class]="'carousel-img slide-' + slideDirection"
-        />
-      </div>
-
-      <button
-        class="carousel-btn carousel-btn--prev"
-        (click)="prevSlide()"
-        aria-label="Imagen anterior"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-
-      <button
-        class="carousel-btn carousel-btn--next"
-        (click)="nextSlide()"
-        aria-label="Imagen siguiente"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"/>
-        </svg>
-      </button>
-
-      <div class="carousel-dots">
-        @for (img of carouselImages; track $index) {
-          <button
-            class="carousel-dot"
-            [class.carousel-dot--active]="$index === currentIndex"
-            (click)="goTo($index)"
-            [attr.aria-label]="'Ver imagen ' + ($index + 1)"
-          ></button>
+      <div class="steps-grid">
+        @for (step of startSteps; track step.number) {
+          <article class="step-card">
+            <span class="step-number">{{ step.number }}</span>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M6 7h12M6 12h9M6 17h7M16 17l2 2 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </article>
         }
       </div>
     </div>
-  </section>
 
-  <section class="section faq" id="faq">
-    <div class="section-head">
-      <p class="eyebrow">Preguntas frecuentes</p>
-      <h2>Respuestas Frecuentes</h2>
-    </div>
-
-    <div class="faq-list">
-      @for (item of faqs; track item.question) {
-        <article class="faq-item">
-          <h3>{{ item.question }}</h3>
-          <p>{{ item.answer }}</p>
-        </article>
+    <aside class="steps-cta">
+      <h3>Listo para llevar tu barberia al siguiente nivel?</h3>
+      <p>Prueba TicketBarber gratis durante 7 dias. Sin compromisos.</p>
+      @if (authStore.isAuthenticated()) {
+        <a class="cta-primary cta-primary--block" routerLink="/staff">Ir al panel</a>
+      } @else {
+        <a class="cta-primary cta-primary--block" routerLink="/staff/start">Empieza ahora gratis</a>
       }
-    </div>
+      <span class="steps-cta__note">Sin tarjeta de credito</span>
+    </aside>
   </section>
 
+  <section class="faq-media section-frame" id="preguntas">
+    <div class="faq-column">
+      <p class="section-kicker">Preguntas frecuentes</p>
+      <h2>Resolvemos tus dudas</h2>
+
+      <div class="faq-list">
+        @for (item of faqs; track item.question; let i = $index) {
+          <article class="faq-item" [class.faq-item--open]="activeFaqIndex === i">
+            <button
+              type="button"
+              class="faq-trigger"
+              (click)="selectFaq(i)"
+              [attr.aria-expanded]="activeFaqIndex === i">
+              <span>{{ item.question }}</span>
+              <span class="faq-trigger__icon">{{ activeFaqIndex === i ? '−' : '+' }}</span>
+            </button>
+
+            @if (activeFaqIndex === i) {
+              <div class="faq-answer">
+                <p>{{ item.answer }}</p>
+              </div>
+            }
+          </article>
+        }
+      </div>
+    </div>
+
+    <aside class="media-column">
+      <div class="media-card">
+        <div class="media-preview">
+          <img src="assets/app-1.jpg" alt="Vista previa multimedia de TicketBarber" />
+          <button type="button" class="play-button" aria-label="Reproducir video">▶</button>
+        </div>
+
+        <div class="media-copy">
+          <h3>Mira como TicketBarber transforma tu negocio</h3>
+          <p>Video de 1:30 min</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="bottom-cta section-frame" id="contacto">
+    <div class="bottom-cta__copy">
+      <div class="bottom-cta__icon">🏆</div>
+      <div>
+        <h2>Unete a las +2,500 barberias que ya estan creciendo</h2>
+        <p>Mas organizacion. Mas clientes. Mas exito.</p>
+      </div>
+    </div>
+
+    <div class="bottom-cta__action">
+      @if (authStore.isAuthenticated()) {
+        <a class="cta-primary cta-primary--wide" routerLink="/staff">Ir al panel</a>
+      } @else {
+        <a class="cta-primary cta-primary--wide" routerLink="/staff/start">Prueba 7 dias gratis</a>
+      }
+      <span>Sin tarjeta de credito</span>
+    </div>
+  </section>
 </main>
+
 <app-footer [currentYear]="currentYear" />
