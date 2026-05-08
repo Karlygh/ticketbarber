@@ -1,4 +1,10 @@
 <main class="staff-barbers-page">
+  <a class="staff-back-btn" [routerLink]="routes.staff.root" aria-label="Volver al panel de staff">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </a>
+
   <header class="page-head">
     <div>
       <p class="eyebrow">Staff</p>
@@ -6,10 +12,6 @@
       <p class="subtitle">Edita nombre e imagen de tus barberos y elimina perfiles de forma definitiva.</p>
     </div>
 
-    <div class="head-actions">
-      <a class="ghost-btn" [routerLink]="routes.staff.root">Volver al panel</a>
-      <a class="primary-btn" [routerLink]="'/staff/tv/generate-code'">Generar codigo TV</a>
-    </div>
   </header>
 
   @if (error()) {

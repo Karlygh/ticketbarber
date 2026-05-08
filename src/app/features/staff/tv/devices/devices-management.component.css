@@ -10,10 +10,38 @@
 }
 
 .devices-shell {
+  position: relative;
   width: min(680px, 94vw);
   margin: 0 auto;
-  padding: 2rem 0 3rem;
+  padding: 5rem 0 3rem;
   animation: fade-up 0.25s ease both;
+}
+
+.back-btn {
+  position: absolute;
+  top: 2.1rem;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  background: rgba(7, 22, 37, 0.66);
+  color: var(--section-kiosk-light);
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.back-btn:hover {
+  border-color: rgba(103, 232, 249, 0.45);
+  background: rgba(6, 182, 212, 0.14);
+  transform: translateY(-1px);
+}
+
+.back-btn:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.55);
+  outline-offset: 2px;
 }
 
 /* ── Cabecera ── */
@@ -23,6 +51,7 @@
   align-items: flex-start;
   gap: 1rem;
   margin-bottom: 1.6rem;
+  padding-right: 3.1rem;
   flex-wrap: wrap;
 }
 

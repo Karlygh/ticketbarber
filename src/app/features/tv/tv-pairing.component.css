@@ -8,9 +8,10 @@
 }
 
 .pairing-shell {
+  position: relative;
   width: min(780px, 92vw);
   margin: 0 auto;
-  padding: 2.5rem 0 4rem;
+  padding: 3.4rem 0 4rem;
 }
 
 .pairing-card {
@@ -271,5 +272,43 @@ button:hover,
   .confirm-actions .btn-secondary,
   .confirm-actions .btn-regenerate {
     width: 100%;
+  }
+}
+.back-btn {
+  position: absolute;
+  top: 0.4rem;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  background: rgba(7, 22, 37, 0.66);
+  color: var(--section-kiosk-light);
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+  z-index: 5;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.back-btn:hover {
+  border-color: rgba(103, 232, 249, 0.45);
+  background: rgba(6, 182, 212, 0.14);
+  transform: translateY(-1px);
+}
+
+.back-btn:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.55);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .back-btn {
+    left: 1rem;
+    top: 0.8rem;
+  }
+
+  .pairing-shell {
+    padding-top: 4.4rem;
   }
 }

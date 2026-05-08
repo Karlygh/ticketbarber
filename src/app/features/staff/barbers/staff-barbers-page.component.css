@@ -8,9 +8,38 @@
 }
 
 .staff-barbers-page {
+  position: relative;
   max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem 1.1rem 2.2rem;
+  padding: 2.4rem 1.35rem 2.2rem;
+}
+
+.staff-back-btn {
+  position: absolute;
+  top: 1.8rem;
+  left: 1.35rem;
+  z-index: 4;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  background: rgba(7, 22, 37, 0.66);
+  color: var(--section-kiosk-light);
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.staff-back-btn:hover {
+  border-color: rgba(103, 232, 249, 0.45);
+  background: rgba(6, 182, 212, 0.14);
+  transform: translateY(-1px);
+}
+
+.staff-back-btn:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.55);
+  outline-offset: 2px;
 }
 
 .page-head,
@@ -27,7 +56,7 @@
 
 .page-head {
   border-radius: 1.2rem;
-  padding: 1.2rem;
+  padding: 1.2rem 1.2rem 1.2rem 4.4rem;
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -100,6 +129,7 @@ p {
   transform: translateY(-1px);
   filter: brightness(1.04);
 }
+
 
 .primary-btn:disabled,
 .ghost-btn:disabled,
@@ -252,6 +282,7 @@ p {
   .page-head {
     flex-direction: column;
     align-items: stretch;
+    padding-left: 1.2rem;
   }
 
   .head-actions {
@@ -261,6 +292,11 @@ p {
   .head-actions a {
     flex: 1 1 160px;
     text-align: center;
+  }
+
+  .staff-back-btn {
+    top: 1rem;
+    left: 1rem;
   }
 
   .card-actions,

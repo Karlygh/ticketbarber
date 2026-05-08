@@ -18,10 +18,18 @@
   animation: fade-up 0.28s ease both;
 }
 
+.page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
 .account-page h1 {
   font-size: clamp(1.6rem, 3vw, 2.1rem);
   font-weight: 700;
-  margin-bottom: 2rem;
+  margin: 0;
   color: var(--text-primary);
 }
 
@@ -343,7 +351,8 @@
 
 /* ── Back link ── */
 .back-link {
-  margin-top: 1rem;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .back-link a {
@@ -357,6 +366,12 @@
 .back-link a:hover {
   color: var(--indigo-400);
   text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .page-head {
+    align-items: center;
+  }
 }
 
 /* ── Quick links ── */
