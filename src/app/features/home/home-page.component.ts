@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  ModernExperienceFeature,
+  ModernExperienceFloatingCard,
+  ModernExperienceKpi,
+  ModernExperienceSectionComponent
+} from './components/modern-experience-section.component';
 import { AuthStore } from '../../core/stores/auth.store';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../shared/components/header/header.component';
@@ -15,11 +21,6 @@ interface QuickBenefit {
   description: string;
 }
 
-interface ExperienceFeature {
-  title: string;
-  description: string;
-}
-
 interface ToolFeature {
   title: string;
   description: string;
@@ -29,6 +30,7 @@ interface Testimonial {
   business: string;
   location: string;
   quote: string;
+  image: string;
 }
 
 interface StartStep {
@@ -45,7 +47,7 @@ interface HomeFaq {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FooterComponent, HeaderComponent],
+  imports: [CommonModule, RouterLink, FooterComponent, HeaderComponent, ModernExperienceSectionComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })
@@ -65,10 +67,31 @@ export class HomePageComponent implements OnInit, OnDestroy {
     { title: 'Mas crecimiento', description: 'Enfocate en lo que importa' }
   ];
 
-  readonly experienceFeatures: ExperienceFeature[] = [
-    { title: 'Sin instalaciones', description: '100% en la nube, lista para usar.' },
-    { title: 'Notificaciones en tiempo real', description: 'SMS o push cuando sea su turno.' },
-    { title: 'Tu marca, tu estilo', description: 'Personaliza la app con tu logo y colores.' }
+  readonly experienceKicker = 'Experiencia moderna para tus clientes';
+  readonly experienceHeadline = 'Tus clientes saben exactamente';
+  readonly experienceSubheadline = 'cuando les toca.';
+  readonly experienceDescription =
+    'Una experiencia simple, rapida y profesional para organizar turnos, mejorar la espera y transmitir confianza en todo momento.';
+
+  readonly experienceFeatures: ModernExperienceFeature[] = [
+    { title: 'Sin instalaciones', description: 'Funciona 100% en la nube desde TV, tablet, movil o PC.' },
+    { title: 'Clientes autogeneran tickets', description: 'El cliente toma su turno y ve su posicion en tiempo real.' },
+    { title: 'MULTI-Barberos', description: 'Todo tu equipo en un solo sistema con colas y tiempos sincronizados.' }
+  ];
+
+  readonly experienceFloatingCards: ModernExperienceFloatingCard[] = [
+    { title: 'Ticket activo', value: 'Carlos', detail: 'Corte clasico · 5 min', tone: 'blue', slot: 'left-top' },
+    { title: 'En espera', value: '5 clientes', detail: 'Antes de ti', tone: 'blue', slot: 'left-bottom' },
+    { title: 'Resumen del dia', value: '23', detail: 'Turnos completados', tone: 'blue', slot: 'right-top' },
+    { title: '+12 clientes hoy', value: '8 min', detail: 'Tiempo medio de atencion', tone: 'blue', slot: 'right-mid' },
+    { title: 'Turno llamado', value: 'Carlos', detail: 'Puesto 2 · ahora', tone: 'green', slot: 'right-bottom' }
+  ];
+
+  readonly experienceKpis: ModernExperienceKpi[] = [
+    { value: '+2,500', label: 'Tickets generados esta semana' },
+    { value: '98%', label: 'Clientes satisfechos' },
+    { value: '-35%', label: 'Menos tiempo de espera' },
+    { value: '4.9 / 5', label: 'Calificacion promedio' }
   ];
 
   readonly toolFeatures: ToolFeature[] = [
@@ -93,21 +116,24 @@ export class HomePageComponent implements OnInit, OnDestroy {
   readonly testimonials: Testimonial[] = [
     {
       business: 'The Classic Cut',
-      location: 'CDMX',
+      location: 'Alicante',
       quote:
-        'Desde que usamos TicketBarber, nuestros clientes esperan menos y estan mas felices. Nos ayudo a organizarnos y a profesionalizar nuestro servicio.'
+        'Desde que usamos TicketBarber, nuestros clientes esperan menos y estan mas felices. Nos ayudo a organizarnos y a profesionalizar nuestro servicio.',
+      image: '/assets/empresa1.jpg'
     },
     {
       business: 'Barberia Norte',
       location: 'Madrid',
       quote:
-        'Ahora el equipo trabaja con mucha mas claridad. La cola se entiende, el cliente confia y el local transmite otro nivel.'
+        'Ahora el equipo trabaja con mucha mas claridad. La cola se entiende, el cliente confia y el local transmite otro nivel.',
+      image: '/assets/empresa2.jpg'
     },
     {
       business: 'Distrito Fade',
-      location: 'Barcelona',
+      location: 'Oviedo',
       quote:
-        'La sensacion de orden se nota desde la entrada. TicketBarber nos ayudo a mejorar operacion y experiencia sin complicar al staff.'
+        'La sensacion de orden se nota desde la entrada. TicketBarber nos ayudo a mejorar operacion y experiencia sin complicar al staff.',
+      image: '/assets/empresa3.jpg'
     }
   ];
 
@@ -136,11 +162,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     },
     {
       question: 'Necesito instalar algo en mi local?',
-      answer: 'No. TicketBarber funciona en la nube y esta pensado para que empieces rapido sin instalaciones complicadas.'
+      answer: 'No. TicketBarber funciona en la nube y esta pensado para que empieces rapido sin instalaciones complicadas desde cualquier dispositivo.'
     },
     {
       question: 'Mis clientes necesitan descargar la app?',
-      answer: 'No siempre. Puedes adaptar la experiencia segun tu operativa y ofrecer acceso simple a la fila y al estado de turnos.'
+      answer: 'No solo tienes que entrar en ticketbarber y vincular tu cuenta con la tv donde quieres mostrar la cola de clientes. Ofrecer acceso simple a la fila y al estado de turnos.'
     },
     {
       question: 'Puedo cancelar en cualquier momento?',

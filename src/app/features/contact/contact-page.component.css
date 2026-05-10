@@ -353,6 +353,135 @@
    RESPONSIVE
    ───────────────────────────────────────────────────────────────────────────── */
 
+@media (min-width: 1024px) {
+  .contact-shell {
+    width: min(1180px, 100%);
+    min-height: auto;
+    margin: 0 auto;
+    padding: 1.1rem 1.5rem 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.84fr);
+    grid-template-areas:
+      "hero hero"
+      "form info";
+    column-gap: 1.5rem;
+    row-gap: 1rem;
+    align-items: start;
+  }
+
+  .contact-hero {
+    grid-area: hero;
+    max-width: 760px;
+    margin: 0 auto 0.35rem;
+  }
+
+  .contact-hero h1 {
+    font-size: clamp(2.2rem, 2.4vw, 2.6rem);
+    margin-bottom: 0.65rem;
+  }
+
+  .hero-subtitle {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+
+  .contact-form-section {
+    grid-area: form;
+    max-width: none;
+    margin: 0;
+  }
+
+  .contact-form {
+    padding: 1.5rem 1.6rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .alert {
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .alert-icon {
+    font-size: 1.2rem;
+  }
+
+  .alert-content strong {
+    margin-bottom: 0.15rem;
+    font-size: 0.95rem;
+  }
+
+  .alert-content p {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .form-field {
+    margin-bottom: 0.85rem;
+  }
+
+  .form-field label {
+    margin-bottom: 0.32rem;
+    font-size: 0.82rem;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  .form-field textarea {
+    min-height: 92px;
+  }
+
+  .field-error {
+    margin-top: 0.18rem;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .btn-submit {
+    padding: 0.88rem 1.4rem;
+    font-size: 0.98rem;
+  }
+
+  .form-footer {
+    margin-top: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .contact-info {
+    grid-area: info;
+    max-width: none;
+    margin: 0;
+    padding: 1.35rem 1.2rem;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+  }
+
+  .contact-info h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .contact-info p {
+    margin: 0 0 0.8rem;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .email-link {
+    padding: 0.55rem 0.95rem;
+    font-size: 0.88rem;
+  }
+}
+
 @media (max-width: 640px) {
   .contact-hero h1 {
     font-size: 2rem;

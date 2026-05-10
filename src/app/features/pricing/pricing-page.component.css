@@ -96,13 +96,66 @@
   box-shadow: 0 0 0 1px var(--section-account-border), 0 18px 70px var(--section-account-glow);
   border-radius: 1.7rem;
   padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.price-card.premium-gold {
+  background: linear-gradient(180deg, rgba(14, 32, 60, 0.98), rgba(8, 20, 42, 0.96));
+  border: 1px solid var(--amber-500);
+  box-shadow: 
+    0 0 0 1px var(--amber-600),
+    0 0 30px rgba(245, 158, 11, 0.15),
+    0 20px 80px rgba(4, 16, 30, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-card.premium-gold::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--amber-400), transparent);
+}
+
+.price-card.premium-gold .top-badge {
+  background: var(--amber-500);
+  color: var(--navy-950);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.price-card.premium-gold h2 {
+  background: linear-gradient(135deg, #fff, var(--amber-200));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.price-card.premium-gold .btn-primary {
+  background: linear-gradient(135deg, var(--amber-600), var(--amber-400));
+  color: var(--navy-950);
+  font-weight: 700;
+  border: none;
+}
+
+.price-card.premium-gold .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.price-card.premium-gold .check {
+  border-color: var(--amber-500);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.price-card.premium-gold .check::after {
+  border-color: var(--amber-400);
+}
+
+.card-top { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; text-align: center; }
 .card-top h2 { margin: 0; font-size: 2rem; }
-.top-badge { padding: 0.45rem 0.9rem; border-radius: 999px; background: var(--section-account-subtle); color: var(--text-primary); font-size: 0.84rem; }
-.card-subtitle { margin: 0.6rem 0 0.3rem; color: var(--text-copy); }
-.card-price { display: flex; align-items: baseline; margin: 0.2rem 0 0.9rem; }
+.top-badge { padding: 0.45rem 0.9rem; border-radius: 999px; background: var(--section-account-subtle); color: var(--text-primary); font-size: 0.84rem; width: fit-content; }
+.card-subtitle { margin: 0.6rem 0 0.3rem; color: var(--text-copy); text-align: center; }
+.card-price { display: flex; align-items: baseline; justify-content: center; margin: 0.2rem 0 0.9rem; }
 .currency { font-size: 2rem; margin-right: 0.2rem; color: var(--section-account-light); }
 .amount { font-size: clamp(3.2rem, 6vw, 4.8rem); font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
 .interval { margin-left: 0.4rem; color: var(--text-copy); }

@@ -31,9 +31,9 @@
 
       <div class="hero-metrics">
         <div class="hero-avatars" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span class="hero-avatar hero-avatar--one"></span>
+          <span class="hero-avatar hero-avatar--two"></span>
+          <span class="hero-avatar hero-avatar--three"></span>
         </div>
 
         @for (metric of heroMetrics; track metric.label) {
@@ -114,44 +114,17 @@
     }
   </section>
 
-  <section class="experience section-frame" id="funciones">
-    <div class="section-intro">
-      <p class="section-kicker">Experiencia moderna para tus clientes</p>
-      <h2>Una experiencia simple, <span>rapida y profesional</span></h2>
-      <p>
-        Tus clientes pueden unirse a la fila desde el dispositivo, ver su turno en la TV.Clientes y barberías gestionan su tiempo. Asi de facil.
-      </p>
-    </div>
-
-    <div class="experience-layout">
-      <div class="phone-showcase">
-        <div class="tablet-frame">
-          <img src="assets/tabletticket.png" alt="Vista de TicketBarber en tablet" />
-        </div>
-      </div>
-
-      <div class="experience-points">
-        @for (feature of experienceFeatures; track feature.title) {
-          <article class="feature-point">
-            <div class="feature-point__icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 5v14m-7-7h14"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round" />
-              </svg>
-            </div>
-            <div>
-              <h3>{{ feature.title }}</h3>
-              <p>{{ feature.description }}</p>
-            </div>
-          </article>
-        }
-      </div>
-    </div>
-  </section>
+  <app-modern-experience-section
+    class="experience section-frame"
+    id="funciones"
+    [kicker]="experienceKicker"
+    [headline]="experienceHeadline"
+    [subheadline]="experienceSubheadline"
+    [description]="experienceDescription"
+    [features]="experienceFeatures"
+    [floatingCards]="experienceFloatingCards"
+    [kpis]="experienceKpis">
+  </app-modern-experience-section>
 
   <section class="tools section-frame">
     <div class="section-intro section-intro--center">
@@ -182,98 +155,6 @@
     <div class="section-action">
       <a class="cta-secondary" routerLink="/pricing">Ver todas las funciones</a>
     </div>
-  </section>
-
-  <section class="stories section-frame">
-    <div class="section-intro section-intro--center">
-      <p class="section-kicker">Barberos que ya confian en TicketBarber</p>
-      <h2>Historias reales, resultados reales</h2>
-    </div>
-
-    <div class="testimonial-shell">
-      <button
-        class="testimonial-nav testimonial-nav--prev"
-        type="button"
-        (click)="prevTestimonial()"
-        aria-label="Testimonio anterior">
-        ‹
-      </button>
-
-      <article class="testimonial-card">
-        <div class="testimonial-badge">
-          <div class="testimonial-logo">
-            <span>The</span>
-            <span>Classic</span>
-            <span>Cut</span>
-          </div>
-        </div>
-
-        <div class="testimonial-copy">
-          <div class="testimonial-stars">★★★★★</div>
-          <p>"{{ testimonials[testimonialIndex].quote }}"</p>
-          <strong>{{ testimonials[testimonialIndex].business }}</strong>
-          <span>{{ testimonials[testimonialIndex].location }}</span>
-        </div>
-      </article>
-
-      <button
-        class="testimonial-nav testimonial-nav--next"
-        type="button"
-        (click)="nextTestimonial()"
-        aria-label="Siguiente testimonio">
-        ›
-      </button>
-    </div>
-
-    <div class="testimonial-dots" aria-label="Selector de testimonios">
-      @for (testimonial of testimonials; track testimonial.business; let i = $index) {
-        <button
-          type="button"
-          class="testimonial-dot"
-          [class.testimonial-dot--active]="i === testimonialIndex"
-          (click)="goToTestimonial(i)"
-          [attr.aria-label]="'Ver testimonio ' + (i + 1)"></button>
-      }
-    </div>
-  </section>
-
-  <section class="steps section-frame">
-    <div class="steps-copy">
-      <p class="section-kicker">Puesta en marcha en 3 pasos</p>
-      <h2>Asi de facil es empezar</h2>
-
-      <div class="steps-grid">
-        @for (step of startSteps; track step.number) {
-          <article class="step-card">
-            <span class="step-number">{{ step.number }}</span>
-            <div class="step-icon">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M6 7h12M6 12h9M6 17h7M16 17l2 2 4-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </div>
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
-          </article>
-        }
-      </div>
-    </div>
-
-    <aside class="steps-cta">
-      <h3>Listo para llevar tu barberia al siguiente nivel?</h3>
-      <p>Prueba TicketBarber gratis durante 7 dias. Sin compromisos.</p>
-      @if (authStore.isAuthenticated()) {
-        <a class="cta-primary cta-primary--block" routerLink="/staff">Ir al panel</a>
-      } @else {
-        <a class="cta-primary cta-primary--block" routerLink="/staff/start">Empieza ahora gratis</a>
-      }
-      <span class="steps-cta__note">Sin tarjeta de credito</span>
-    </aside>
   </section>
 
   <section class="faq-media section-frame" id="preguntas">
@@ -316,6 +197,97 @@
         </div>
       </div>
     </aside>
+  </section>
+
+  <section class="steps section-frame">
+    <div class="steps-copy">
+      <p class="section-kicker">Puesta en marcha en 3 pasos</p>
+      <h2>Asi de facil es empezar</h2>
+
+      <div class="steps-grid">
+        @for (step of startSteps; track step.number) {
+          <article class="step-card">
+            <span class="step-number">{{ step.number }}</span>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M6 7h12M6 12h9M6 17h7M16 17l2 2 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </article>
+        }
+      </div>
+    </div>
+
+    <aside class="steps-cta">
+      <h3>Listo para llevar tu barberia al siguiente nivel?</h3>
+      <p>Prueba TicketBarber gratis durante 7 dias. Sin compromisos.</p>
+      @if (authStore.isAuthenticated()) {
+        <a class="cta-primary cta-primary--block" routerLink="/staff">Ir al panel</a>
+      } @else {
+        <a class="cta-primary cta-primary--block" routerLink="/staff/start">Empieza ahora gratis</a>
+      }
+      <span class="steps-cta__note">Sin tarjeta de credito</span>
+    </aside>
+  </section>
+
+  <section class="stories section-frame">
+    <div class="section-intro section-intro--center">
+      <p class="section-kicker">Barberos que ya confian en TicketBarber</p>
+      <h2>Historias reales, resultados reales</h2>
+    </div>
+
+    <div class="testimonial-shell">
+      <button
+        class="testimonial-nav testimonial-nav--prev"
+        type="button"
+        (click)="prevTestimonial()"
+        aria-label="Testimonio anterior">
+        ‹
+      </button>
+
+      <article class="testimonial-card">
+        <div class="testimonial-badge">
+          <div
+            class="testimonial-logo"
+            [style.background-image]="'url(' + testimonials[testimonialIndex].image + ')'">
+          </div>
+        </div>
+
+        <div class="testimonial-copy">
+          <div class="testimonial-stars">★★★★★</div>
+          <p>"{{ testimonials[testimonialIndex].quote }}"</p>
+          <strong>{{ testimonials[testimonialIndex].business }}</strong>
+          <span>{{ testimonials[testimonialIndex].location }}</span>
+        </div>
+      </article>
+
+      <button
+        class="testimonial-nav testimonial-nav--next"
+        type="button"
+        (click)="nextTestimonial()"
+        aria-label="Siguiente testimonio">
+        ›
+      </button>
+    </div>
+
+    <div class="testimonial-dots" aria-label="Selector de testimonios">
+      @for (testimonial of testimonials; track testimonial.business; let i = $index) {
+        <button
+          type="button"
+          class="testimonial-dot"
+          [class.testimonial-dot--active]="i === testimonialIndex"
+          (click)="goToTestimonial(i)"
+          [attr.aria-label]="'Ver testimonio ' + (i + 1)"></button>
+      }
+    </div>
   </section>
 
   <section class="bottom-cta section-frame" id="contacto">

@@ -14,7 +14,7 @@ import { formatOpeningHoursForToday } from '../../core/utils/opening-hours.util'
 @Component({
   selector: 'app-kiosk-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, ],
   templateUrl: './kiosk-page.component.html',
   styleUrl: './kiosk-page.component.css'
 })

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -11,6 +11,7 @@ import { CustomerDetailModalComponent } from '../../../shared/components/custome
 import { BarberService } from '../../../core/services/barber.service';
 import { BarberProfile, BarberStatus } from '../../../core/models/barber.model';
 import { Ticket } from '../../../core/models/ticket.model';
+import { ShopService } from '../../../core/services/shop.service';
 
 @Component({
   selector: 'app-staff-page',
@@ -31,6 +32,7 @@ export class StaffPageComponent {
   readonly subscriptionStore = inject(SubscriptionStore);
   readonly queueStore = inject(QueueStore);
   private readonly barberService = inject(BarberService);
+  private readonly shopService = inject(ShopService);
   readonly routes = APP_ROUTES;
 
   readonly barbers = toSignal(this.barberService.observeBarbers(), { initialValue: [] as BarberProfile[] });
@@ -47,6 +49,8 @@ export class StaffPageComponent {
     this.barbers().filter((barber) => barber.isAvailableToday).length
   );
   readonly visibleBarbers = computed(() => this.barbers().filter((barber) => barber.status !== 'hidden'));
+  private readonly shopNameState = signal('');
+  readonly welcomeName = computed(() => this.shopNameState().trim());
   readonly tvQueueRoute = computed(() => {
     const shopId = this.authStore.user()?.uid;
     return shopId ? ['/tv', shopId] : ['/tv'];
@@ -74,6 +78,14 @@ export class StaffPageComponent {
 
   constructor() {
     void this.queueStore.bootstrap();
+    effect(() => {
+      const uid = this.authStore.user()?.uid;
+      if (!uid) {
+        this.shopNameState.set('');
+        return;
+      }
+      void this.loadShopName(uid);
+    });
   }
 
   barberTickets(barberId: string): Ticket[] {
@@ -325,6 +337,15 @@ export class StaffPageComponent {
   closeBarberDetailModal(): void {
     this.showBarberDetailModal.set(false);
     this.selectedBarber.set(null);
+  }
+
+  private async loadShopName(uid: string): Promise<void> {
+    try {
+      const profile = await this.shopService.getShopProfile(uid);
+      this.shopNameState.set(profile?.shopName?.trim() || '');
+    } catch {
+      this.shopNameState.set('');
+    }
   }
 
   private async runAction(action: () => Promise<void>): Promise<void> {

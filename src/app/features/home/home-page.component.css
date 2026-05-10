@@ -204,9 +204,9 @@
   margin-left: -0.45rem;
   border: 2px solid rgba(10, 16, 28, 0.95);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.38), transparent 38%),
-    linear-gradient(145deg, #c29d82, #5a422e);
+  background-size: 100% 100%, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.26);
 }
 
@@ -214,16 +214,22 @@
   margin-left: 0;
 }
 
-.hero-avatars span:nth-child(2) {
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.38), transparent 38%),
-    linear-gradient(145deg, #7a8fb4, #20324f);
+.hero-avatar--one {
+  background-image:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.34), transparent 42%),
+    url('/assets/face-generator_gallery_1763099237_4902.avif');
 }
 
-.hero-avatars span:nth-child(3) {
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.38), transparent 38%),
-    linear-gradient(145deg, #e2c7a1, #6c4d2e);
+.hero-avatar--two {
+  background-image:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.34), transparent 42%),
+    url('/assets/689f36244b9da2b6e44e1074_Ryan-7.jpg');
+}
+
+.hero-avatar--three {
+  background-image:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.34), transparent 42%),
+    url('/assets/sample-girl-blonde-hair.png');
 }
 
 .metric-card {
@@ -599,31 +605,65 @@
 }
 
 .phone-showcase {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0.5rem;
 }
 
-.tablet-frame {
-  width: min(32rem, 100%);
-  padding: 0.78rem;
-  border-radius: 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    linear-gradient(180deg, rgba(24, 36, 54, 0.95), rgba(7, 13, 22, 0.98));
+.phone-frame {
+  width: clamp(14rem, 25vw, 18.5rem);
+  max-width: 100%;
+  padding: 0.52rem;
+  border-radius: 2.4rem;
+  border: 1px solid rgba(118, 154, 219, 0.34);
+  background: linear-gradient(180deg, rgba(13, 31, 61, 0.96), rgba(6, 15, 29, 0.98));
   box-shadow:
-    0 40px 80px rgba(0, 0, 0, 0.48),
-    inset 0 2px 0 rgba(255, 255, 255, 0.08);
-  transform: rotate(-8deg);
+    0 34px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: rotate(-4deg);
 }
 
-.tablet-frame img {
+.phone-frame__img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 1.2rem;
-  object-fit: contain;
-  background: rgba(6, 13, 24, 0.95);
+  aspect-ratio: 853 / 1844;
+  border-radius: 2rem;
+  object-fit: cover;
+}
+
+.ticket-badge {
+  position: absolute;
+  right: clamp(-1.1rem, -0.7vw, -0.45rem);
+  bottom: clamp(0.9rem, 1.8vw, 1.35rem);
+  z-index: 2;
+  width: min(14.5rem, 72%);
+  padding: 0.78rem 0.9rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(96, 147, 255, 0.35);
+  background: linear-gradient(160deg, rgba(17, 45, 89, 0.92), rgba(8, 19, 39, 0.86));
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 18px 34px rgba(2, 8, 18, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.ticket-badge__label,
+.ticket-badge__hint {
+  display: block;
+  margin: 0;
+  color: #9ab5d8;
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+
+.ticket-badge strong {
+  display: block;
+  margin: 0.2rem 0 0.15rem;
+  color: #f3f8ff;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
 }
 
 .experience-points {
@@ -749,24 +789,16 @@
   width: 6.4rem;
   height: 6.4rem;
   margin: 0 auto;
-  display: grid;
-  place-items: center;
+  display: block;
   border-radius: 50%;
   border: 1px solid rgba(214, 177, 108, 0.38);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.14), transparent 35%),
-    linear-gradient(180deg, #30281e, #1f1811);
-  color: #ddd1b8;
-  text-align: center;
-  font-family: 'Sora', sans-serif;
+  background-color: #1f1811;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow:
     inset 0 0 0 3px rgba(210, 179, 126, 0.08),
     0 10px 24px rgba(0, 0, 0, 0.3);
-}
-
-.testimonial-logo span {
-  display: block;
-  line-height: 1.02;
 }
 
 .testimonial-stars {
@@ -1067,6 +1099,19 @@
   .bottom-cta__action {
     width: 100%;
   }
+
+  .phone-showcase {
+    justify-content: center;
+  }
+
+  .phone-frame {
+    transform: rotate(-2deg);
+  }
+
+  .ticket-badge {
+    right: 0.2rem;
+    bottom: 0.85rem;
+  }
 }
 
 @media (max-width: 860px) {
@@ -1107,10 +1152,43 @@
     max-width: 9.8ch;
   }
 
-  .hero-actions,
-  .hero-metrics {
+  .hero-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1.3rem;
+  }
+
+  .hero-avatars {
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding-right: 0;
+  }
+
+  .metric-card {
+    min-width: 0;
+    padding: 0.85rem 0.95rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(121, 152, 196, 0.18);
+    background: rgba(7, 18, 34, 0.72);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 10px 24px rgba(2, 8, 17, 0.2);
+  }
+
+  .metric-card strong,
+  .metric-card span {
+    display: block;
+  }
+
+  .metric-card span {
+    margin-top: 0.18rem;
   }
 
   .cta-primary,
@@ -1119,7 +1197,8 @@
   }
 
   .hero-visual {
-    min-height: 24rem;
+    min-height: 26.5rem;
+    margin-top: 0.65rem;
   }
 
   .status-panel {
@@ -1143,12 +1222,33 @@
     font-size: 2rem;
   }
 
-  .tablet-frame {
-    transform: rotate(-7deg);
+  .phone-showcase {
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: min(18rem, 84vw);
+    transform: none;
+  }
+
+  .ticket-badge {
+    right: 0.3rem;
+    bottom: 0.7rem;
+    width: min(12.5rem, 70%);
   }
 
   .bottom-cta__copy {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-avatars {
+    justify-content: flex-start;
   }
 }

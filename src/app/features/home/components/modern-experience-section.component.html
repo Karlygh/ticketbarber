@@ -1,0 +1,67 @@
+<section class="modern-experience">
+  <div class="experience-bg-grid" aria-hidden="true"></div>
+  <div class="experience-bg-glow experience-bg-glow--left" aria-hidden="true"></div>
+  <div class="experience-bg-glow experience-bg-glow--right" aria-hidden="true"></div>
+
+  <div class="experience-main">
+    <div class="experience-copy">
+      <p class="experience-kicker">{{ kicker }}</p>
+      <h2>
+        {{ headline }}
+        <span>{{ subheadline }}</span>
+      </h2>
+      <p class="experience-description">{{ description }}</p>
+
+      <div class="experience-points">
+        @for (feature of features; track feature.title) {
+          <article class="feature-item">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 5v14m-7-7h14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+
+    <div class="experience-visual">
+      <div class="experience-core-glow" aria-hidden="true"></div>
+
+      <div class="tablet-shell">
+        <img src="assets/tabletticket.png" alt="Panel de control de TicketBarber en tablet" />
+      </div>
+
+      <div class="phone-shell">
+        <img src="assets/iphoneticketbarber.png" alt="TicketBarber en movil con turno activo" />
+      </div>
+
+      @for (card of floatingCards; track card.title) {
+        <article class="floating-card" [class]="cardClass(card.slot, card.tone).join(' ')">
+          <p>{{ card.title }}</p>
+          <strong>{{ card.value }}</strong>
+          <span>{{ card.detail }}</span>
+        </article>
+      }
+    </div>
+  </div>
+
+  <div class="kpi-bar">
+    @for (kpi of kpis; track kpi.label) {
+      <article class="kpi-item">
+        <strong>{{ kpi.value }}</strong>
+        <span>{{ kpi.label }}</span>
+      </article>
+    }
+  </div>
+</section>
+

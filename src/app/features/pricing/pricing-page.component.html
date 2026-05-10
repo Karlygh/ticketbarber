@@ -42,10 +42,12 @@
         <button class="btn-secondary" type="button" (click)="loadProducts()">Reintentar</button>
       </div>
     } @else if (featuredProduct() && selectedPrice(); as price) {
-      <article class="price-card">
+      <article class="price-card" [class.premium-gold]="billingCycle() === 'year'">
         <div class="card-top">
           <h2>Suscripción Oro</h2>
-          <span class="top-badge">Mejor elección</span>
+          @if (billingCycle() === 'year') {
+            <span class="top-badge">Mejor elección</span>
+          }
         </div>
 
         <p class="card-subtitle">

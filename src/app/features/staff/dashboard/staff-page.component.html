@@ -53,10 +53,12 @@
     </header>
 
     <header class="hero">
-      <div>
+      <div class="hero-brand">
+        <img class="hero-brand-logo" src="assets/logoticketpeq.png" alt="TicketBarber" />
+        <div class="hero-brand-copy">
         <p class="eyebrow">Staff</p>
-        <h1>Panel de staff</h1>
-        <p class="hero-copy">Gestiona a tus barberos, abre jornada y controla cada cola desde un solo sitio.</p>
+        <h1>Bienvenido@if (welcomeName()) {, {{ welcomeName() }}}</h1>
+        </div>
       </div>
 
       <div class="hero-actions">
