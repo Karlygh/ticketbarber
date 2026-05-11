@@ -1,0 +1,204 @@
+<main
+  class="tv-shell"
+  [ngClass]="[vm.densityMode, vm.globalWaitingRows.length ? 'has-waiting' : 'no-waiting']">
+  <header class="tv-head">
+    <section class="tv-brand">
+      @if (vm.shop.logoUrl) {
+        <img class="tv-brand-logo" [src]="vm.shop.logoUrl" alt="Logo" />
+      }
+      <div class="tv-brand-copy">
+        <p class="brand">{{ vm.shop.name || 'TicketBarber' }}</p>
+        <p class="brand-sub">Colas en directo</p>
+        @if (vm.shop.address || vm.shop.phone) {
+          <div class="brand-contact" aria-label="Datos del negocio">
+            @if (vm.shop.address) {
+              <p class="brand-address">{{ vm.shop.address }}</p>
+            }
+            @if (vm.shop.phone) {
+              <span class="brand-phone-inline">
+                <p class="brand-phone">{{ vm.shop.phone }}</p>
+                <a class="tv-back-inline" routerLink="/staff" aria-label="Volver al panel">←</a>
+              </span>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="tv-hours-card">
+      <button
+        type="button"
+        class="tv-view-switch"
+        [disabled]="switchingView"
+        (click)="changeView.emit()"
+        aria-label="Cambiar vista de TV">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3.5 5.5h8v13h-8zM12.5 5.5h8v5h-8zM12.5 11.5h8v7h-8z" />
+        </svg>
+      </button>
+      <p class="tv-hours" aria-label="Horario de hoy">{{ vm.shop.todayHours }}</p>
+    </section>
+
+    <section class="tv-head-meta">
+      <p class="clock">{{ vm.clockLabel }}</p>
+    </section>
+  </header>
+
+  <section class="tv-content">
+    @if (vm.groups.length === 0) {
+      <section class="empty-tv">
+        <h2>Sin barberos activos</h2>
+        <p>La barberia todavia no ha abierto la jornada o no ha activado ningun barbero.</p>
+      </section>
+    } @else if (vm.singleBarberMode) {
+      @if (vm.groups[0]; as group) {
+        <section class="single-layout">
+          <div class="single-current">
+            <div class="barber-head">
+              @if (group.barber.photoUrl) {
+                <img class="barber-photo" [src]="group.barber.photoUrl" [alt]="group.barber.name" />
+              } @else {
+                <div class="barber-photo fallback">{{ group.initials }}</div>
+              }
+              <div>
+                <p class="pill-label">Barbero activo</p>
+                <h2>{{ group.barber.name }}</h2>
+              </div>
+            </div>
+
+            @if (group.current) {
+              <div class="single-ticket">
+                <p class="pill-label">Turno actual</p>
+                <div class="current-main">
+                  <h3>{{ group.current.displayName }}</h3>
+                  <p>{{ group.current.serviceName }}</p>
+                </div>
+                <strong>Termina aprox. en {{ group.current.waitLabel }}</strong>
+              </div>
+            } @else {
+              <div class="single-ticket idle">
+                <p class="pill-label">Turno actual</p>
+                <h3>Sin turno activo</h3>
+              </div>
+            }
+          </div>
+
+          <div class="single-upcoming">
+            <h2>Proximos turnos</h2>
+            <ul>
+              @for (row of group.upcomingAll; track row.row.ticket.id) {
+                <li>
+                  <span class="position">{{ row.row.ticket.position }}</span>
+                  <span class="name">{{ row.displayName }}</span>
+                  <span class="service">{{ row.serviceName }}</span>
+                  <span class="eta">
+                    <strong>{{ row.waitLabel }}</strong>
+                    <small>{{ row.etaLabel }}</small>
+                  </span>
+                </li>
+              } @empty {
+                <li class="queue-empty">No hay mas clientes en espera.</li>
+              }
+            </ul>
+          </div>
+        </section>
+      }
+    } @else {
+      <section class="multi-grid" [class]="vm.layoutClass">
+        @for (group of vm.groups; track group.barber.id) {
+          <article class="tv-card" [style.--barber-accent]="group.accentColor">
+            <header class="card-head">
+              <div class="barber-head">
+                @if (group.barber.photoUrl) {
+                  <img class="barber-photo" [src]="group.barber.photoUrl" [alt]="group.barber.name" />
+                } @else {
+                  <div class="barber-photo fallback">{{ group.initials }}</div>
+                }
+                <div>
+                  <p class="pill-label">Barbero</p>
+                  <h2>{{ group.barber.name }}</h2>
+                </div>
+              </div>
+            </header>
+
+            <div class="current-box">
+              <p class="pill-label">Turno actual</p>
+              @if (group.current) {
+                <div class="current-main">
+                  <h3>{{ group.current.displayName }}</h3>
+                  <p>{{ group.current.serviceName }}</p>
+                </div>
+                <strong>{{ group.current.waitLabel }}</strong>
+              } @else {
+                <div class="idle-inline">
+                  <h3>Sin turno</h3>
+                  <p>Esperando al siguiente cliente</p>
+                </div>
+              }
+            </div>
+
+            <div class="next-box">
+              <p class="pill-label">Siguientes ({{ group.upcomingAll.length }})</p>
+              <ul class="next-list">
+                @for (row of group.upcomingVisible; track row.row.ticket.id) {
+                  <li>
+                    <span class="position">{{ row.row.ticket.position }}</span>
+                    <div class="next-copy">
+                      <div class="next-main">
+                        <strong>{{ row.displayName }}</strong>
+                        <small>{{ row.serviceName }}</small>
+                      </div>
+                    </div>
+                    <div class="next-eta">
+                      <strong>{{ row.waitLabel }} para corte</strong>
+                      <small>{{ row.etaLabel }}</small>
+                    </div>
+                  </li>
+                } @empty {
+                  <li class="queue-empty">Sin clientes en espera.</li>
+                }
+              </ul>
+            </div>
+          </article>
+        }
+      </section>
+
+      @if (vm.globalWaitingRows.length > 0) {
+        <section class="waiting-board">
+          <header class="waiting-head">
+            <p class="waiting-title">Proximos clientes</p>
+            <p class="pill-label">En espera</p>
+          </header>
+
+          <div class="waiting-list">
+            @for (item of vm.globalWaitingRows; track item.row.row.ticket.id) {
+              <article class="waiting-item">
+                <span class="position">{{ item.row.row.ticket.position }}</span>
+                <div class="waiting-copy">
+                  <div class="waiting-main">
+                    <strong>{{ item.row.displayName }}</strong>
+                    <small>{{ item.row.serviceName }}</small>
+                  </div>
+                  <small class="waiting-barber">Barbero: {{ item.barberName }}</small>
+                </div>
+                <div class="waiting-eta">
+                  <strong>≈ {{ item.row.waitLabel }}</strong>
+                  <small>{{ item.row.etaLabel }}</small>
+                </div>
+              </article>
+            } @empty {
+              <article class="waiting-item empty">
+                <strong>No hay clientes adicionales en espera.</strong>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    }
+  </section>
+
+  <footer class="tv-foot">
+    <a routerLink="/kiosk">Agenda</a>
+    <a routerLink="/staff">Panel para barberos</a>
+  </footer>
+</main>

@@ -5,7 +5,7 @@
     </svg>
   </a>
 
-  <header class="page-head">
+  <header class="page-head" data-guide-id="barbers-overview">
     <div>
       <p class="eyebrow">Staff</p>
       <h1>Barberos</h1>
@@ -22,9 +22,9 @@
     <div class="success-banner" role="status">{{ success() }}</div>
   }
 
-  <section class="barbers-list">
-    @for (barber of barbers(); track barber.id) {
-      <article class="barber-card">
+  <section class="barbers-list" data-guide-id="barbers-list">
+    @for (barber of barbers(); track barber.id; let isFirst = $first) {
+      <article class="barber-card" [attr.data-guide-id]="isFirst ? 'barbers-first-card' : null">
         <div class="barber-main">
           @if (barber.photoUrl) {
             <img class="avatar-image" [src]="barber.photoUrl" [alt]="barber.name" />
@@ -40,8 +40,24 @@
 
         <div class="card-actions">
           @if (!isEditing(barber.id)) {
-            <button type="button" class="ghost-btn" (click)="startEdit(barber)" [disabled]="isBusy()">Editar</button>
-            <button type="button" class="danger-btn" (click)="requestDelete(barber)" [disabled]="isBusy()">Eliminar</button>
+            <button
+              type="button"
+              class="ghost-btn"
+              (click)="startEdit(barber)"
+              [disabled]="isBusy()"
+              [attr.data-guide-id]="isFirst ? 'barbers-edit-button' : null"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              class="danger-btn"
+              (click)="requestDelete(barber)"
+              [disabled]="isBusy()"
+              [attr.data-guide-id]="isFirst ? 'barbers-delete-button' : null"
+            >
+              Eliminar
+            </button>
           }
         </div>
 

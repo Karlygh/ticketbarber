@@ -1,0 +1,60 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #071428 0%, #102242 100%);
+  color: #e6eefc;
+}
+
+.placeholder-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.placeholder-card {
+  width: min(720px, 100%);
+  padding: 2rem;
+  border-radius: 1.8rem;
+  background: rgba(8, 22, 40, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.eyebrow,
+.meta,
+.placeholder-card p {
+  margin: 0;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cyan-300);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.placeholder-card h1 {
+  margin: 0.8rem 0 1rem;
+}
+
+.placeholder-card p + p {
+  margin-top: 0.8rem;
+}
+
+.meta {
+  color: #9db4d6;
+}
+
+.placeholder-card button {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}

@@ -1,0 +1,12 @@
+<main class="placeholder-shell">
+  <section class="placeholder-card">
+    <p class="eyebrow">Vista 3</p>
+    <h1>Esta tercera vista ya esta preparada en la arquitectura.</h1>
+    <p>
+      La TV sigue guardando la vista por tienda y el icono del header ya forma el ciclo completo entre las
+      tres variantes.
+    </p>
+    <p class="meta">Hora actual: {{ vm.clockLabel }}</p>
+    <button type="button" [disabled]="switchingView" (click)="changeView.emit()">Cambiar de vista</button>
+  </section>
+</main>

@@ -24,12 +24,14 @@
       (click)="closeMobileMenu()">Inicio</a>
     <a [routerLink]="routes.contact" routerLinkActive="active" (click)="closeMobileMenu()">Contacto</a>
     <a [routerLink]="routes.guiaTv" routerLinkActive="active" (click)="closeMobileMenu()">Guía TV</a>
-    <a [routerLink]="routes.activateTv" routerLinkActive="active" (click)="closeMobileMenu()">Ingresar código TV</a>
     <a [routerLink]="routes.pricing" routerLinkActive="active" (click)="closeMobileMenu()">Precios</a>
+    <a [routerLink]="routes.activateTv" routerLinkActive="active" (click)="closeMobileMenu()">Ingresar código TV</a>
+    @if (authStore.isAuthenticated()) {
+      <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
+    }
 
     <div class="top-actions">
       @if (authStore.isAuthenticated()) {
-        <a [routerLink]="routes.tvPair" class="btn-tv-link" (click)="closeMobileMenu()">Vincular TV</a>
         <div class="user-menu" [class.user-menu--open]="userMenuOpen()">
           <button
             class="user-trigger"

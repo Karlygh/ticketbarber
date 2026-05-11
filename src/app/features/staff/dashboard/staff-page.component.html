@@ -1,5 +1,5 @@
 <main class="staff-layout">
-  <aside class="sidebar">
+  <aside class="sidebar" data-guide-id="staff-sidebar">
     <div class="brand-block">
       <p class="brand-title">Autotickets</p>
       <p class="brand-subtitle">Barberia</p>
@@ -17,6 +17,7 @@
       <p class="nav-label">Configuracion</p>
       <a routerLink="/account/negocio">Negocio</a>
       <a [routerLink]="routes.account">Mi cuenta</a>
+      <a [routerLink]="routes.staff.guide">Guia</a>
       <a [routerLink]="routes.home">Volver a la web</a>
     </nav>
 
@@ -35,6 +36,7 @@
           (click)="openAvailabilityModal()"
           [disabled]="isBusy() || queueStore.settings().isOpen"
           aria-label="Abrir jornada"
+          data-guide-id="staff-open-day-mobile"
         >
           ▶
         </button>
@@ -46,6 +48,7 @@
           (click)="requestCloseDay()"
           [disabled]="isBusy()"
           aria-label="Cerrar jornada"
+          data-guide-id="staff-close-day-mobile"
         >
           ⏻
         </button>
@@ -69,10 +72,19 @@
           type="button"
           (click)="openAvailabilityModal()"
           [disabled]="isBusy() || queueStore.settings().isOpen"
+          data-guide-id="staff-open-day"
         >
           Abrir jornada
         </button>
-        <button class="primary-btn" type="button" (click)="openCreateBarberModal()" [disabled]="isBusy()">+ Agregar barbero</button>
+        <button
+          class="primary-btn"
+          type="button"
+          (click)="openCreateBarberModal()"
+          [disabled]="isBusy()"
+          data-guide-id="staff-add-barber"
+        >
+          + Agregar barbero
+        </button>
       </div>
     </header>
 
@@ -116,7 +128,7 @@
       </div>
     }
 
-    <section class="metrics-grid">
+    <section class="metrics-grid" data-guide-id="staff-metrics">
       <article class="metric-card">
         <p>Total barberos</p>
         <strong>{{ barbers().length }}</strong>
@@ -139,7 +151,7 @@
       </article>
     </section>
 
-    <section class="toolbar">
+    <section class="toolbar" data-guide-id="staff-team-toolbar">
       <div class="toolbar-copy">
         <h2>Equipo de barberos</h2>
         <p>
@@ -161,6 +173,7 @@
           type="button"
           (click)="requestCloseDay()"
           [disabled]="isBusy()"
+          data-guide-id="staff-close-day"
         >
           Cerrar jornada
         </button>
@@ -177,7 +190,7 @@
         <span>Acciones</span>
       </div>
 
-      @for (barber of barbers(); track barber.id) {
+      @for (barber of barbers(); track barber.id; let isFirst = $first) {
         <article class="table-row" (click)="openBarberDetailModal(barber)">
           <div class="barber-cell">
             @if (barber.photoUrl) {
@@ -200,7 +213,11 @@
           <div>{{ barberWaitingCount(barber.id) }}</div>
           <div>{{ barberCurrent(barber.id)?.displayName || 'Sin turno activo' }}</div>
 
-          <div class="row-turn-actions" (click)="$event.stopPropagation()">
+          <div
+            class="row-turn-actions"
+            (click)="$event.stopPropagation()"
+            [attr.data-guide-id]="isFirst ? 'staff-turn-actions' : null"
+          >
             <button
               type="button"
               class="mini-btn turn-btn"
@@ -228,6 +245,7 @@
               (click)="toggleActionsMenu(barber.id)"
               [disabled]="isBusy()"
               [attr.aria-expanded]="isActionsMenuOpen(barber.id)"
+              [attr.data-guide-id]="isFirst ? 'staff-status-actions' : null"
             >
               Estado
             </button>
@@ -259,6 +277,7 @@
       <a [routerLink]="routes.staff.devices" routerLinkActive="active">Dispositivos</a>
       <a routerLink="/account/negocio" routerLinkActive="active">Negocio</a>
       <a [routerLink]="routes.account" routerLinkActive="active">Mi cuenta</a>
+      <a [routerLink]="routes.staff.guide" routerLinkActive="active">Guia</a>
       <a [routerLink]="routes.home">Volver a la web</a>
       <button type="button" class="mobile-bottom-logout" (click)="requestLogout()" [disabled]="isBusy()">Cerrar sesion</button>
     </nav>

@@ -14,6 +14,7 @@ export const APP_ROUTES = {
   subscriptionManage: '/subscription/manage',
   staff: {
     root: '/staff',
+    guide: '/staff/guia',
     barbers: '/staff/barberos',
     devices: '/staff/devices',
     login: '/staff/login',

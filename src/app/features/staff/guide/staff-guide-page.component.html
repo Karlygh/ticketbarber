@@ -1,0 +1,47 @@
+<div class="staff-guide-shell">
+  @if (currentView() === 'dashboard') {
+    <app-staff-page />
+  } @else {
+    <app-staff-barbers-page />
+  }
+
+  <div class="guide-overlay" aria-hidden="true">
+    @if (spotlightRect(); as rect) {
+      <div class="guide-overlay__top" [style.height.px]="rect.top"></div>
+      <div class="guide-overlay__left" [style.top.px]="rect.top" [style.width.px]="rect.left" [style.height.px]="rect.height"></div>
+      <div class="guide-overlay__right" [style.top.px]="rect.top" [style.left.px]="rect.right" [style.height.px]="rect.height"></div>
+      <div class="guide-overlay__bottom" [style.top.px]="rect.bottom"></div>
+      <div
+        class="guide-spotlight"
+        [style.top.px]="rect.top"
+        [style.left.px]="rect.left"
+        [style.width.px]="rect.width"
+        [style.height.px]="rect.height"
+      ></div>
+    } @else {
+      <div class="guide-overlay__fallback"></div>
+    }
+  </div>
+
+  <aside class="guide-card" [ngStyle]="cardStyle()" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+    <div class="guide-card__topline">
+      <span class="guide-badge">Guia staff</span>
+      <span class="guide-progress">{{ progressLabel() }}</span>
+    </div>
+
+    <h2 id="guide-title">{{ currentStep().title }}</h2>
+    <p>{{ resolvedBody() }}</p>
+
+    @if (targetMissing()) {
+      <p class="guide-note">Este paso sigue disponible aunque el elemento no aparezca ahora mismo.</p>
+    }
+
+    <div class="guide-card__actions">
+      <button type="button" class="guide-btn guide-btn--ghost" (click)="closeGuide()">Cerrar</button>
+      <button type="button" class="guide-btn guide-btn--ghost" (click)="previousStep()" [disabled]="isFirstStep()">Atras</button>
+      <button type="button" class="guide-btn guide-btn--primary" (click)="nextStep()">
+        {{ isLastStep() ? 'Finalizar' : 'Siguiente' }}
+      </button>
+    </div>
+  </aside>
+</div>

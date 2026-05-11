@@ -451,6 +451,20 @@ export class QueueRepository {
     );
   }
 
+  async updateTvViewForShop(shopId: string, tvView: QueueSettings['tvView']): Promise<void> {
+    const ref = this.runInInjectionContext(() => doc(this.firestore, `shops/${shopId}/settings/queue`));
+    await this.runInInjectionContext(() =>
+      setDoc(
+        ref,
+        {
+          tvView,
+          updatedAtMs: Date.now()
+        },
+        { merge: true }
+      )
+    );
+  }
+
   private async fetchTickets(): Promise<Ticket[]> {
     const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
     return ticketsSnap.docs.map((ticketDoc) => this.toTicket({ id: ticketDoc.id, ...ticketDoc.data() } as Ticket));
@@ -473,7 +487,8 @@ export class QueueRepository {
       isOpen: value.isOpen ?? true,
       updatedAtMs: value.updatedAtMs ?? 0,
       activeBarberIds: Array.isArray(value.activeBarberIds) ? value.activeBarberIds : [],
-      barberStates: value.barberStates ?? {}
+      barberStates: value.barberStates ?? {},
+      tvView: value.tvView ?? DEFAULT_QUEUE_SETTINGS.tvView
     };
   }
 

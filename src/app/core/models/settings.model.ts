@@ -15,11 +15,13 @@ export interface QueueSettings {
   updatedAtMs: number;
   activeBarberIds: string[];
   barberStates: Record<string, BarberQueueState>;
+  tvView: 'default' | 'cards-light' | 'view-3';
 }
 
 export const DEFAULT_QUEUE_SETTINGS: QueueSettings = {
   isOpen: true,
   updatedAtMs: 0,
   activeBarberIds: [],
-  barberStates: {}
+  barberStates: {},
+  tvView: 'cards-light'
 };

@@ -99,6 +99,12 @@ export const routes: Routes = [
       import('./features/staff/auth/register/staff-register-page.component').then((m) => m.StaffRegisterPageComponent)
   },
   {
+    path: 'staff/guia',
+    canActivate: [staffAuthGuard, proGuard],
+    loadComponent: () =>
+      import('./features/staff/guide/staff-guide-page.component').then((m) => m.StaffGuidePageComponent)
+  },
+  {
     path: 'staff',
     canActivate: [staffAuthGuard, proGuard],
     loadComponent: () =>

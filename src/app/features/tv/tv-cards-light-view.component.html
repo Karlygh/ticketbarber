@@ -1,0 +1,143 @@
+<main class="light-shell">
+  <header class="light-header">
+    <div class="light-brand">
+      <div class="light-brand-mark">
+        @if (vm.shop.logoUrl) {
+          <img [src]="vm.shop.logoUrl" alt="Logo" />
+        } @else {
+          <span>TB</span>
+        }
+      </div>
+
+      <div class="light-brand-copy">
+        <h1>{{ vm.shop.name || 'TicketBarber' }}</h1>
+        <p>Colas en directo</p>
+      </div>
+    </div>
+
+    <div class="light-hours-card">
+      <div class="icon-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 3v3M17 3v3M4 9h16M6 6h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />
+        </svg>
+      </div>
+      <div class="hours-copy">
+        <p class="meta-label">Horario</p>
+        <span class="hours-inline">
+          <strong>{{ vm.shop.todayHours }}</strong>
+          <a class="light-back-inline" routerLink="/staff" aria-label="Volver al panel de control">←</a>
+        </span>
+      </div>
+    </div>
+
+    <div class="light-clock-card">
+      <div>
+        <p class="meta-label">Hora actual</p>
+        <strong>{{ vm.clockLabel }}</strong>
+        <span>Hoy</span>
+      </div>
+
+      <button
+        type="button"
+        class="view-toggle"
+        [disabled]="switchingView"
+        (click)="changeView.emit()"
+        aria-label="Cambiar vista de TV">
+        <svg viewBox="0 0 24 24">
+          <path d="M3.5 5.5h8v13h-8zM12.5 5.5h8v5h-8zM12.5 11.5h8v7h-8z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  @if (vm.groups.length === 0) {
+    <section class="light-empty">
+      <h2>Sin barberos activos</h2>
+      <p>Activa la jornada o selecciona barberos para empezar a mostrar esta vista.</p>
+      <a routerLink="/staff">Volver al panel</a>
+    </section>
+  } @else {
+    <section class="cards-grid" [class]="cardClass(vm.groups.length)">
+      @for (group of vm.groups; track group.barber.id) {
+        <article
+          class="barber-card"
+          [class]="statusClass(group)"
+          [style.--accent]="group.accentColor">
+          <section class="card-section card-barber">
+            <div class="barber-profile">
+              @if (group.barber.photoUrl) {
+                <img class="barber-photo" [src]="group.barber.photoUrl" [alt]="group.barber.name" />
+              } @else {
+                <div class="barber-photo fallback">{{ group.initials }}</div>
+              }
+              <div class="barber-copy">
+                <p>Barbero</p>
+                <h2>{{ group.barber.name }}</h2>
+              </div>
+            </div>
+            <span class="status-badge">Activo</span>
+          </section>
+
+          <section class="card-section card-current">
+            <p class="section-label">Turno actual</p>
+            @if (group.current) {
+              <div class="current-content">
+                <div class="current-copy">
+                  <h3>{{ group.current.displayName }}</h3>
+                  <p>{{ group.current.serviceName }}</p>
+                </div>
+                <div class="time-chip">
+                  <strong>{{ group.current.row.waitMin }}</strong>
+                  <span>min</span>
+                </div>
+              </div>
+            } @else {
+              <div class="current-empty">
+                <div class="current-copy">
+                  <h3>Sin turno</h3>
+                  <p>Esperando al siguiente cliente</p>
+                </div>
+                <div class="time-chip idle">
+                  <strong>0</strong>
+                  <span>min</span>
+                </div>
+              </div>
+            }
+          </section>
+
+          <section class="card-section card-next">
+            <p class="section-label">Siguientes ({{ group.upcomingAll.length }})</p>
+
+            @if (group.upcomingVisible.length > 0) {
+              <div class="next-list">
+                @for (row of group.upcomingVisible; track row.row.ticket.id) {
+                  <article class="next-item">
+                    <span class="next-position">{{ row.row.ticket.position }}</span>
+                    <div class="next-copy">
+                      <strong>{{ row.displayName }}</strong>
+                      <p>{{ row.serviceName }}</p>
+                    </div>
+                    <div class="next-time">
+                      <strong>{{ row.waitLabel }}</strong>
+                      <span>{{ row.etaLabel }}</span>
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="next-empty">
+                <div class="next-empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <strong>Sin clientes en espera.</strong>
+                <p>¡Listo para el próximo!</p>
+              </div>
+            }
+          </section>
+        </article>
+      }
+    </section>
+  }
+</main>
