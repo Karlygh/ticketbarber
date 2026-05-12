@@ -80,7 +80,7 @@ export class StaffTvSetupPageComponent {
           '1.4  Cuando hayas iniciado sesión correctamente, podrás acceder al panel de gestión de turnos.'
         ],
         warning: 'Asegúrate de iniciar sesión con la cuenta de barbero.',
-        tip: 'Guarda la URL en favoritos de la tablet para abrirla más rápido cada día.'
+        tip: 'Guarda la URL en favoritos de la tablet y TV para abrirla más rápido cada día.'
       }
     },
     {
@@ -120,7 +120,7 @@ export class StaffTvSetupPageComponent {
           '3.4  Espera a que cargue la página de inicio de la aplicación.'
         ],
         warning: 'No busques en Google — escribe la URL directamente en la barra de direcciones para evitar entrar en páginas equivocadas.',
-        tip: 'Puedes usar un teclado Bluetooth conectado a la TV para escribir con más comodidad.'
+        tip: 'Puedes usar un teclado Bluetooth conectado a la TV para escribir con más comodidad.Busca en tu navegador el modo F11 o pantalla completa'
       }
     },
     {
@@ -147,19 +147,19 @@ export class StaffTvSetupPageComponent {
       number: '05',
       title: 'Introduce el código en la TV y deja la pantalla lista',
       description:
-        'En la TV abre /activate, introduce el código y, cuando termine la vinculación, deja la vista preparada para tus clientes.',
+        'En la TV pulsa el boton de la barra de búsqueda , introduce el código y, cuando termine la vinculación, deja la vista preparada para tus clientes.',
       imageLabel: 'Imagen del paso 5',
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
       imageSrc: 'assets/5.png',
       detail: {
         body: 'La TV no necesita iniciar sesión. Solo tienes que abrir la pantalla pública de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [
-          '5.1  En la TV escribe la URL de la app seguida de /activate y pulsa Enter.',
-          '5.2  Introduce el código de 6 dígitos que generaste desde tu cuenta.',
-          '5.3  Espera a que la TV confirme la vinculación y cargue la cola en tiempo real.',
-          '5.4  Activa pantalla completa y comprueba desde la sala que los turnos se leen bien.'
+          '5.1  En la TV escribe la URL de la app y pulsa Enter.',
+          '5.2  En la barra de búsqueda de ticketbarber existe un botón que dice Ingresar código TV, pulsa en el enlace.',
+          '5.3  Tendras una pantalla donde debes ingresar el codigo que previamente generaste desde tu tablet o móvil.Esto significa haberte logeado previamente. ',
+          '5.4Activa pantalla completa y comprueba desde la sala que los turnos se leen bien.'
         ],
-        tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático.'
+        tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático.Usa el modo pantalla completa de tu navegador de la TV'
       }
     }
   ];

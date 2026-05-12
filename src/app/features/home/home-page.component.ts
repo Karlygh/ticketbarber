@@ -1,5 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
+  inject
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   ModernExperienceFeature,
@@ -51,9 +62,11 @@ interface HomeFaq {
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })
-export class HomePageComponent implements OnInit, OnDestroy {
+export class HomePageComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly authStore = inject(AuthStore);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly currentYear = new Date().getFullYear();
+  @ViewChildren('revealSection') private revealSections!: QueryList<ElementRef<HTMLElement>>;
 
   readonly heroMetrics: HeroMetric[] = [
     { value: '+2,500', label: 'Clientes confían' },
@@ -157,33 +170,95 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   readonly faqs: HomeFaq[] = [
     {
-      question: 'Cuanto cuesta usar TicketBarber?',
-      answer: 'Puedes empezar con una prueba gratis de 7 dias y despues elegir el plan que mejor encaje con tu barberia.'
+    question: '¿Cómo utilizarás TicketBarber?',
+    answer: 'Cada vez que abras tu jornada, entrarás en tu panel de staff y seleccionarás los barberos que estarán activos ese día. Automáticamente, esos barberos aparecerán en la pantalla de la TV junto con la cola de clientes y el estado de los turnos en tiempo real.'
     },
     {
-      question: 'Necesito instalar algo en mi local?',
-      answer: 'No. TicketBarber funciona en la nube y esta pensado para que empieces rapido sin instalaciones complicadas desde cualquier dispositivo.'
+    question: '¿Necesito instalar algo en mi local?',
+    answer: 'Sí, pero muy poca cosa. TicketBarber funciona en la nube, así que no necesitas instalaciones complicadas ni equipos especiales. Solo necesitarías una TV o pantalla donde quieras mostrar la cola de clientes, por ejemplo en la zona de espera, y una tablet, móvil u ordenador para usarlo en recepción y gestionar los tickets, clientes y turnos. Con eso ya podrías empezar a usar TicketBarber desde cualquier dispositivo con conexión a internet.'
     },
     {
-      question: 'Mis clientes necesitan descargar la app?',
-      answer: 'No solo tienes que entrar en ticketbarber y vincular tu cuenta con la tv donde quieres mostrar la cola de clientes. Ofrecer acceso simple a la fila y al estado de turnos.'
+    question: '¿Mis clientes necesitan descargar la app?',
+    answer: 'No. Tus clientes no necesitan descargar nada. TicketBarber está pensado para peluquerías, barberías y profesionales autónomos que quieren gestionar la cola de clientes de forma sencilla. Solo tú accedes a la plataforma para vincular tu cuenta con la TV donde quieras mostrar la cola y gestionar los turnos desde recepción.'
     },
-    {
-      question: 'Puedo cancelar en cualquier momento?',
-      answer: 'Si. La idea es que pruebes con libertad y decidas si te aporta valor real antes de comprometerte.'
-    }
+   {
+  question: '¿Cuánto tardo en configurar TicketBarber para mi peluquería?',
+  answer: 'En unos 5 minutos puedes tener TicketBarber listo para usar. Solo tienes que registrarte, configurar los datos de tu peluquería y tus barberos, y vincular tu teléfono con la TV mediante un código. Después de eso, ya podrás empezar a gestionar la cola de clientes y disfrutar de TicketBarber.'
+},
   ];
 
   activeFaqIndex = 0;
   testimonialIndex = 0;
+  previousTestimonialIndex = 0;
+  isTestimonialAnimating = false;
+  heroReady = false;
+  revealVisibility: Record<string, boolean> = {};
+  reducedMotion = false;
+  isMobileMotion = false;
+  parallaxOffsetY = 0;
+  private mediaReduceQuery: MediaQueryList | null = null;
+  private mediaMobileQuery: MediaQueryList | null = null;
+  private revealObserver: IntersectionObserver | null = null;
+  private parallaxTicking = false;
   private testimonialTimer: ReturnType<typeof setInterval> | null = null;
+  private testimonialAnimTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly onReduceMotionChange = (event: MediaQueryListEvent): void => {
+    this.reducedMotion = event.matches;
+    this.cdr.markForCheck();
+  };
+  private readonly onMobileMotionChange = (event: MediaQueryListEvent): void => {
+    this.isMobileMotion = event.matches;
+    this.cdr.markForCheck();
+  };
 
   ngOnInit(): void {
+    if (typeof window !== 'undefined') {
+      this.mediaReduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      this.mediaMobileQuery = window.matchMedia('(max-width: 860px)');
+      this.reducedMotion = this.mediaReduceQuery.matches;
+      this.isMobileMotion = this.mediaMobileQuery.matches;
+      this.mediaReduceQuery.addEventListener('change', this.onReduceMotionChange);
+      this.mediaMobileQuery.addEventListener('change', this.onMobileMotionChange);
+    }
+
     this.startTestimonialAutoplay();
+
+    if (!this.reducedMotion) {
+      setTimeout(() => {
+        this.heroReady = true;
+        this.cdr.markForCheck();
+      }, 80);
+    } else {
+      this.heroReady = true;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.setupRevealObserver();
   }
 
   ngOnDestroy(): void {
     this.clearTestimonialAutoplay();
+    this.clearTestimonialAnimation();
+    this.revealObserver?.disconnect();
+
+    this.mediaReduceQuery?.removeEventListener('change', this.onReduceMotionChange);
+    this.mediaMobileQuery?.removeEventListener('change', this.onMobileMotionChange);
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    if (this.reducedMotion || this.isMobileMotion || this.parallaxTicking) {
+      return;
+    }
+
+    this.parallaxTicking = true;
+    requestAnimationFrame(() => {
+      const y = typeof window !== 'undefined' ? window.scrollY : 0;
+      this.parallaxOffsetY = Math.max(-20, Math.min(20, y * 0.03));
+      this.parallaxTicking = false;
+      this.cdr.markForCheck();
+    });
   }
 
   selectFaq(index: number): void {
@@ -191,24 +266,100 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   prevTestimonial(): void {
-    this.testimonialIndex =
-      (this.testimonialIndex - 1 + this.testimonials.length) % this.testimonials.length;
+    this.previousTestimonialIndex = this.testimonialIndex;
+    this.testimonialIndex = (this.testimonialIndex - 1 + this.testimonials.length) % this.testimonials.length;
+    this.triggerTestimonialAnimation();
     this.resetTestimonialAutoplay();
   }
 
   nextTestimonial(): void {
+    this.previousTestimonialIndex = this.testimonialIndex;
     this.testimonialIndex = (this.testimonialIndex + 1) % this.testimonials.length;
+    this.triggerTestimonialAnimation();
     this.resetTestimonialAutoplay();
   }
 
   goToTestimonial(index: number): void {
+    this.previousTestimonialIndex = this.testimonialIndex;
     this.testimonialIndex = index;
+    this.triggerTestimonialAnimation();
     this.resetTestimonialAutoplay();
+  }
+
+  getFaqContentId(index: number): string {
+    return `faq-content-${index}`;
+  }
+
+  shouldReveal(id: string): boolean {
+    return this.reducedMotion || !!this.revealVisibility[id];
+  }
+
+  private setupRevealObserver(): void {
+    if (this.reducedMotion || typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      for (const section of this.revealSections.toArray()) {
+        const id = section.nativeElement.dataset['revealId'];
+        if (id) {
+          this.revealVisibility[id] = true;
+        }
+      }
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.revealObserver = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) {
+            continue;
+          }
+
+          const element = entry.target as HTMLElement;
+          const id = element.dataset['revealId'];
+          if (!id) {
+            continue;
+          }
+
+          this.revealVisibility[id] = true;
+          this.revealObserver?.unobserve(element);
+        }
+
+        this.cdr.markForCheck();
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -8% 0px' }
+    );
+
+    for (const section of this.revealSections.toArray()) {
+      this.revealObserver.observe(section.nativeElement);
+    }
+  }
+
+  private triggerTestimonialAnimation(): void {
+    if (this.reducedMotion) {
+      this.isTestimonialAnimating = false;
+      return;
+    }
+
+    this.isTestimonialAnimating = true;
+    this.clearTestimonialAnimation();
+    this.testimonialAnimTimer = setTimeout(() => {
+      this.isTestimonialAnimating = false;
+      this.cdr.markForCheck();
+    }, 460);
+  }
+
+  private clearTestimonialAnimation(): void {
+    if (this.testimonialAnimTimer !== null) {
+      clearTimeout(this.testimonialAnimTimer);
+      this.testimonialAnimTimer = null;
+    }
   }
 
   private startTestimonialAutoplay(): void {
     this.testimonialTimer = setInterval(() => {
+      this.previousTestimonialIndex = this.testimonialIndex;
       this.testimonialIndex = (this.testimonialIndex + 1) % this.testimonials.length;
+      this.triggerTestimonialAnimation();
+      this.cdr.markForCheck();
     }, 5500);
   }
 

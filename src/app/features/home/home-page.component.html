@@ -1,24 +1,24 @@
 <app-header></app-header>
 
 <main class="home-shell" id="inicio">
-  <div class="page-aura page-aura--left"></div>
-  <div class="page-aura page-aura--right"></div>
+  <div class="page-aura page-aura--left" [style.transform]="'translate3d(0,' + (-parallaxOffsetY) + 'px,0)'"></div>
+  <div class="page-aura page-aura--right" [style.transform]="'translate3d(0,' + parallaxOffsetY + 'px,0)'"></div>
   <div class="page-grid"></div>
 
-  <section class="hero section-frame">
-    <div class="hero-copy">
-      <p class="eyebrow-pill">La app Nº1 para tickets de barberias y peluquerías</p>
-      <h1>
+  <section #revealSection data-reveal-id="hero" class="hero section-frame reveal reveal--hero" [class.reveal--visible]="shouldReveal('hero')">
+    <div class="hero-copy" [class.hero-copy--ready]="heroReady || reducedMotion">
+      <p class="eyebrow-pill hero-seq hero-seq--1">La app Nº1 para tickets de barberias y peluquerías</p>
+      <h1 class="hero-seq hero-seq--2">
         Gestiona turnos.
         <span>Mejora la experiencia.</span>
         Haz crecer tu peluquería.
       </h1>
-      <p class="hero-text">
+      <p class="hero-text hero-seq hero-seq--3">
         TicketBarber te ayuda a organizar tu barberia, reducir tiempos de espera y
         ofrecer un servicio de primera clase. Tus clientes lo notaran. Tu negocio crecera.
       </p>
 
-      <div class="hero-actions">
+      <div class="hero-actions hero-seq hero-seq--4">
         @if (authStore.isAuthenticated()) {
           <a class="cta-primary" routerLink="/staff">Ir al panel</a>
         } @else {
@@ -27,9 +27,9 @@
         <a class="cta-secondary" href="assets/video-home.mp4">Ver video</a>
       </div>
 
-      <p class="hero-note">Sin tarjeta de credito • Cancelas cuando quieras</p>
+      <p class="hero-note hero-seq hero-seq--5">Sin tarjeta de credito • Cancelas cuando quieras</p>
 
-      <div class="hero-metrics">
+      <div class="hero-metrics hero-seq hero-seq--6">
         <div class="hero-avatars" aria-hidden="true">
           <span class="hero-avatar hero-avatar--one"></span>
           <span class="hero-avatar hero-avatar--two"></span>
@@ -45,7 +45,10 @@
       </div>
     </div>
 
-    <div class="hero-visual">
+    <div
+      class="hero-visual hero-seq hero-seq--7"
+      [class.hero-visual--ready]="heroReady || reducedMotion"
+      [style.transform]="'translate3d(0,' + (parallaxOffsetY * 0.7) + 'px,0)'">
       <div class="hero-scene">
         <img src="assets/barberosheader.png" alt="Vista principal de TicketBarber" />
         <div class="hero-overlay"></div>
@@ -92,9 +95,9 @@
     </div>
   </section>
 
-  <section class="benefit-strip section-frame" id="beneficios">
+  <section #revealSection data-reveal-id="benefits" class="benefit-strip section-frame reveal stagger-group" [class.reveal--visible]="shouldReveal('benefits')" id="beneficios">
     @for (benefit of quickBenefits; track benefit.title) {
-      <article class="strip-item">
+      <article class="strip-item stagger-item">
         <div class="strip-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -115,7 +118,10 @@
   </section>
 
   <app-modern-experience-section
-    class="experience section-frame"
+    class="experience section-frame reveal stagger-group"
+    #revealSection
+    data-reveal-id="experience"
+    [class.reveal--visible]="shouldReveal('experience')"
     id="funciones"
     [kicker]="experienceKicker"
     [headline]="experienceHeadline"
@@ -126,7 +132,7 @@
     [kpis]="experienceKpis">
   </app-modern-experience-section>
 
-  <section class="tools section-frame">
+  <section #revealSection data-reveal-id="tools" class="tools section-frame reveal stagger-group" [class.reveal--visible]="shouldReveal('tools')">
     <div class="section-intro section-intro--center">
       <p class="section-kicker">Todo lo que tu barberia necesita</p>
       <h2>Herramientas que te hacen la vida mas facil</h2>
@@ -134,7 +140,7 @@
 
     <div class="tools-grid">
       @for (tool of toolFeatures; track tool.title) {
-        <article class="tool-card">
+        <article class="tool-card stagger-item">
           <div class="tool-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -157,28 +163,32 @@
     </div>
   </section>
 
-  <section class="faq-media section-frame" id="preguntas">
+  <section #revealSection data-reveal-id="faq" class="faq-media section-frame reveal stagger-group" [class.reveal--visible]="shouldReveal('faq')" id="preguntas">
     <div class="faq-column">
       <p class="section-kicker">Preguntas frecuentes</p>
       <h2>Resolvemos tus dudas</h2>
 
       <div class="faq-list">
         @for (item of faqs; track item.question; let i = $index) {
-          <article class="faq-item" [class.faq-item--open]="activeFaqIndex === i">
+          <article class="faq-item stagger-item" [class.faq-item--open]="activeFaqIndex === i">
             <button
               type="button"
               class="faq-trigger"
               (click)="selectFaq(i)"
-              [attr.aria-expanded]="activeFaqIndex === i">
+              [attr.aria-expanded]="activeFaqIndex === i"
+              [attr.aria-controls]="getFaqContentId(i)">
               <span>{{ item.question }}</span>
               <span class="faq-trigger__icon">{{ activeFaqIndex === i ? '−' : '+' }}</span>
             </button>
 
-            @if (activeFaqIndex === i) {
+            <div
+              class="faq-answer-wrap"
+              [class.faq-answer-wrap--open]="activeFaqIndex === i"
+              [attr.id]="getFaqContentId(i)">
               <div class="faq-answer">
                 <p>{{ item.answer }}</p>
               </div>
-            }
+            </div>
           </article>
         }
       </div>
@@ -199,14 +209,14 @@
     </aside>
   </section>
 
-  <section class="steps section-frame">
+  <section #revealSection data-reveal-id="steps" class="steps section-frame reveal stagger-group" [class.reveal--visible]="shouldReveal('steps')">
     <div class="steps-copy">
       <p class="section-kicker">Puesta en marcha en 3 pasos</p>
       <h2>Asi de facil es empezar</h2>
 
       <div class="steps-grid">
         @for (step of startSteps; track step.number) {
-          <article class="step-card">
+          <article class="step-card stagger-item">
             <span class="step-number">{{ step.number }}</span>
             <div class="step-icon">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -238,7 +248,7 @@
     </aside>
   </section>
 
-  <section class="stories section-frame">
+  <section #revealSection data-reveal-id="stories" class="stories section-frame reveal" [class.reveal--visible]="shouldReveal('stories')">
     <div class="section-intro section-intro--center">
       <p class="section-kicker">Barberos que ya confian en TicketBarber</p>
       <h2>Historias reales, resultados reales</h2>
@@ -253,7 +263,7 @@
         ‹
       </button>
 
-      <article class="testimonial-card">
+      <article class="testimonial-card" [class.testimonial-card--animating]="isTestimonialAnimating">
         <div class="testimonial-badge">
           <div
             class="testimonial-logo"
@@ -268,6 +278,8 @@
           <span>{{ testimonials[testimonialIndex].location }}</span>
         </div>
       </article>
+
+      <div class="testimonial-progress" aria-hidden="true"></div>
 
       <button
         class="testimonial-nav testimonial-nav--next"
@@ -290,7 +302,7 @@
     </div>
   </section>
 
-  <section class="bottom-cta section-frame" id="contacto">
+  <section #revealSection data-reveal-id="bottomCta" class="bottom-cta section-frame reveal stagger-group" [class.reveal--visible]="shouldReveal('bottomCta')" id="contacto">
     <div class="bottom-cta__copy">
       <div class="bottom-cta__icon">🏆</div>
       <div>

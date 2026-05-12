@@ -6,12 +6,14 @@ import { RouterLink } from '@angular/router';
 import { BarberProfile } from '../../../core/models/barber.model';
 import { BarberService } from '../../../core/services/barber.service';
 import { QueueStore } from '../../../core/stores/queue.store';
+import { FooterComponent } from '../../../shared/components/footer/footer.component';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { APP_ROUTES } from '../../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-staff-barbers-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './staff-barbers-page.component.html',
   styleUrl: './staff-barbers-page.component.css'
 })

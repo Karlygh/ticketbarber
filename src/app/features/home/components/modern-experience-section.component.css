@@ -29,6 +29,7 @@
     linear-gradient(90deg, rgba(134, 176, 255, 0.06) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 95%);
+  animation: grid-drift 16s linear infinite;
 }
 
 .experience-bg-glow {
@@ -152,6 +153,7 @@
   background: radial-gradient(circle, rgba(59, 130, 246, 0.34) 0%, rgba(59, 130, 246, 0) 70%);
   filter: blur(24px);
   pointer-events: none;
+  animation: core-pulse 4.6s ease-in-out infinite;
 }
 
 .tablet-shell,
@@ -173,6 +175,7 @@
   padding: 0.48rem;
   border-radius: 1.7rem;
   transform: rotate(-4deg);
+  animation: tablet-drift 7.2s ease-in-out infinite;
 }
 
 .tablet-shell img {
@@ -189,7 +192,7 @@
   top: clamp(5.4rem, 8vw, 7.8rem);
   padding: 0.42rem;
   z-index: 3;
-  animation: phone-float 5.6s ease-in-out infinite;
+  animation: phone-float 4.8s ease-in-out infinite;
 }
 
 .phone-shell img {
@@ -201,10 +204,10 @@
 @keyframes phone-float {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-16px) rotate(1.2deg);
   }
 }
 
@@ -219,7 +222,7 @@
   box-shadow:
     0 14px 30px rgba(3, 10, 21, 0.62),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  animation: card-float 5.4s ease-in-out infinite;
+  animation: card-float 4.9s ease-in-out infinite;
 }
 
 .floating-card p,
@@ -259,10 +262,39 @@
 @keyframes card-float {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-12px) scale(1.025);
+  }
+}
+
+@keyframes grid-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 42px 42px;
+  }
+}
+
+@keyframes core-pulse {
+  0%, 100% {
+    opacity: 0.74;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes tablet-drift {
+  0%, 100% {
+    transform: rotate(-4deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotate(-3.2deg) translate3d(0, -10px, 0);
   }
 }
 
@@ -350,12 +382,22 @@
     right: auto;
     transform: translateX(-50%) rotate(-3.5deg);
     width: min(44rem, 92%);
+    animation-name: tablet-drift-tablet;
   }
 
   .phone-shell {
     left: 50%;
     transform: translateX(-50%);
     top: clamp(5.7rem, 9vw, 7rem);
+  }
+
+  @keyframes tablet-drift-tablet {
+    0%, 100% {
+      transform: translateX(-50%) rotate(-3.5deg) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) rotate(-2.8deg) translateY(-8px);
+    }
   }
 
   .floating-card--left-top {
@@ -402,6 +444,7 @@
   .tablet-shell {
     width: min(34rem, 100%);
     transform: none;
+    animation: none;
   }
 
   .phone-shell {
@@ -469,6 +512,7 @@
     padding: 0.3rem;
     border-radius: 1.2rem;
     margin-top: -0.2rem;
+    animation-name: phone-float-mobile;
   }
 
   .phone-shell img {
@@ -478,6 +522,7 @@
   .floating-card {
     width: clamp(8.2rem, 38vw, 10.4rem);
     padding: 0.58rem 0.62rem 0.65rem;
+    animation-name: card-float-mobile;
   }
 
   .floating-card p {
@@ -511,7 +556,28 @@
   }
 }
 
+@keyframes phone-float-mobile {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes card-float-mobile {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .experience-bg-grid,
+  .experience-core-glow,
+  .tablet-shell,
   .phone-shell,
   .floating-card {
     animation: none;
