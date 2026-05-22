@@ -209,6 +209,43 @@ h2 {
   box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.08);
 }
 
+.step-media__trigger {
+  width: 100%;
+  cursor: zoom-in;
+  appearance: none;
+  text-align: inherit;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.step-media__trigger:hover {
+  border-color: rgba(6, 182, 212, 0.62);
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.1), 0 14px 24px rgba(3, 105, 161, 0.2);
+}
+
+.step-media__trigger:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.62);
+  outline-offset: 2px;
+}
+
+.step-media__zoom-label {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 1;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(103, 232, 249, 0.3);
+  background: rgba(6, 22, 37, 0.78);
+  color: var(--section-kiosk-light);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .step-media__label {
   display: block;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
@@ -378,6 +415,37 @@ h2 {
   animation: dialog-in 0.2s ease;
   display: flex;
   flex-direction: column;
+}
+
+.image-modal-overlay {
+  z-index: 950;
+  background: rgba(2, 6, 23, 0.86);
+}
+
+.image-modal-dialog {
+  position: relative;
+  width: min(1200px, 94vw);
+  max-height: 90vh;
+  border: 1px solid var(--section-kiosk-border);
+  border-radius: var(--r-lg);
+  background: rgba(9, 25, 41, 0.92);
+  padding: 2.6rem 0.75rem 0.75rem;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 34px var(--section-kiosk-glow);
+  animation: dialog-in 0.2s ease;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+}
+
+.image-modal-img {
+  display: block;
+  width: 100%;
+  max-height: calc(90vh - 3.8rem);
+  object-fit: contain;
+  border-radius: calc(var(--r-lg) - 6px);
 }
 
 @keyframes dialog-in {
@@ -578,10 +646,41 @@ h2 {
   .modal-dialog {
     max-height: 85vh;
   }
+
+  .image-modal-dialog {
+    width: min(1100px, 96vw);
+    max-height: 86vh;
+    padding: 2.4rem 0.55rem 0.55rem;
+  }
+
+  .image-modal-img {
+    max-height: calc(86vh - 3.6rem);
+  }
 }
 
 @media (max-width: 500px) {
   .tv-setup-shell {
     width: min(1080px, 96vw);
+  }
+
+  .step-media__zoom-label {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    font-size: 0.68rem;
+  }
+
+  .image-modal-dialog {
+    width: 97vw;
+    max-height: 88vh;
+    padding: 2.2rem 0.45rem 0.45rem;
+  }
+
+  .image-modal-close {
+    top: 0.45rem;
+    right: 0.45rem;
+  }
+
+  .image-modal-img {
+    max-height: calc(88vh - 3.2rem);
   }
 }

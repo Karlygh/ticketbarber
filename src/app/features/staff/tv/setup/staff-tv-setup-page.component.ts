@@ -40,20 +40,44 @@ export class StaffTvSetupPageComponent {
   readonly routes = APP_ROUTES;
 
   activeStep: SetupStep | null = null;
+  activeImageStep: SetupStep | null = null;
 
   openModal(step: SetupStep): void {
     this.activeStep = step;
-    document.body.style.overflow = 'hidden';
+    this.updateBodyScrollLock();
   }
 
   closeModal(): void {
     this.activeStep = null;
-    document.body.style.overflow = '';
+    this.updateBodyScrollLock();
+  }
+
+  openImageModal(step: SetupStep): void {
+    if (!step.imageSrc) {
+      return;
+    }
+    this.activeImageStep = step;
+    this.updateBodyScrollLock();
+  }
+
+  closeImageModal(): void {
+    this.activeImageStep = null;
+    this.updateBodyScrollLock();
   }
 
   @HostListener('keydown.escape')
   onEscape(): void {
-    this.closeModal();
+    if (this.activeImageStep) {
+      this.closeImageModal();
+      return;
+    }
+    if (this.activeStep) {
+      this.closeModal();
+    }
+  }
+
+  private updateBodyScrollLock(): void {
+    document.body.style.overflow = this.activeStep || this.activeImageStep ? 'hidden' : '';
   }
 
   readonly prereqs: Prereq[] = [
@@ -130,7 +154,7 @@ export class StaffTvSetupPageComponent {
         'Con sesión iniciada en Ticketbarber, abre la opción Vincular TV desde el navbar para generar un código temporal para la TV.',
       imageLabel: 'Imagen del paso 4',
       imageHint: 'Sustituir por una captura de la pantalla Vincular TV con el código visible.',
-      imageSrc: 'assets/5.png',
+      imageSrc: 'assets/55.png',
       detail: {
         body: 'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos. Mientras siga activo, volverás a ver ese mismo código al entrar en la pantalla de Vincular TV.',
         subSteps: [
