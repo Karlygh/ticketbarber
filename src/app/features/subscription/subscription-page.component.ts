@@ -1,8 +1,7 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subscription } from 'rxjs';
 import { AuthStore } from '../../core/stores/auth.store';
 import { SubscriptionStore } from '../../core/stores/subscription.store';
 import { StripeService } from '../../core/services/stripe.service';
@@ -26,6 +25,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
   standalone: true,
   imports: [CurrencyPipe, DatePipe, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './subscription-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './subscription-page.component.css'
 })
 export class SubscriptionPageComponent implements OnInit {
@@ -33,7 +33,6 @@ export class SubscriptionPageComponent implements OnInit {
   readonly authStore = inject(AuthStore);
   private readonly stripeService = inject(StripeService);
   private readonly destroyRef = inject(DestroyRef);
-  private productsSub: Subscription | null = null;
 
   readonly subscriptionStore = inject(SubscriptionStore);
 
@@ -45,21 +44,19 @@ export class SubscriptionPageComponent implements OnInit {
   readonly portalLoading = signal(false);
 
   ngOnInit(): void {
-    this.destroyRef.onDestroy(() => this.productsSub?.unsubscribe());
     this.loadProducts();
   }
 
   loadProducts(): void {
-    this.productsSub?.unsubscribe();
     this.productsLoading.set(true);
     this.productsError.set(null);
 
-    this.productsSub = this.stripeService.getProducts().subscribe({
+    this.stripeService.getProducts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (prods) => {
         this.products.set(prods);
         this.productsLoading.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Error cargando productos:', err);
         this.productsError.set('No se pudieron cargar los planes en este momento. Intentalo de nuevo.');
         this.productsLoading.set(false);
@@ -116,24 +113,21 @@ export class SubscriptionPageComponent implements OnInit {
 
     this.loadingPriceId.set(price.id);
     this.checkoutError.set(null);
-
-    this.stripeService
-      .startCheckout(user.uid, price.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        error: (err: Error) => {
-          this.checkoutError.set('No se pudo iniciar el pago. Inténtalo de nuevo.');
-          console.error('Checkout error:', err);
-          this.loadingPriceId.set(null);
-        }
-      });
+    try {
+      await this.stripeService.startCheckoutRedirect(user.uid, price.id);
+    } catch (err: unknown) {
+      this.checkoutError.set('No se pudo iniciar el pago. Inténtalo de nuevo.');
+      console.error('Checkout error:', err);
+      this.loadingPriceId.set(null);
+      return;
+    }
   }
 
   async openPortal(): Promise<void> {
     this.portalLoading.set(true);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Portal error:', err);
       this.checkoutError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {

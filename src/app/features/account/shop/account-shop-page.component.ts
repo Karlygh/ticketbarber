@@ -1,24 +1,37 @@
-import { Component, EnvironmentInjector, OnInit, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, EnvironmentInjector, inject, OnInit, runInInjectionContext, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Storage, deleteObject, getDownloadURL, ref, uploadBytesResumable } from '@angular/fire/storage';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { ShopService } from '../../../core/services/shop.service';
 import { OpeningHoursDay, OpeningHoursSlot, defaultOpeningHours } from '../../../core/models/shop.model';
 import { normalizeOpeningHoursDays, validateOpeningHoursDay } from '../../../core/utils/opening-hours.util';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
+import {
+  createShopBasicForm,
+  createShopHoursForm,
+  createShopSlotFormGroup,
+  DEFAULT_SHOP_HOURS_SLOT,
+  getGlobalHoursFromSlots,
+  patchGlobalHoursForm,
+  SECOND_SHOP_HOURS_SLOT,
+  validateShopGlobalHours
+} from './account-shop-form.util';
 
 @Component({
   selector: 'app-account-shop-page',
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, HeaderComponent, FooterComponent],
   templateUrl: './account-shop-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './account-shop-page.component.css'
 })
 export class AccountShopPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly storage = inject(Storage);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(EnvironmentInjector);
   private readonly authStore = inject(AuthStore);
   private readonly shopService = inject(ShopService);
@@ -44,17 +57,9 @@ export class AccountShopPageComponent implements OnInit {
   hoursForm!: FormGroup;
 
   private initialLogoUrl = '';
+  private readonly successTimeoutIds = new Set<ReturnType<typeof setTimeout>>();
   private initialBasic = { shopName: '', description: '', address: '', phone: '' };
-  private initialGlobalHours: OpeningHoursDay = { closed: false, slots: [{ opens: '09:00', closes: '19:00' }] };
-  readonly tvPath = '/tv';
-
-  get tvQueueUrl(): string {
-    const uid = this.authStore.user()?.uid;
-    if (!uid) return this.tvPath;
-    if (typeof window === 'undefined') return `${this.tvPath}/${uid}`;
-    return `${window.location.origin}${this.tvPath}/${uid}`;
-  }
-
+  private initialGlobalHours: OpeningHoursDay = { closed: false, slots: [DEFAULT_SHOP_HOURS_SLOT] };
   get slotsArray(): FormArray {
     return this.hoursForm.get('slots') as FormArray;
   }
@@ -64,53 +69,49 @@ export class AccountShopPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.basicForm = this.fb.group({
-      shopName: ['', [Validators.required, Validators.maxLength(60)]],
-      logoUrl: [''],
-      description: ['', Validators.maxLength(200)],
-      address: ['', Validators.maxLength(120)],
-      phone: ['', Validators.maxLength(20)]
-    });
+    this.basicForm = createShopBasicForm(this.fb);
+    this.hoursForm = createShopHoursForm(this.fb);
 
-    this.hoursForm = this.fb.group({
-      slots: this.fb.array([this.createSlotFormGroup({ opens: '09:00', closes: '19:00' })])
+    this.hoursForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.globalHoursError.set(this.validateGlobalHours()));
+    this.destroyRef.onDestroy(() => {
+      for (const id of this.successTimeoutIds) clearTimeout(id);
+      this.successTimeoutIds.clear();
     });
-
-    this.hoursForm.valueChanges.subscribe(() => this.globalHoursError.set(this.validateGlobalHours()));
     this.loadProfile();
   }
 
+  private scheduleSuccessReset(target: 'logo' | 'basic' | 'hours'): void {
+    const timeoutId = setTimeout(() => {
+      if (target === 'logo') this.logoSaveSuccess.set(false);
+      if (target === 'basic') this.basicSaveSuccess.set(false);
+      if (target === 'hours') this.hoursSaveSuccess.set(false);
+      this.successTimeoutIds.delete(timeoutId);
+    }, 3000);
+    this.successTimeoutIds.add(timeoutId);
+  }
+
   private createSlotFormGroup(slot: OpeningHoursSlot): FormGroup {
-    return this.fb.group({
-      opens: [slot.opens, Validators.required],
-      closes: [slot.closes, Validators.required]
-    });
+    return createShopSlotFormGroup(this.fb, slot);
   }
 
   private getGlobalHoursFromForm(): OpeningHoursDay {
-    const slots = this.slotsArray.getRawValue() as OpeningHoursSlot[];
-    return {
-      closed: false,
-      slots: slots
-        .filter((slot) => !!slot?.opens && !!slot?.closes)
-        .slice(0, 2)
-        .map((slot) => ({ opens: slot.opens, closes: slot.closes }))
-    };
+    return getGlobalHoursFromSlots(this.slotsArray);
   }
 
   private patchGlobalHours(day: OpeningHoursDay): void {
-    const slots = day.slots.length > 0 ? day.slots : [{ opens: '09:00', closes: '19:00' }];
-    this.hoursForm.setControl('slots', this.fb.array(slots.map((slot) => this.createSlotFormGroup(slot))));
+    patchGlobalHoursForm(this.fb, this.hoursForm, day);
     this.globalHoursError.set(this.validateGlobalHours());
   }
 
   private validateGlobalHours(): string | null {
-    return validateOpeningHoursDay(this.getGlobalHoursFromForm());
+    return validateShopGlobalHours(this.slotsArray);
   }
 
   addSecondSlot(): void {
     if (this.slotsArray.length >= 2) return;
-    this.slotsArray.push(this.createSlotFormGroup({ opens: '16:00', closes: '20:00' }));
+    this.slotsArray.push(this.createSlotFormGroup(SECOND_SHOP_HOURS_SLOT));
     this.hoursForm.markAsDirty();
     this.globalHoursError.set(this.validateGlobalHours());
   }
@@ -156,7 +157,7 @@ export class AccountShopPageComponent implements OnInit {
       } else {
         this.initialLogoUrl = '';
         this.initialBasic = { shopName: '', description: '', address: '', phone: '' };
-        this.initialGlobalHours = { closed: false, slots: [{ opens: '09:00', closes: '19:00' }] };
+        this.initialGlobalHours = { closed: false, slots: [DEFAULT_SHOP_HOURS_SLOT] };
         this.patchGlobalHours(this.initialGlobalHours);
       }
 
@@ -189,6 +190,7 @@ export class AccountShopPageComponent implements OnInit {
       },
       async () => {
         const url = await this.runInCtx(() => getDownloadURL(task.snapshot.ref));
+        await this.deleteStoredFile(this.initialLogoUrl, url);
         this.logoPreview.set(url);
         this.basicForm.get('logoUrl')!.setValue(url);
         this.logoUploading.set(false);
@@ -198,8 +200,7 @@ export class AccountShopPageComponent implements OnInit {
   async removeLogo(): Promise<void> {
     const uid = this.authStore.user()?.uid;
     if (!uid) return;
-    const storageRef = this.runInCtx(() => ref(this.storage, `users/${uid}/logo`));
-    try { await this.runInCtx(() => deleteObject(storageRef)); } catch {}
+    await this.deleteStoredFile(this.basicForm.get('logoUrl')!.value || this.initialLogoUrl);
     this.logoPreview.set(null);
     this.basicForm.get('logoUrl')!.setValue('');
   }
@@ -252,7 +253,7 @@ export class AccountShopPageComponent implements OnInit {
       await this.shopService.updateShopProfile(uid, { logoUrl });
       this.initialLogoUrl = logoUrl;
       this.logoSaveSuccess.set(true);
-      setTimeout(() => this.logoSaveSuccess.set(false), 3000);
+      this.scheduleSuccessReset('logo');
     } catch {
       this.logoSaveError.set('No se pudo guardar el logo. Inténtalo de nuevo.');
     } finally {
@@ -277,7 +278,7 @@ export class AccountShopPageComponent implements OnInit {
       });
       this.initialBasic = { shopName: data.shopName, description: data.description, address: data.address, phone: data.phone };
       this.basicSaveSuccess.set(true);
-      setTimeout(() => this.basicSaveSuccess.set(false), 3000);
+      this.scheduleSuccessReset('basic');
     } catch {
       this.basicSaveError.set('No se pudo guardar la información básica. Inténtalo de nuevo.');
     } finally {
@@ -310,11 +311,21 @@ export class AccountShopPageComponent implements OnInit {
       this.initialGlobalHours = { closed: false, slots: globalHours.slots.map((slot) => ({ ...slot })) };
       this.patchGlobalHours(this.initialGlobalHours);
       this.hoursSaveSuccess.set(true);
-      setTimeout(() => this.hoursSaveSuccess.set(false), 3000);
+      this.scheduleSuccessReset('hours');
     } catch {
       this.hoursSaveError.set('No se pudo guardar el horario. Inténtalo de nuevo.');
     } finally {
       this.hoursSaving.set(false);
+    }
+  }
+
+  private async deleteStoredFile(fileUrl: string | null, nextUrl?: string): Promise<void> {
+    if (!fileUrl || fileUrl === nextUrl) return;
+
+    try {
+      await this.runInCtx(() => deleteObject(ref(this.storage, fileUrl)));
+    } catch {
+      // Ignora referencias antiguas o ya eliminadas.
     }
   }
 }

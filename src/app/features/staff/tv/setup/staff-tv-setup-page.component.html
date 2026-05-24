@@ -34,7 +34,7 @@
 
     <div class="hero-actions">
       @if (authStore.isAuthenticated()) {
-        <a class="primary-link" [routerLink]="routes.tv">Abrir vista TV</a>
+        <a class="primary-link" [routerLink]="routes.staff.root">Abrir panel staff</a>
       } @else {
         <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta gratuita</a>
       }
@@ -93,7 +93,7 @@
     <div class="tips-actions">
       <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
       @if (authStore.isAuthenticated()) {
-        <a class="primary-link" [routerLink]="routes.tv">Ir a /tv</a>
+        <a class="primary-link" [routerLink]="routes.tvPair">Vincular TV</a>
       } @else {
         <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta</a>
       }

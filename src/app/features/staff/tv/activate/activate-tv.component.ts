@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TvAuthService } from '../../../../core/services/tv-auth.service';
@@ -11,6 +11,7 @@ import { APP_ROUTES } from '../../../../shared/routing/app-routes';
   standalone: true,
   imports: [FormsModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './activate-tv.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './activate-tv.component.css'
 })
 export class ActivateTvComponent {
@@ -67,3 +68,4 @@ export class ActivateTvComponent {
     void this.router.navigateByUrl(this.routes.tv);
   }
 }
+

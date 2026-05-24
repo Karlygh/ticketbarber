@@ -69,7 +69,7 @@
           <label>
             <span>Servicio</span>
             <select formControlName="serviceId">
-              <option value="" disabled selected>Selecciona un servicio</option>
+              <option value="" disabled>Selecciona un servicio</option>
               @for (service of queueStore.services(); track service.id) {
                 <option [value]="service.id">{{ service.name }} ({{ service.durationMin }} min)</option>
               }

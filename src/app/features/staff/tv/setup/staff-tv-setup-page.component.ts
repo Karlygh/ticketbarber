@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
@@ -33,9 +33,10 @@ interface Prereq {
   standalone: true,
   imports: [CommonModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './staff-tv-setup-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-tv-setup-page.component.css'
 })
-export class StaffTvSetupPageComponent {
+export class StaffTvSetupPageComponent implements OnDestroy {
   readonly authStore = inject(AuthStore);
   readonly routes = APP_ROUTES;
 
@@ -78,6 +79,10 @@ export class StaffTvSetupPageComponent {
 
   private updateBodyScrollLock(): void {
     document.body.style.overflow = this.activeStep || this.activeImageStep ? 'hidden' : '';
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
   }
 
   readonly prereqs: Prereq[] = [
@@ -124,7 +129,7 @@ export class StaffTvSetupPageComponent {
           '2.4  Si el navegador pide actualización, acéptala antes de continuar.'
         ],
         warning: 'Comprueba que la TV tiene Wi-Fi o cable de red activo antes de continuar. Sin conexión, la vista no se actualizará.',
-        tip: 'Chrome funciona mejor para mostrar la vista /tv sin problemas de compatibilidad.'
+        tip: 'Chrome funciona mejor para mostrar la vista interna de TV sin problemas de compatibilidad.'
       }
     },
     {
@@ -176,7 +181,7 @@ export class StaffTvSetupPageComponent {
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
       imageSrc: 'assets/5.png',
       detail: {
-        body: 'La TV no necesita iniciar sesión. Solo tienes que abrir la pantalla pública de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
+        body: 'La TV no necesita iniciar sesión continua. Solo tienes que abrir la pantalla interna de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [
           '5.1  En la TV escribe la URL de la app y pulsa Enter.',
           '5.2  En la barra de búsqueda de ticketbarber existe un botón que dice Ingresar código TV, pulsa en el enlace.',
@@ -190,7 +195,7 @@ export class StaffTvSetupPageComponent {
 
   readonly tips: string[] = [
     'Activa el modo pantalla completa para que la información se vea mejor desde lejos.',
-    'Guarda /activate en favoritos de la TV para volver a vincularla rápidamente si hace falta.',
+    'Guarda la pantalla de activación en favoritos de la TV para volver a vincularla rápidamente si hace falta.',
     'Comprueba la conexión Wi-Fi antes de introducir el código para evitar cortes.',
     'Si necesitas cambiar turnos o revisar la cola, vuelve al panel de barberos desde la tablet.'
   ];
@@ -203,3 +208,4 @@ export class StaffTvSetupPageComponent {
     return this.authStore.isAuthenticated() ? this.routes.staff.root : this.routes.pricing;
   }
 }
+

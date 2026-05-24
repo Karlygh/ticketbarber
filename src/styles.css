@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap');
+@import './app/features/home/home-page-global.css';
 
 /* ═══════════════════════════════════════════════════════
    TICKETBARBER — DESIGN SYSTEM v2
@@ -126,6 +127,13 @@
   --section-pricing-border: rgba(245, 158, 11, 0.28);
   --section-pricing-glow:   rgba(245, 158, 11, 0.22);
 
+  /* TV → Cyan (pantalla pública) */
+  --section-tv:        var(--cyan-500);
+  --section-tv-light:  var(--cyan-300);
+  --section-tv-subtle: rgba(6, 182, 212, 0.12);
+  --section-tv-border: rgba(6, 182, 212, 0.28);
+  --section-tv-glow:   rgba(6, 182, 212, 0.22);
+
   /* ══════════════════════════════════════
      SEMANTIC TOKENS — ESTADOS
      ══════════════════════════════════════ */
@@ -160,6 +168,30 @@
 
   /* PRO badge */
   --pro-gradient: linear-gradient(135deg, var(--indigo-600), var(--indigo-400));
+
+  /* Shared semantic colors for reusable surfaces and premium states */
+  --app-shell-bg: #0d1b2a;
+  --surface-soft: rgba(255, 255, 255, 0.04);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --text-on-dark-strong: rgba(255, 255, 255, 0.85);
+  --text-on-dark-medium: rgba(255, 255, 255, 0.75);
+  --text-on-dark-soft: rgba(255, 255, 255, 0.55);
+  --text-on-dark-muted: rgba(255, 255, 255, 0.45);
+  --text-on-dark-faint: rgba(255, 255, 255, 0.35);
+  --premium-cyan: #00e5d4;
+  --premium-cyan-soft: rgba(0, 229, 212, 0.06);
+  --premium-cyan-ring: rgba(0, 229, 212, 0.15);
+  --premium-gold: #ffd700;
+  --premium-gold-glow: rgba(255, 215, 0, 0.35);
+  --overlay-backdrop: rgba(0, 0, 0, 0.65);
+  --surface-card-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  --surface-modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --spinner-ring-muted: rgba(255, 255, 255, 0.35);
+  --danger-strong: #dc2626;
+  --danger-gradient: linear-gradient(135deg, var(--danger-strong), var(--red-500));
+  --danger-glow: rgba(239, 68, 68, 0.3);
+  --danger-subtle: rgba(239, 68, 68, 0.12);
+  --danger-border-soft: rgba(239, 68, 68, 0.35);
 
   /* Radius scale */
   --r-sm:  0.5rem;

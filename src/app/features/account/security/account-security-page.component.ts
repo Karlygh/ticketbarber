@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
@@ -9,6 +9,7 @@ import { FooterComponent } from '../../../shared/components/footer/footer.compon
   standalone: true,
   imports: [RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './account-security-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './account-security-page.component.css'
 })
 export class AccountSecurityPageComponent {
@@ -40,3 +41,4 @@ export class AccountSecurityPageComponent {
     window.open('https://myaccount.google.com/two-step-verification', '_blank', 'noopener,noreferrer');
   }
 }
+

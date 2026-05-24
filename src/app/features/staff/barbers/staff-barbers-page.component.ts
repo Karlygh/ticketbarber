@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { BarberProfile } from '../../../core/models/barber.model';
 import { BarberService } from '../../../core/services/barber.service';
 import { QueueStore } from '../../../core/stores/queue.store';
+import { barberInitials } from '../../../core/utils/barber-display.util';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { APP_ROUTES } from '../../../shared/routing/app-routes';
@@ -15,6 +16,7 @@ import { APP_ROUTES } from '../../../shared/routing/app-routes';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './staff-barbers-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-barbers-page.component.css'
 })
 export class StaffBarbersPageComponent {
@@ -111,12 +113,7 @@ export class StaffBarbersPageComponent {
   }
 
   initials(name: string): string {
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join('');
+    return barberInitials(name);
   }
 
   private clearBanners(): void {
@@ -131,7 +128,7 @@ export class StaffBarbersPageComponent {
     this.isBusy.set(true);
     try {
       await action();
-    } catch (err) {
+    } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'No se pudo completar la accion.';
       this.error.set(message);
     } finally {
@@ -139,3 +136,4 @@ export class StaffBarbersPageComponent {
     }
   }
 }
+

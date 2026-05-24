@@ -1,7 +1,7 @@
-<div class="modal-backdrop" (click)="close()"></div>
-<div class="modal-content">
-  <button class="close-btn" (click)="close()">&times;</button>
-  <h2>Detalles del Cliente</h2>
+<div class="modal-backdrop" (click)="close()" aria-hidden="true"></div>
+<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="customer-detail-title">
+  <button class="close-btn" type="button" aria-label="Cerrar detalles del cliente" (click)="close()">&times;</button>
+  <h2 id="customer-detail-title">Detalles del Cliente</h2>
   <div class="customer-details">
     <div><strong>Nombre:</strong> {{ customer?.name || '-' }}</div>
     <div><strong>Hora de llegada:</strong> {{ customer?.arrivalTime || '-' }}</div>

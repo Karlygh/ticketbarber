@@ -1,7 +1,7 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe, DatePipe, UpperCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthStore } from '../../core/stores/auth.store';
 import { SubscriptionStore } from '../../core/stores/subscription.store';
 import { StripeService } from '../../core/services/stripe.service';
@@ -14,6 +14,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
   standalone: true,
   imports: [DatePipe, CurrencyPipe, UpperCasePipe, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './account-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './account-page.component.css'
 })
 export class AccountPageComponent implements OnInit {
@@ -21,7 +22,6 @@ export class AccountPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly stripeService = inject(StripeService);
   private readonly destroyRef = inject(DestroyRef);
-  private paymentsSub: Subscription | null = null;
 
   readonly subscriptionStore = inject(SubscriptionStore);
 
@@ -47,7 +47,6 @@ export class AccountPageComponent implements OnInit {
     const uid = this.authStore.user()?.uid;
     if (!uid) return;
 
-    this.destroyRef.onDestroy(() => this.paymentsSub?.unsubscribe());
     this.loadPayments();
   }
 
@@ -55,16 +54,15 @@ export class AccountPageComponent implements OnInit {
     const uid = this.authStore.user()?.uid;
     if (!uid) return;
 
-    this.paymentsSub?.unsubscribe();
     this.paymentsLoading.set(true);
     this.paymentsError.set(null);
 
-    this.paymentsSub = this.stripeService.getPayments(uid).subscribe({
+    this.stripeService.getPayments(uid).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (p) => {
         this.payments.set(p);
         this.paymentsLoading.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Error cargando pagos:', err);
         this.paymentsError.set('No se pudo cargar el historial de pagos. Intentalo de nuevo.');
         this.paymentsLoading.set(false);
@@ -81,7 +79,7 @@ export class AccountPageComponent implements OnInit {
     this.portalError.set(null);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Portal error:', err);
       this.portalError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {

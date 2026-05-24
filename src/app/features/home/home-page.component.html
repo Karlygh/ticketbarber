@@ -24,7 +24,15 @@
         } @else {
           <a class="cta-primary" routerLink="/staff/start">Prueba 7 dias gratis</a>
         }
-        <a class="cta-secondary" href="assets/video-home.mp4">Ver video</a>
+        <button
+          type="button"
+          class="cta-secondary"
+          [disabled]="!homeVideoReady"
+          [attr.aria-disabled]="!homeVideoReady"
+          [attr.title]="homeVideoReady ? 'Ver video' : 'Video disponible pronto'"
+          (click)="openHomeVideo()">
+          {{ homeVideoReady ? 'Ver video' : 'Video proximamente' }}
+        </button>
       </div>
 
       <p class="hero-note hero-seq hero-seq--5">Sin tarjeta de credito • Cancelas cuando quieras</p>
@@ -198,7 +206,13 @@
       <div class="media-card">
         <div class="media-preview">
           <img src="assets/app-1.jpg" alt="Vista previa multimedia de TicketBarber" />
-          <button type="button" class="play-button" aria-label="Reproducir video">▶</button>
+          <button
+            type="button"
+            class="play-button"
+            [disabled]="!homeVideoReady"
+            [attr.aria-disabled]="!homeVideoReady"
+            [attr.aria-label]="homeVideoReady ? 'Reproducir video' : 'Video disponible pronto'"
+            (click)="openHomeVideo()">▶</button>
         </div>
 
         <div class="media-copy">

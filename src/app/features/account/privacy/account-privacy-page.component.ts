@@ -1,8 +1,10 @@
-import { Component, EnvironmentInjector, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EnvironmentInjector, inject, runInInjectionContext, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Firestore, collection, getDocs } from '@angular/fire/firestore';
+import { firstValueFrom } from 'rxjs';
+import { Payment } from '../../../core/models/user.model';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { StripeService } from '../../../core/services/stripe.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
@@ -13,6 +15,7 @@ import { FooterComponent } from '../../../shared/components/footer/footer.compon
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, HeaderComponent, FooterComponent],
   templateUrl: './account-privacy-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './account-privacy-page.component.css'
 })
 export class AccountPrivacyPageComponent {
@@ -60,7 +63,7 @@ export class AccountPrivacyPageComponent {
       await deleteFn({});
       await this.authStore.signOut();
       void this.router.navigateByUrl('/');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error eliminando cuenta:', err);
       this.deleteError.set('No se pudo eliminar la cuenta. Contacta con soporte si el problema persiste.');
       this.deleteStep.set('error');
@@ -83,13 +86,8 @@ export class AccountPrivacyPageComponent {
         photoURL: user.photoURL
       };
 
-      // Historial de pagos (observable → Promise)
-      const payments = await new Promise<object[]>((resolve) => {
-        const sub = this.stripeService.getPayments(uid).subscribe({
-          next: (p) => { resolve(p as object[]); sub.unsubscribe(); },
-          error: () => { resolve([]); }
-        });
-      });
+      // Historial de pagos
+      const payments = await firstValueFrom(this.stripeService.getPayments(uid)).catch((): Payment[] => []);
 
       // Historial de tickets
       const ticketsCollection = this.runInCtx(() => collection(this.firestore, `shops/${uid}/tickets`));
@@ -110,7 +108,7 @@ export class AccountPrivacyPageComponent {
       a.download = `ticketbarber-datos-${uid.slice(0, 8)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error exportando datos:', err);
       this.exportError.set('No se pudo exportar. Inténtalo de nuevo.');
     } finally {
@@ -118,3 +116,4 @@ export class AccountPrivacyPageComponent {
     }
   }
 }
+

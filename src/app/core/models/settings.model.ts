@@ -19,7 +19,7 @@ export interface QueueSettings {
 }
 
 export const DEFAULT_QUEUE_SETTINGS: QueueSettings = {
-  isOpen: true,
+  isOpen: false,
   updatedAtMs: 0,
   activeBarberIds: [],
   barberStates: {},

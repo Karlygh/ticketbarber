@@ -1,9 +1,9 @@
-import { Component, EnvironmentInjector, OnInit, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, EnvironmentInjector, inject, OnInit, runInInjectionContext, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Auth, updateProfile } from '@angular/fire/auth';
-import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
-import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
+import { Storage, deleteObject, getDownloadURL, ref, uploadBytesResumable } from '@angular/fire/storage';
+import { Firestore, doc, setDoc } from '@angular/fire/firestore';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
@@ -13,6 +13,7 @@ import { FooterComponent } from '../../../shared/components/footer/footer.compon
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, HeaderComponent, FooterComponent],
   templateUrl: './account-profile-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './account-profile-page.component.css'
 })
 export class AccountProfilePageComponent implements OnInit {
@@ -22,6 +23,7 @@ export class AccountProfilePageComponent implements OnInit {
   private readonly injector = inject(EnvironmentInjector);
   private readonly fb = inject(FormBuilder);
   private readonly authStore = inject(AuthStore);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
@@ -33,6 +35,17 @@ export class AccountProfilePageComponent implements OnInit {
   readonly avatarError = signal<string | null>(null);
 
   form!: FormGroup;
+  private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private currentAvatarUrl: string | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.successTimeoutId !== null) {
+        clearTimeout(this.successTimeoutId);
+        this.successTimeoutId = null;
+      }
+    });
+  }
 
   private runInCtx<T>(fn: () => T): T {
     return runInInjectionContext(this.injector, fn);
@@ -46,6 +59,7 @@ export class AccountProfilePageComponent implements OnInit {
     });
     if (user?.photoURL) {
       this.avatarPreview.set(user.photoURL);
+      this.currentAvatarUrl = user.photoURL;
     }
   }
 
@@ -83,6 +97,8 @@ export class AccountProfilePageComponent implements OnInit {
       },
       async () => {
         const url = await this.runInCtx(() => getDownloadURL(task.snapshot.ref));
+        await this.deleteStoredFile(this.currentAvatarUrl, url);
+        this.currentAvatarUrl = url;
         this.avatarPreview.set(url);
         this.form.get('photoURL')!.setValue(url);
         this.avatarUploading.set(false);
@@ -104,15 +120,40 @@ export class AccountProfilePageComponent implements OnInit {
       await this.runInCtx(() => updateProfile(currentUser, { displayName, photoURL: photoURL || null }));
 
       const userRef = this.runInCtx(() => doc(this.firestore, `users/${currentUser.uid}`));
-      await this.runInCtx(() => updateDoc(userRef, { displayName, photoURL: photoURL || null }));
+      await this.runInCtx(() =>
+        setDoc(userRef, { uid: currentUser.uid, displayName, photoURL: photoURL || null }, { merge: true })
+      );
+      this.currentAvatarUrl = photoURL || null;
 
       this.saveSuccess.set(true);
-      setTimeout(() => this.saveSuccess.set(false), 3000);
-    } catch (err) {
+      this.scheduleSuccessReset();
+    } catch (err: unknown) {
       console.error('Error guardando perfil:', err);
       this.saveError.set('No se pudo guardar. Inténtalo de nuevo.');
     } finally {
       this.saving.set(false);
     }
   }
+
+  private scheduleSuccessReset(): void {
+    if (this.successTimeoutId !== null) {
+      clearTimeout(this.successTimeoutId);
+      this.successTimeoutId = null;
+    }
+    this.successTimeoutId = setTimeout(() => {
+      this.successTimeoutId = null;
+      this.saveSuccess.set(false);
+    }, 3000);
+  }
+
+  private async deleteStoredFile(fileUrl: string | null, nextUrl?: string): Promise<void> {
+    if (!fileUrl || fileUrl === nextUrl) return;
+
+    try {
+      await this.runInCtx(() => deleteObject(ref(this.storage, fileUrl)));
+    } catch {
+      // Ignora referencias antiguas o ya eliminadas.
+    }
+  }
 }
+

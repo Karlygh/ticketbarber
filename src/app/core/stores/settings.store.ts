@@ -20,7 +20,7 @@ export class SettingsStore {
     this.bootstrapped = true;
     try {
       await this.repository.bootstrapDefaults();
-    } catch (error) {
+    } catch (error: unknown) {
       // Kiosk/TV can run in read-only mode if Firestore rules deny bootstrap writes.
       // Staff view can still create defaults after authentication.
       console.warn('Bootstrap skipped due to Firestore permissions:', error);

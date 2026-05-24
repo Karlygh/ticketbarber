@@ -41,6 +41,21 @@ service cloud.firestore {
              && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.expiresAt > request.time.toMillis();
     }
 
+    function isActiveDevice() {
+      return (!('active' in resource.data) || resource.data.active == true)
+             && (!('revokedAt' in resource.data) || resource.data.revokedAt == 0);
+    }
+
+    function canUpdateDeviceHeartbeat(deviceId) {
+      return request.auth == null
+             && request.resource.data.deviceId == deviceId
+             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen'])
+             && request.resource.data.lastSeen is number
+             && request.resource.data.lastSeen >= resource.data.lastSeen
+             && request.resource.data.lastSeen <= request.time.toMillis()
+             && isActiveDevice();
+    }
+
     // ── Perfil del usuario ─────────────────────────────────────────────────
     // Solo el propio usuario puede leer/actualizar su perfil.
     // La creación se hace desde el backend (AuthStore) justo después del login.
@@ -151,14 +166,17 @@ service cloud.firestore {
 
     // ── Dispositivos vinculados (permanentes) ─────────────────────────────
     match /devices/{deviceId} {
-      // Solo el propietario puede leer, crear, actualizar y eliminar
-      allow read, delete: if request.auth != null
-                          && resource.data.userId == request.auth.uid;
+      // La TV conoce un identificador aleatorio y necesita validar su propio vínculo sin login.
+      allow get: if request.auth == null
+                 || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow list, delete: if request.auth != null
+                         && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
                     || canCreateDeviceFromCode(deviceId);
       allow update: if request.auth != null
-                    && resource.data.userId == request.auth.uid;
+                    && resource.data.userId == request.auth.uid
+                    || canUpdateDeviceHeartbeat(deviceId);
     }
 
     // ── Contactos (formulario de contacto) ────────────────────────────────

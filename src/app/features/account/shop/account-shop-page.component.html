@@ -16,7 +16,7 @@
 
   <h1>Mi negocio</h1>
   <p class="page-lead">
-    Esta información aparece en la pantalla TV y el kiosk de tu barbería.
+    Esta información se usa dentro de las vistas internas de tu barbería.
   </p>
 
   @if (loading()) {
@@ -146,7 +146,7 @@
               maxlength="20"
             />
             <p class="field-hint" style="text-align:left; margin-top:0.45rem;">
-              Cola TV: <a [href]="tvQueueUrl" target="_blank" rel="noopener noreferrer">{{ tvQueueUrl }}</a>
+              La vista TV se abre solo desde tu panel interno de staff.
             </p>
           </div>
         </div>
@@ -176,7 +176,7 @@
     <div class="form-section">
       <form [formGroup]="hoursForm" (ngSubmit)="saveHours()" novalidate>
         <h2 class="section-title">Horario de apertura</h2>
-        <p class="section-note">Este horario único se aplica a toda la semana y se muestra en TV y kiosk.</p>
+        <p class="section-note">Este horario único se aplica a toda la semana y se refleja en tus vistas internas.</p>
 
         <div class="hours-grid">
           <div class="hours-row">

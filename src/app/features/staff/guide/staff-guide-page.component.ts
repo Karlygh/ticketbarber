@@ -1,15 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  HostListener,
-  NgZone,
-  computed,
-  effect,
-  inject,
-  signal
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, HostListener, inject, NgZone, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { StaffBarbersPageComponent } from '../barbers/staff-barbers-page.component';
 import { StaffPageComponent } from '../dashboard/staff-page.component';
@@ -31,6 +21,7 @@ type GuideCardStyle = Record<string, string>;
   standalone: true,
   imports: [CommonModule, StaffPageComponent, StaffBarbersPageComponent],
   templateUrl: './staff-guide-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-guide-page.component.css'
 })
 export class StaffGuidePageComponent implements AfterViewInit {
@@ -214,3 +205,4 @@ export class StaffGuidePageComponent implements AfterViewInit {
     return style;
   }
 }
+

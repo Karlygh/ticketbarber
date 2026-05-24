@@ -7,16 +7,15 @@ import {
   query,
   where,
   orderBy,
-  limit,
   doc,
-  updateDoc,
-  serverTimestamp
+  updateDoc
 } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import {
   CheckoutSession,
   Payment,
+  SubscriptionStatus,
   StripePrice,
   StripeProduct,
   StripeSubscription
@@ -47,6 +46,16 @@ export class StripeService {
   private readonly functions = inject(Functions);
 
   private static readonly CHECKOUT_TIMEOUT_MS = 30_000;
+  private static readonly SUBSCRIPTION_PRIORITY: Readonly<Record<SubscriptionStatus, number>> = {
+    active: 0,
+    trialing: 1,
+    past_due: 2,
+    incomplete: 3,
+    canceled: 4,
+    unpaid: 5,
+    incomplete_expired: 6,
+    paused: 7
+  };
 
   // ── Catálogo de productos ───────────────────────────────────────────────
 
@@ -268,23 +277,36 @@ export class StripeService {
       }
 
       window.location.assign(url);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[Stripe] Error al crear portal de cliente:', err);
       const message = err instanceof Error ? err.message : 'Error desconocido al abrir el portal.';
       throw new Error(`No se pudo abrir el portal de gestión: ${message}`);
     }
   }
 
+  /** Variante basada en Promise para reutilizar el mismo flujo de checkout desde varias pantallas. */
+  startCheckoutRedirect(uid: string, priceId: string, trial = false): Promise<string> {
+    return firstValueFrom(this.startCheckout(uid, priceId, trial));
+  }
+
   // ── Suscripciones ──────────────────────────────────────────────────────
 
-  /** Devuelve la suscripción activa más reciente del usuario. */
+  /** Devuelve la suscripción más relevante del usuario para que la UI interprete su estado actual. */
   getActiveSubscription(uid: string): Observable<StripeSubscription | null> {
     return new Observable<StripeSubscription | null>((subscriber) => {
       const subsRef = collection(this.firestore, `customers/${uid}/subscriptions`);
       const q = query(
         subsRef,
-        where('status', 'in', ['active', 'trialing']),
-        limit(1)
+        where('status', 'in', [
+          'active',
+          'trialing',
+          'past_due',
+          'canceled',
+          'unpaid',
+          'incomplete',
+          'incomplete_expired',
+          'paused'
+        ])
       );
 
       const unsub = onSnapshot(
@@ -294,18 +316,10 @@ export class StripeService {
             subscriber.next(null);
             return;
           }
-          const raw = snap.docs[0].data();
-          const sub: StripeSubscription = {
-            id: snap.docs[0].id,
-            status: raw['status'],
-            priceId: raw['price']?.id ?? raw['items']?.[0]?.price?.id ?? '',
-            productId: raw['product'] ?? raw['items']?.[0]?.price?.product ?? '',
-            currentPeriodStart: raw['current_period_start']?.seconds ?? 0,
-            currentPeriodEnd: raw['current_period_end']?.seconds ?? 0,
-            cancelAtPeriodEnd: raw['cancel_at_period_end'] ?? false,
-            trialEnd: raw['trial_end']?.seconds ?? null
-          };
-          subscriber.next(sub);
+          const current = snap.docs
+            .map((subDoc) => this.toSubscription(subDoc.id, subDoc.data()))
+            .sort((a, b) => this.compareSubscriptions(a, b))[0] ?? null;
+          subscriber.next(current);
         },
         (err) => subscriber.error(err)
       );
@@ -323,19 +337,7 @@ export class StripeService {
       const unsub = onSnapshot(
         q,
         (snap) => {
-          const subs: StripeSubscription[] = snap.docs.map((d) => {
-            const raw = d.data();
-            return {
-              id: d.id,
-              status: raw['status'],
-              priceId: raw['price']?.id ?? raw['items']?.[0]?.price?.id ?? '',
-              productId: raw['product'] ?? raw['items']?.[0]?.price?.product ?? '',
-              currentPeriodStart: raw['current_period_start']?.seconds ?? 0,
-              currentPeriodEnd: raw['current_period_end']?.seconds ?? 0,
-              cancelAtPeriodEnd: raw['cancel_at_period_end'] ?? false,
-              trialEnd: raw['trial_end']?.seconds ?? null
-            } as StripeSubscription;
-          });
+          const subs: StripeSubscription[] = snap.docs.map((d) => this.toSubscription(d.id, d.data()));
           subscriber.next(subs);
         },
         (err) => subscriber.error(err)
@@ -373,5 +375,30 @@ export class StripeService {
 
       return () => unsub();
     });
+  }
+
+  private toSubscription(id: string, raw: Record<string, unknown>): StripeSubscription {
+    return {
+      id,
+      status: (raw['status'] as SubscriptionStatus | undefined) ?? 'incomplete',
+      priceId: (raw['price'] as { id?: string } | undefined)?.id ??
+        ((raw['items'] as { 0?: { price?: { id?: string } } } | undefined)?.[0]?.price?.id ?? ''),
+      productId: (raw['product'] as string | undefined) ??
+        ((raw['items'] as { 0?: { price?: { product?: string } } } | undefined)?.[0]?.price?.product ?? ''),
+      currentPeriodStart: (raw['current_period_start'] as { seconds?: number } | undefined)?.seconds ?? 0,
+      currentPeriodEnd: (raw['current_period_end'] as { seconds?: number } | undefined)?.seconds ?? 0,
+      cancelAtPeriodEnd: Boolean(raw['cancel_at_period_end']),
+      trialEnd: (raw['trial_end'] as { seconds?: number } | undefined)?.seconds ?? null
+    };
+  }
+
+  private compareSubscriptions(a: StripeSubscription, b: StripeSubscription): number {
+    const priorityDiff =
+      (StripeService.SUBSCRIPTION_PRIORITY[a.status] ?? Number.MAX_SAFE_INTEGER) -
+      (StripeService.SUBSCRIPTION_PRIORITY[b.status] ?? Number.MAX_SAFE_INTEGER);
+    if (priorityDiff !== 0) {
+      return priorityDiff;
+    }
+    return b.currentPeriodEnd - a.currentPeriodEnd;
   }
 }

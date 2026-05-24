@@ -6,9 +6,9 @@
   overflow: hidden;
   color: var(--text-primary);
   background:
-    radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.12) 0%, transparent 34%),
-    radial-gradient(circle at 90% 16%, rgba(245, 158, 11, 0.1) 0%, transparent 34%),
-    linear-gradient(135deg, #071428 0%, #0a1f3a 52%, #081624 100%);
+    radial-gradient(circle at 10% 10%, var(--section-tv-subtle) 0%, transparent 34%),
+    radial-gradient(circle at 90% 16%, var(--section-pricing-subtle) 0%, transparent 34%),
+    linear-gradient(135deg, var(--bg-page) 0%, var(--navy-850) 52%, var(--navy-900) 100%);
 }
 
 .tv-shell {

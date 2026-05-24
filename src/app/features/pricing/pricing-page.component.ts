@@ -2,17 +2,18 @@ import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
   OnInit,
   computed,
   inject,
   signal
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthStore } from '../../core/stores/auth.store';
 import { SubscriptionStore } from '../../core/stores/subscription.store';
 import { StripeService } from '../../core/services/stripe.service';
+import { BrowserStorageService } from '../../core/services/browser-storage.service';
 import { StripePrice, StripeProduct } from '../../core/models/user.model';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -30,13 +31,14 @@ export interface PricingProduct extends StripeProduct {
   styleUrl: './pricing-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PricingPageComponent implements OnInit, OnDestroy {
+export class PricingPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly authStore = inject(AuthStore);
   readonly subscriptionStore = inject(SubscriptionStore);
   private readonly stripeService = inject(StripeService);
-  private productsSub: Subscription | null = null;
+  private readonly storage = inject(BrowserStorageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly routes = APP_ROUTES;
 
@@ -73,16 +75,11 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  ngOnDestroy(): void {
-    this.productsSub?.unsubscribe();
-  }
-
   loadProducts(): void {
-    this.productsSub?.unsubscribe();
     this.loading.set(true);
     this.productsError.set(null);
 
-    this.productsSub = this.stripeService.getProducts().subscribe({
+    this.stripeService.getProducts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (prods) => {
         this.products.set(prods as PricingProduct[]);
         if (!this.monthlyPrice() && this.yearlyPrice()) {
@@ -101,11 +98,11 @@ export class PricingPageComponent implements OnInit, OnDestroy {
   }
 
   private triggerPendingCheckout(): void {
-    const pendingPriceId = sessionStorage.getItem('pendingPriceId');
+    const pendingPriceId = this.storage.getSessionItem('pendingPriceId');
     if (!pendingPriceId) return;
     const uid = this.authStore.user()?.uid;
     if (!uid) return;
-    sessionStorage.removeItem('pendingPriceId');
+    this.storage.removeSessionItem('pendingPriceId');
     const price = this.products()
       .flatMap((p) => p.prices)
       .find((p) => p.id === pendingPriceId);
@@ -189,8 +186,8 @@ export class PricingPageComponent implements OnInit, OnDestroy {
 
     const uid = this.authStore.user()?.uid;
     if (!uid) {
-      sessionStorage.setItem('pendingPriceId', price.id);
-      this.router.navigate(['/staff/register'], {
+      this.storage.setSessionItem('pendingPriceId', price.id);
+      void this.router.navigate(['/staff/register'], {
         queryParams: { reason: 'auth-required', returnUrl: '/pricing' }
       });
       return;
@@ -198,12 +195,7 @@ export class PricingPageComponent implements OnInit, OnDestroy {
 
     this.loadingPriceId.set(price.id);
     try {
-      await new Promise<void>((resolve, reject) => {
-        this.stripeService.startCheckout(uid, price.id).subscribe({
-          next: () => resolve(),
-          error: (err) => reject(err)
-        });
-      });
+      await this.stripeService.startCheckoutRedirect(uid, price.id);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al iniciar el pago';
       this.checkoutError.set(message);
@@ -218,7 +210,7 @@ export class PricingPageComponent implements OnInit, OnDestroy {
     this.portalLoading.set(true);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[Pricing] Portal error:', err);
       this.checkoutError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {

@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeviceDoc, TvAuthService } from '../../../../core/services/tv-auth.service';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -12,10 +12,12 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, HeaderComponent],
   templateUrl: './devices-management.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './devices-management.component.css'
 })
-export class DevicesManagementComponent implements OnInit, OnDestroy {
+export class DevicesManagementComponent implements OnInit {
   private readonly tvAuthService = inject(TvAuthService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly routes = APP_ROUTES;
 
   readonly devices = signal<DeviceDoc[]>([]);
@@ -23,14 +25,8 @@ export class DevicesManagementComponent implements OnInit, OnDestroy {
   readonly renamingId = signal<string | null>(null);
   readonly newName = signal('');
 
-  private sub?: Subscription;
-
   ngOnInit(): void {
-    this.sub = this.tvAuthService.watchDevices().subscribe(d => this.devices.set(d));
-  }
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.tvAuthService.watchDevices().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((d) => this.devices.set(d));
   }
 
   startRename(device: DeviceDoc): void {
@@ -45,6 +41,11 @@ export class DevicesManagementComponent implements OnInit, OnDestroy {
     await this.tvAuthService.renameDevice(id, name);
     this.renamingId.set(null);
     this.newName.set('');
+  }
+
+  onRenameInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    this.newName.set(input?.value ?? '');
   }
 
   cancelRename(): void {

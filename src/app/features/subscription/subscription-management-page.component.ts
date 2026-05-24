@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -23,6 +23,7 @@ const CANCEL_REASONS = [
   standalone: true,
   imports: [CommonModule, DatePipe, RouterLink, ReactiveFormsModule, HeaderComponent, FooterComponent],
   templateUrl: './subscription-management-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './subscription-management-page.component.css'
 })
 export class SubscriptionManagementPageComponent {
@@ -71,7 +72,7 @@ export class SubscriptionManagementPageComponent {
     this.portalError.set(null);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Portal error:', err);
       this.portalError.set('No se pudo abrir el portal. Inténtalo más tarde.');
     } finally {
@@ -106,7 +107,7 @@ export class SubscriptionManagementPageComponent {
       });
       this.cancelModalOpen.set(false);
       await this.openPortal();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error guardando feedback:', err);
       this.cancelError.set('No se pudo guardar el motivo. Inténtalo de nuevo.');
     } finally {
@@ -114,3 +115,4 @@ export class SubscriptionManagementPageComponent {
     }
   }
 }
+

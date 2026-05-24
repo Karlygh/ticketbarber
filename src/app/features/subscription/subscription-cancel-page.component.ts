@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 
@@ -6,6 +6,7 @@ import { HeaderComponent } from '../../shared/components/header/header.component
   selector: 'app-subscription-cancel-page',
   standalone: true,
   imports: [HeaderComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-header></app-header>
     <div class="result-page cancel">
@@ -18,43 +19,7 @@ import { HeaderComponent } from '../../shared/components/header/header.component
       </div>
     </div>
   `,
-  styles: [`
-    .result-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 70vh;
-      gap: 1rem;
-      text-align: center;
-      padding: 2rem;
-    }
-    .icon { font-size: 4rem; }
-    h1 { font-size: 2rem; font-weight: 700; }
-    p { color: #4b5563; }
-    .actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 0.5rem; }
-    .btn-primary {
-      padding: 0.75rem 2rem;
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      border-radius: 0.625rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-primary:hover { background: #4338ca; }
-    .btn-secondary {
-      padding: 0.75rem 2rem;
-      background: transparent;
-      color: #4f46e5;
-      border: 2px solid #4f46e5;
-      border-radius: 0.625rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-  `]
+  styleUrl: './subscription-cancel-page.component.css'
 })
 export class SubscriptionCancelPageComponent {
   private readonly router = inject(Router);

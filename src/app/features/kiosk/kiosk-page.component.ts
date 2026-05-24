@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -9,13 +9,16 @@ import { ShopService } from '../../core/services/shop.service';
 import { TicketReceipt } from '../../core/models/ticket.model';
 import { BarberService } from '../../core/services/barber.service';
 import { BarberProfile } from '../../core/models/barber.model';
+import { barberInitials } from '../../core/utils/barber-display.util';
 import { formatOpeningHoursForToday } from '../../core/utils/opening-hours.util';
+import { buildTvQueueRouteCommands } from '../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-kiosk-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ],
   templateUrl: './kiosk-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './kiosk-page.component.css'
 })
 export class KioskPageComponent implements OnInit {
@@ -37,10 +40,7 @@ export class KioskPageComponent implements OnInit {
   readonly availableBarbers = computed(() =>
     this.barbers().filter((barber) => barber.isAvailableToday && barber.status !== 'hidden')
   );
-  readonly tvQueueRoute = computed(() => {
-    const shopId = this.authStore.user()?.uid;
-    return shopId ? ['/tv', shopId] : ['/tv'];
-  });
+  readonly tvQueueRoute = computed(() => buildTvQueueRouteCommands(this.authStore.user()?.uid));
 
   readonly form = this.fb.nonNullable.group({
     barberId: ['', [Validators.required]],
@@ -63,12 +63,7 @@ export class KioskPageComponent implements OnInit {
   }
 
   initials(name: string): string {
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join('');
+    return barberInitials(name);
   }
 
   selectBarber(barberId: string): void {
@@ -139,7 +134,7 @@ export class KioskPageComponent implements OnInit {
         serviceId: '',
         phone: ''
       });
-    } catch (error) {
+    } catch (error: unknown) {
       this.errorMessage.set(this.toMessage(error));
     } finally {
       this.isSubmitting.set(false);
@@ -153,3 +148,4 @@ export class KioskPageComponent implements OnInit {
     return 'No se pudo crear el ticket. Intentalo de nuevo.';
   }
 }
+

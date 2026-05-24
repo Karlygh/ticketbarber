@@ -26,6 +26,8 @@ Aplicacion Angular 20 para gestionar cola de barberia en tres pantallas:
 - `npm start` inicia entorno local
 - `npm run build` genera build de produccion
 - `npm test` ejecuta tests unitarios
+- `npm run lint` valida tipado estatico de app y specs
+- `npm run check` ejecuta secuencia de entrega (`build` + `test` headless + `lint`)
 
 ## Rutas
 

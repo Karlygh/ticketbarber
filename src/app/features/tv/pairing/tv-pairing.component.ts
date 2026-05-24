@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TvAuthService } from '../../core/services/tv-auth.service';
-import { HeaderComponent } from '../../shared/components/header/header.component';
-import { APP_ROUTES } from '../../shared/routing/app-routes';
+import { TvAuthService } from '../../../core/services/tv-auth.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { APP_ROUTES } from '../../../shared/routing/app-routes';
 
 @Component({
   selector: 'app-tv-pairing',
   standalone: true,
   imports: [CommonModule, RouterLink, HeaderComponent],
   templateUrl: './tv-pairing.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './tv-pairing.component.css'
 })
 export class TvPairingComponent implements OnInit, OnDestroy {
@@ -112,11 +113,6 @@ export class TvPairingComponent implements OnInit, OnDestroy {
     }
   }
 
-  private cleanup(): void {
-    if (this.countdownInterval) clearInterval(this.countdownInterval);
-    this.stopLinkCheck();
-  }
-
   async regenerate(): Promise<void> {
     await this.loadCode(true);
   }
@@ -125,6 +121,11 @@ export class TvPairingComponent implements OnInit, OnDestroy {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  private cleanup(): void {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    this.stopLinkCheck();
   }
 
   ngOnDestroy(): void {

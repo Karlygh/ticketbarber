@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
@@ -13,6 +13,7 @@ interface ActivationFeature {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './staff-trial-start-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-trial-start-page.component.css'
 })
 export class StaffTrialStartPageComponent {
@@ -56,3 +57,4 @@ export class StaffTrialStartPageComponent {
     void this.router.navigateByUrl(this.routes.root);
   }
 }
+

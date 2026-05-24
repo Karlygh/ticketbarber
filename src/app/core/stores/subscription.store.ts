@@ -55,10 +55,15 @@ export class SubscriptionStore {
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
 
+  readonly hasSubscriptionRecord = computed(() => {
+    const sub = this._subscription();
+    return sub !== undefined && sub !== null;
+  });
+
   /** true solo si hay suscripción Stripe active|trialing */
   readonly isPro = computed(() => {
     const sub = this._subscription();
-    return sub !== undefined && sub !== null;
+    return sub?.status === 'active' || sub?.status === 'trialing';
   });
 
   readonly isTrialing = computed(() => this._subscription()?.status === 'trialing');
@@ -78,7 +83,7 @@ export class SubscriptionStore {
    */
   readonly isTrialActive = computed(() => {
     if (!this._profileReady()) return false;
-    if (this.isPro()) return false;
+    if (this.hasSubscriptionRecord()) return false;
     const expires = this._trialExpiresAt();
     if (!expires) return false;
     return Date.now() < expires.getTime();
@@ -96,7 +101,7 @@ export class SubscriptionStore {
    * true si el usuario puede acceder a las funciones de pago:
    * suscripción Stripe activa (Pro) O trial gratuito de 7 días en curso.
    */
-  readonly hasAccess = computed(() => this.isPro() || this.isTrialActive());
+  readonly hasAccess = computed(() => this.isPro() || this.isPastDue() || this.isTrialActive());
 
   /** true cuando el perfil de Firestore ya fue leído (necesario para el guard) */
   readonly profileReady = computed(() => this._profileReady());
@@ -104,7 +109,7 @@ export class SubscriptionStore {
   /** true si el trial gratuito expiró y no hay suscripción Stripe */
   readonly isTrialExpired = computed(() => {
     if (!this._profileReady()) return false;
-    if (this.isPro()) return false;
+    if (this.hasSubscriptionRecord()) return false;
     const expires = this._trialExpiresAt();
     if (!expires) return false;
     return Date.now() >= expires.getTime();
@@ -139,6 +144,7 @@ export class SubscriptionStore {
       if (sub.status === 'past_due') return 'pro-past-due';
       if (sub.status === 'canceled' || sub.status === 'unpaid' ||
           sub.status === 'incomplete_expired' || sub.status === 'paused') return 'pro-expired';
+      if (sub.status === 'incomplete') return 'free';
       if (sub.status === 'trialing') return 'pro-trialing';
       if (sub.cancelAtPeriodEnd) return 'pro-canceling';
       return 'pro-active';

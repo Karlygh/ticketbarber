@@ -92,9 +92,17 @@
 }
 
 .light-brand-copy p {
-  margin: 0.35rem 0 0;
+  margin: 0;
   color: #41577f;
   font-size: 1.25rem;
+}
+
+.light-brand-subline {
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .light-hours-card,
@@ -134,12 +142,6 @@
 
 .hours-copy {
   min-width: 0;
-}
-
-.hours-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
 }
 
 .light-back-inline {
@@ -411,6 +413,15 @@
 .card-next {
   display: grid;
   gap: 1rem;
+}
+
+.card-next.has-upcoming {
+  align-content: start;
+  align-items: start;
+}
+
+.card-next.has-upcoming .next-list {
+  align-self: start;
 }
 
 .next-list {

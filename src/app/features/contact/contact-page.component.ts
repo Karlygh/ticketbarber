@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Functions, httpsCallable } from '@angular/fire/functions';
@@ -8,16 +8,24 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { ContactRequest, ContactResponse } from '../../core/models/contact.model';
 import { APP_ROUTES } from '../../shared/routing/app-routes';
 
+interface CallableError {
+  code?: string;
+  message?: string;
+}
+
 @Component({
   selector: 'app-contact-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './contact-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './contact-page.component.css'
 })
 export class ContactPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly functions = inject(Functions);
+  private readonly destroyRef = inject(DestroyRef);
+  private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
   
   readonly routes = APP_ROUTES;
   readonly currentYear = new Date().getFullYear();
@@ -75,23 +83,38 @@ export class ContactPageComponent {
         this.submitted.set(false);
         
         // Auto-ocultar mensaje de éxito después de 10 segundos
-        setTimeout(() => this.success.set(false), 10000);
+        if (this.successTimeoutId) clearTimeout(this.successTimeoutId);
+        this.successTimeoutId = setTimeout(() => {
+          this.success.set(false);
+          this.successTimeoutId = null;
+        }, 10000);
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al enviar mensaje:', err);
-      
+
+      const callableError = err as CallableError;
+
       // Manejar diferentes tipos de errores
-      if (err.code === 'functions/resource-exhausted') {
+      if (callableError.code === 'functions/resource-exhausted') {
         this.error.set('Has alcanzado el límite de envíos. Por favor, intenta más tarde.');
-      } else if (err.code === 'functions/invalid-argument') {
-        this.error.set(err.message || 'Datos del formulario inválidos. Verifica e intenta de nuevo.');
+      } else if (callableError.code === 'functions/invalid-argument') {
+        this.error.set(callableError.message || 'Datos del formulario inválidos. Verifica e intenta de nuevo.');
       } else {
         this.error.set('Error al enviar el mensaje. Por favor, intenta de nuevo o contáctanos por email directo.');
       }
     } finally {
       this.loading.set(false);
     }
+  }
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.successTimeoutId) {
+        clearTimeout(this.successTimeoutId);
+        this.successTimeoutId = null;
+      }
+    });
   }
 
   fieldError(fieldName: keyof typeof this.form.controls): string | null {

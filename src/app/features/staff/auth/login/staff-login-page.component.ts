@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { sanitizeReturnUrl } from '../../../../core/auth/auth-navigation';
 import { AuthStore } from '../../../../core/stores/auth.store';
@@ -12,16 +12,28 @@ type LoginState = 'idle' | 'loading' | 'success' | 'error';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './staff-login-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-login-page.component.css'
 })
 export class StaffLoginPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   readonly authStore = inject(AuthStore);
   readonly routes = APP_ROUTES;
   readonly loginState = signal<LoginState>('idle');
   readonly errorMsg = signal('');
   readonly accessReason = signal(this.route.snapshot.queryParamMap.get('reason') ?? '');
+  private redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.redirectTimeoutId !== null) {
+        clearTimeout(this.redirectTimeoutId);
+        this.redirectTimeoutId = null;
+      }
+    });
+  }
 
   get isLoading() { return this.loginState() === 'loading'; }
   get showAuthRequiredNotice() { return this.accessReason() === 'auth-required'; }
@@ -33,11 +45,22 @@ export class StaffLoginPageComponent {
       await this.authStore.signInWithGoogle();
       this.loginState.set('success');
       const safeUrl = sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
-      setTimeout(() => this.router.navigateByUrl(safeUrl), 1800);
-    } catch (err) {
+      this.scheduleRedirect(safeUrl, 1800);
+    } catch (err: unknown) {
       this.errorMsg.set(this.toMessage(err));
       this.loginState.set('error');
     }
+  }
+
+  private scheduleRedirect(url: string, delayMs: number): void {
+    if (this.redirectTimeoutId !== null) {
+      clearTimeout(this.redirectTimeoutId);
+      this.redirectTimeoutId = null;
+    }
+    this.redirectTimeoutId = setTimeout(() => {
+      this.redirectTimeoutId = null;
+      void this.router.navigateByUrl(url);
+    }, delayMs);
   }
 
   private toMessage(error: unknown): string {
@@ -67,3 +90,4 @@ export class StaffLoginPageComponent {
     }
   }
 }
+

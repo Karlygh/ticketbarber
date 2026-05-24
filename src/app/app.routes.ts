@@ -31,24 +31,7 @@ export const routes: Routes = [
   },
   {
     path: 'tv',
-    children: [
-      {
-        path: 'pair',
-        canActivate: [staffAuthGuard, proGuard],
-        loadComponent: () =>
-          import('./features/tv/tv-pairing.component').then(m => m.TvPairingComponent)
-      },
-      {
-        path: ':shopId',
-        loadComponent: () =>
-          import('./features/tv/tv-page.component').then(m => m.TvPageComponent)
-      },
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/tv/tv-page.component').then(m => m.TvPageComponent)
-      }
-    ]
+    loadChildren: () => import('./features/tv/tv.routes').then((m) => m.TV_ROUTES)
   },
   {
     path: 'activate',

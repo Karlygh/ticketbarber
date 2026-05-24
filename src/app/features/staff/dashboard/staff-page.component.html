@@ -191,7 +191,12 @@
       </div>
 
       @for (barber of barbers(); track barber.id; let isFirst = $first) {
-        <article class="table-row" (click)="openBarberDetailModal(barber)">
+        <article
+          class="table-row"
+          role="button"
+          tabindex="0"
+          (click)="openBarberDetailModal(barber)"
+          (keydown)="openBarberDetailFromKeyboard($event, barber)">
           <div class="barber-cell">
             @if (barber.photoUrl) {
               <img class="avatar-image" [src]="barber.photoUrl" [alt]="barber.name" />

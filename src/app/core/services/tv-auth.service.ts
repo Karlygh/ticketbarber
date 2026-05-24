@@ -14,6 +14,7 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { AuthStore } from '../stores/auth.store';
+import { BrowserStorageService } from './browser-storage.service';
 
 export interface DeviceDoc {
   deviceId: string;
@@ -22,6 +23,8 @@ export interface DeviceDoc {
   createdAt: number;
   lastSeen: number;
   activationCode?: string;
+  active?: boolean;
+  revokedAt?: number;
 }
 
 export interface ActiveTvCode {
@@ -46,14 +49,23 @@ interface DeviceCodeDoc {
   revokedAt: number;
 }
 
+export interface TvBindingValidation {
+  valid: boolean;
+  shopId: string | null;
+  deviceId: string | null;
+  reason?: 'missing' | 'not_found' | 'owner_mismatch' | 'revoked' | 'unavailable';
+}
+
 @Injectable({ providedIn: 'root' })
 export class TvAuthService {
   private readonly firestore = inject(Firestore);
   private readonly injector = inject(EnvironmentInjector);
   private readonly authStore = inject(AuthStore);
+  private readonly storage = inject(BrowserStorageService);
 
   private readonly DEVICE_ID_KEY = 'tb_device_id';
   private readonly SHOP_ID_KEY = 'tb_shop_id';
+  private readonly BOUND_DEVICE_ID_KEY = 'tb_bound_device_id';
   private readonly USER_CODE_KEY_PREFIX = 'tb_user_pair_code_';
   private readonly USER_CODE_EXPIRY_PREFIX = 'tb_user_pair_expiry_';
 
@@ -62,27 +74,83 @@ export class TvAuthService {
   }
 
   getDeviceId(): string {
-    let id = localStorage.getItem(this.DEVICE_ID_KEY);
+    let id = this.storage.getLocalItem(this.DEVICE_ID_KEY);
     if (!id) {
       id = 'tv_' + Array.from(crypto.getRandomValues(new Uint8Array(8)))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
-      localStorage.setItem(this.DEVICE_ID_KEY, id);
+      this.storage.setLocalItem(this.DEVICE_ID_KEY, id);
     }
     return id;
   }
 
   getShopId(): string | null {
-    return localStorage.getItem(this.SHOP_ID_KEY);
+    return this.storage.getLocalItem(this.SHOP_ID_KEY);
   }
 
-  saveBinding(shopId: string): void {
-    localStorage.setItem(this.SHOP_ID_KEY, shopId);
+  getBoundDeviceId(): string | null {
+    const boundId = this.storage.getLocalItem(this.BOUND_DEVICE_ID_KEY);
+    if (boundId) return boundId;
+
+    const legacyDeviceId = this.storage.getLocalItem(this.DEVICE_ID_KEY);
+    if (legacyDeviceId) {
+      this.storage.setLocalItem(this.BOUND_DEVICE_ID_KEY, legacyDeviceId);
+      return legacyDeviceId;
+    }
+
+    return null;
+  }
+
+  saveBinding(shopId: string, deviceId?: string): void {
+    this.storage.setLocalItem(this.SHOP_ID_KEY, shopId);
+    if (deviceId) {
+      this.storage.setLocalItem(this.BOUND_DEVICE_ID_KEY, deviceId);
+      this.storage.setLocalItem(this.DEVICE_ID_KEY, deviceId);
+    }
   }
 
   clearBinding(): void {
-    localStorage.removeItem(this.SHOP_ID_KEY);
-    localStorage.removeItem(this.DEVICE_ID_KEY);
+    this.storage.removeLocalItem(this.SHOP_ID_KEY);
+    this.storage.removeLocalItem(this.BOUND_DEVICE_ID_KEY);
+  }
+
+  async validateBinding(): Promise<TvBindingValidation> {
+    const shopId = this.getShopId();
+    const deviceId = this.getBoundDeviceId();
+
+    if (!shopId || !deviceId) {
+      this.clearBinding();
+      return { valid: false, shopId: null, deviceId: null, reason: 'missing' };
+    }
+
+    let deviceSnap;
+    try {
+      deviceSnap = await this.runInCtx(() => getDoc(doc(this.firestore, `devices/${deviceId}`)));
+    } catch {
+      this.clearBinding();
+      return { valid: false, shopId, deviceId, reason: 'unavailable' };
+    }
+
+    if (!deviceSnap.exists()) {
+      this.clearBinding();
+      return { valid: false, shopId, deviceId, reason: 'not_found' };
+    }
+
+    const device = deviceSnap.data() as Partial<DeviceDoc>;
+    if (device.userId !== shopId) {
+      this.clearBinding();
+      return { valid: false, shopId, deviceId, reason: 'owner_mismatch' };
+    }
+
+    const revoked = Number(device.revokedAt ?? 0) > 0;
+    const inactive = device.active === false;
+    if (revoked || inactive) {
+      this.clearBinding();
+      return { valid: false, shopId, deviceId, reason: 'revoked' };
+    }
+
+    this.storage.setLocalItem(this.DEVICE_ID_KEY, deviceId);
+    return { valid: true, shopId, deviceId };
   }
 
   async getActivePairingCode(): Promise<ActiveTvCode | null> {
@@ -182,11 +250,13 @@ export class TvAuthService {
       name: 'TV',
       createdAt: now,
       lastSeen: now,
-      activationCode: normalizedCode
+      activationCode: normalizedCode,
+      active: true,
+      revokedAt: 0
     });
 
     await this.runInCtx(() => batch.commit());
-    this.saveBinding(data.userId);
+    this.saveBinding(data.userId, deviceId);
 
     return { userId: data.userId, deviceId };
   }
@@ -288,8 +358,8 @@ export class TvAuthService {
   }
 
   private getStoredUserCode(userId: string): ActiveTvCode | null {
-    const code = localStorage.getItem(this.userCodeKey(userId));
-    const expiresAtRaw = localStorage.getItem(this.userCodeExpiryKey(userId));
+    const code = this.storage.getLocalItem(this.userCodeKey(userId));
+    const expiresAtRaw = this.storage.getLocalItem(this.userCodeExpiryKey(userId));
     if (!code || !expiresAtRaw) {
       return null;
     }
@@ -304,13 +374,13 @@ export class TvAuthService {
   }
 
   private saveStoredUserCode(userId: string, code: string, expiresAt: number): void {
-    localStorage.setItem(this.userCodeKey(userId), code);
-    localStorage.setItem(this.userCodeExpiryKey(userId), String(expiresAt));
+    this.storage.setLocalItem(this.userCodeKey(userId), code);
+    this.storage.setLocalItem(this.userCodeExpiryKey(userId), String(expiresAt));
   }
 
   private clearStoredUserCode(userId: string): void {
-    localStorage.removeItem(this.userCodeKey(userId));
-    localStorage.removeItem(this.userCodeExpiryKey(userId));
+    this.storage.removeLocalItem(this.userCodeKey(userId));
+    this.storage.removeLocalItem(this.userCodeExpiryKey(userId));
   }
 
   private userCodeKey(userId: string): string {

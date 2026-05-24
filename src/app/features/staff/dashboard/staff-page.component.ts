@@ -1,27 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { SubscriptionStore } from '../../../core/stores/subscription.store';
 import { QueueStore } from '../../../core/stores/queue.store';
-import { APP_ROUTES } from '../../../shared/routing/app-routes';
-import { CustomerDetailModalComponent } from '../../../shared/components/customer-detail-modal.component';
+import { APP_ROUTES, buildTvQueueRouteCommands } from '../../../shared/routing/app-routes';
+import { CustomerDetailModalComponent, CustomerDetailViewModel } from '../../../shared/components/customer-detail-modal.component';
 import { BarberService } from '../../../core/services/barber.service';
 import { BarberProfile, BarberStatus } from '../../../core/models/barber.model';
 import { Ticket } from '../../../core/models/ticket.model';
 import { ShopService } from '../../../core/services/shop.service';
+import { barberInitials, barberStatusLabel } from '../../../core/utils/barber-display.util';
+import {
+  STAFF_WARNING_MESSAGES,
+  toStaffSupportMessage
+} from './staff-dashboard-messages.util';
+import {
+  activeTicketsForBarber,
+  buildStaffCustomerDetail,
+  doneTicketsForBarber
+} from './staff-queue-view.util';
 
 @Component({
   selector: 'app-staff-page',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, CustomerDetailModalComponent, FormsModule],
   templateUrl: './staff-page.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './staff-page.component.css'
 })
 export class StaffPageComponent {
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly arrivalTimeFormatter = new Intl.DateTimeFormat('es-ES', {
     hour: '2-digit',
     minute: '2-digit',
@@ -51,16 +63,13 @@ export class StaffPageComponent {
   readonly visibleBarbers = computed(() => this.barbers().filter((barber) => barber.status !== 'hidden'));
   private readonly shopNameState = signal('');
   readonly welcomeName = computed(() => this.shopNameState().trim());
-  readonly tvQueueRoute = computed(() => {
-    const shopId = this.authStore.user()?.uid;
-    return shopId ? ['/tv', shopId] : ['/tv'];
-  });
+  readonly tvQueueRoute = computed(() => buildTvQueueRouteCommands(this.authStore.user()?.uid));
 
   readonly isBusy = signal(false);
   readonly error = signal('');
   readonly logoutState = signal<'idle' | 'confirm' | 'loading' | 'success'>('idle');
   readonly showCustomerModal = signal(false);
-  readonly selectedCustomer = signal<{ name: string; arrivalTime: string; phone: string } | null>(null);
+  readonly selectedCustomer = signal<CustomerDetailViewModel | null>(null);
   readonly showCreateBarberModal = signal(false);
   readonly showOpenDayModal = signal(false);
   readonly pendingBarberName = signal('');
@@ -86,6 +95,12 @@ export class StaffPageComponent {
       }
       void this.loadShopName(uid);
     });
+    this.destroyRef.onDestroy(() => {
+      if (this.warningToastTimeoutId) {
+        clearTimeout(this.warningToastTimeoutId);
+        this.warningToastTimeoutId = null;
+      }
+    });
   }
 
   barberTickets(barberId: string): Ticket[] {
@@ -93,23 +108,11 @@ export class StaffPageComponent {
   }
 
   activeTicketsForBarber(barberId: string): Ticket[] {
-    return this.queueStore.tickets()
-      .filter((ticket) => ticket.barberId === barberId && ticket.status !== 'done')
-      .sort((a, b) => {
-        if (a.status === 'current' && b.status !== 'current') return -1;
-        if (a.status !== 'current' && b.status === 'current') return 1;
-        return a.position - b.position || a.createdAtMs - b.createdAtMs;
-      });
+    return activeTicketsForBarber(this.queueStore.tickets(), barberId);
   }
 
   doneTicketsForBarber(barberId: string): Ticket[] {
-    return this.queueStore.tickets()
-      .filter((ticket) => ticket.barberId === barberId && ticket.status === 'done')
-      .sort((a, b) => {
-        const aTime = a.completedAtMs ?? a.createdAtMs;
-        const bTime = b.completedAtMs ?? b.createdAtMs;
-        return bTime - aTime;
-      });
+    return doneTicketsForBarber(this.queueStore.tickets(), barberId);
   }
 
   barberCurrent(barberId: string): Ticket | null {
@@ -125,18 +128,11 @@ export class StaffPageComponent {
   }
 
   barberStatusLabel(status: BarberStatus): string {
-    if (status === 'available') return 'Disponible';
-    if (status === 'break') return 'Descanso';
-    return 'Oculto';
+    return barberStatusLabel(status);
   }
 
   initials(name: string): string {
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join('');
+    return barberInitials(name);
   }
 
   formatArrivalTime(timestampMs: number): string {
@@ -147,11 +143,7 @@ export class StaffPageComponent {
   }
 
   openCustomerModal(ticket: Ticket): void {
-    this.selectedCustomer.set({
-      name: ticket.displayName || ticket.customerName || '-',
-      arrivalTime: this.formatArrivalTime(ticket.createdAtMs),
-      phone: ticket.phone || '-'
-    });
+    this.selectedCustomer.set(buildStaffCustomerDetail(ticket, (timestampMs) => this.formatArrivalTime(timestampMs)));
     this.showCustomerModal.set(true);
   }
 
@@ -201,8 +193,8 @@ export class StaffPageComponent {
       const url = await this.barberService.uploadBarberPhoto(file);
       this.pendingPhotoUrl.set(url);
       this.pendingPhotoFileName.set(file.name);
-    } catch (err) {
-      this.error.set(this.toSupportMessage(err, 'No se pudo subir la foto.'));
+    } catch (err: unknown) {
+      this.error.set(toStaffSupportMessage(err, 'No se pudo subir la foto.'));
     } finally {
       this.isBusy.set(false);
     }
@@ -334,6 +326,14 @@ export class StaffPageComponent {
     this.showBarberDetailModal.set(true);
   }
 
+  openBarberDetailFromKeyboard(event: KeyboardEvent, barber: BarberProfile): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    event.preventDefault();
+    this.openBarberDetailModal(barber);
+  }
+
   closeBarberDetailModal(): void {
     this.showBarberDetailModal.set(false);
     this.selectedBarber.set(null);
@@ -353,33 +353,20 @@ export class StaffPageComponent {
     this.isBusy.set(true);
     try {
       await action();
-    } catch (err) {
-      this.error.set(this.toSupportMessage(err, 'No se pudo completar la accion.'));
+    } catch (err: unknown) {
+      this.error.set(toStaffSupportMessage(err, 'No se pudo completar la accion.'));
     } finally {
       this.isBusy.set(false);
     }
   }
 
-  private toSupportMessage(error: unknown, fallback: string): string {
-    const raw = error instanceof Error ? error.message : fallback;
-    const normalized = raw.toLowerCase();
-    if (
-      normalized.includes('insufficient permissions') ||
-      normalized.includes('storage/unauthorized') ||
-      normalized.includes('permission_denied')
-    ) {
-      return 'Permiso denegado en Firebase. Revisa que estas con la cuenta duena del negocio y que las reglas esten desplegadas en el proyecto activo ticketbarber-7c16d.';
-    }
-    return raw || fallback;
-  }
-
   private showClosedDayWarning(): void {
-    this.warningToastMessage.set('Para cambiar la direccion de la jornada, abre jornada primero.');
+    this.warningToastMessage.set(STAFF_WARNING_MESSAGES.closedDay);
     this.showWarningToastWithAutoClose();
   }
 
   private showCloseDayWithoutOpenWarning(): void {
-    this.warningToastMessage.set('Para cerrar jornada, primero tienes que iniciar una jornada activa.');
+    this.warningToastMessage.set(STAFF_WARNING_MESSAGES.closeDayWithoutOpen);
     this.showWarningToastWithAutoClose();
   }
 
@@ -394,3 +381,4 @@ export class StaffPageComponent {
     }, 2800);
   }
 }
+

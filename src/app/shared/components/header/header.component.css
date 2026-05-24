@@ -45,10 +45,30 @@
 .top-nav {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 1.25rem;
 }
 
-.top-nav a {
+.account-top,
+.nav-links,
+.cta-zone {
+  display: flex;
+  align-items: center;
+}
+
+.account-top {
+  margin-left: auto;
+}
+
+.nav-links {
+  gap: 1.25rem;
+}
+
+.cta-zone {
+  gap: 0.75rem;
+}
+
+.nav-links a {
   text-decoration: none;
   color: var(--text-copy);
   font-size: 0.9rem;
@@ -57,7 +77,7 @@
   position: relative;
 }
 
-.top-nav a::after {
+.nav-links a::after {
   content: '';
   position: absolute;
   bottom: -3px;
@@ -70,13 +90,13 @@
   transition: transform 0.18s ease;
 }
 
-.top-nav a:hover,
-.top-nav a.active {
+.nav-links a:hover,
+.nav-links a.active {
   color: var(--accent-light);
 }
 
-.top-nav a:hover::after,
-.top-nav a.active::after {
+.nav-links a:hover::after,
+.nav-links a.active::after {
   transform: scaleX(1);
 }
 
@@ -289,7 +309,7 @@
 
 .btn-tv-link {
   text-decoration: none;
-  color: var(--btn-text);
+  color: #ffffff;
   background: linear-gradient(135deg, #16a34a 0%, #0d4e25 100%);
   padding: 0.58rem 1rem;
   border-radius: var(--r-pill);
@@ -298,13 +318,30 @@
   border: 1px solid rgba(34, 197, 94, 0.4);
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.28);
   transition: box-shadow 0.18s, transform 0.15s, filter 0.15s;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.top-nav a.btn-tv-link,
+.top-nav a.btn-tv-link:visited,
+.top-nav a.btn-tv-link:hover,
+.top-nav a.btn-tv-link.active {
+  color: #ffffff;
+}
+
+.top-nav a.btn-tv-link::after {
+  display: none;
 }
 
 .btn-tv-link:hover {
+  color: #ffffff;
   box-shadow: 0 6px 20px rgba(34, 197, 94, 0.38);
   transform: translateY(-1px);
   filter: brightness(1.12);
+}
+
+.btn-tv-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 2px;
 }
 
 .top-login {
@@ -343,12 +380,12 @@
     left: 1rem;
     right: 1rem;
     flex-direction: column;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 1.1rem 1rem 1.2rem;
+    align-items: stretch;
+    gap: 0.95rem;
+    padding: 0.9rem;
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    background: rgba(8, 22, 42, 0.97);
+    background: linear-gradient(180deg, rgba(7, 20, 39, 0.985), rgba(5, 16, 33, 0.975));
     backdrop-filter: blur(12px);
     box-shadow: var(--glass-shadow);
     z-index: 20;
@@ -359,15 +396,68 @@
     display: flex;
   }
 
-  .top-nav a {
-    font-size: 0.96rem;
+  .account-top {
+    margin-left: 0;
+  }
+
+  .account-top,
+  .nav-links,
+  .cta-zone,
+  .top-actions {
+    width: 100%;
+  }
+
+  .account-top {
+    order: 1;
+    padding: 0.3rem 0.25rem 0.7rem;
+    border-bottom: 1px solid rgba(120, 160, 220, 0.16);
+  }
+
+  .nav-links {
+    order: 2;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    padding: 0.2rem 0.1rem;
+  }
+
+  .nav-links a {
+    font-size: 1rem;
     text-align: center;
+    font-weight: 600;
+    color: #d7eaff;
+    padding: 0.62rem 0.8rem;
+    border-radius: 0.8rem;
+  }
+
+  .nav-links a::after {
+    display: none;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: #ffffff;
+    background: rgba(53, 115, 210, 0.2);
+  }
+
+  .cta-zone {
+    order: 3;
+    display: flex;
+    justify-content: center;
+    padding-top: 0.2rem;
+  }
+
+  .cta-zone .btn-tv-link {
+    width: 100%;
+    max-width: 240px;
+    text-align: center;
+    font-size: 0.99rem;
+    padding: 0.72rem 1rem;
   }
 
   .top-actions {
-    width: 100%;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
 
   .top-account,
@@ -383,20 +473,36 @@
   }
 
   .user-menu,
-  .user-trigger,
-  .user-dropdown {
+  .user-trigger {
     width: 100%;
   }
 
   .user-trigger {
-    justify-content: center;
-    flex-wrap: wrap;
-    row-gap: 0.35rem;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    row-gap: 0;
+    padding: 0.55rem 0.72rem;
+  }
+
+  .user-trigger .top-account {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+    margin-right: 0.45rem;
+  }
+
+  .user-trigger .user-gear {
+    flex: 0 0 auto;
   }
 
   .user-dropdown {
     position: static;
     margin-top: 0.6rem;
+    width: 100%;
+    border-radius: 0.95rem;
+    border-color: rgba(120, 160, 220, 0.18);
+    background: rgba(7, 18, 34, 0.94);
   }
 }
 

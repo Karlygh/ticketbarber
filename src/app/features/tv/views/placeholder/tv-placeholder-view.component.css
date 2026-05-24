@@ -2,8 +2,8 @@
   display: block;
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(135deg, #071428 0%, #102242 100%);
-  color: #e6eefc;
+  background: linear-gradient(135deg, var(--bg-page) 0%, var(--navy-800) 100%);
+  color: var(--text-primary);
 }
 
 .placeholder-shell {
@@ -17,8 +17,8 @@
   width: min(720px, 100%);
   padding: 2rem;
   border-radius: 1.8rem;
-  background: rgba(8, 22, 40, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
@@ -45,7 +45,7 @@
 }
 
 .meta {
-  color: #9db4d6;
+  color: var(--text-copy);
 }
 
 .placeholder-card button {

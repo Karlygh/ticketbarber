@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { QueueRepository } from '../data/queue.repository';
 import { CreateTicketInput, Ticket, TicketReceipt } from '../models/ticket.model';
 import { BarberService } from '../models/service.model';
+import { buildTvQueueRows } from '../utils/tv-queue.util';
 import { SettingsStore } from './settings.store';
 
 export interface TvQueueRow {
@@ -86,35 +87,6 @@ export class QueueStore {
   }
 
   queueForTv(nowMs: number): TvQueueRow[] {
-    const active = this.activeQueue();
-    if (!active.length) {
-      return [];
-    }
-
-    const rows: TvQueueRow[] = [];
-    let carry = 0;
-    active.forEach((ticket, index) => {
-      if (index === 0 && ticket.status === 'current') {
-        const remaining = this.remainingCurrentMinutes(ticket, nowMs);
-        const etaAtMs = nowMs + (remaining * 60000);
-        rows.push({ ticket, waitMin: remaining, etaAtMs });
-        carry = remaining;
-        return;
-      }
-
-      const etaAtMs = nowMs + (carry * 60000);
-      rows.push({ ticket, waitMin: carry, etaAtMs });
-      carry += ticket.estimatedDurationMin;
-    });
-
-    return rows;
-  }
-
-  private remainingCurrentMinutes(ticket: Ticket, nowMs: number): number {
-    if (!ticket.startedAtMs) {
-      return ticket.estimatedDurationMin;
-    }
-    const elapsedMin = (nowMs - ticket.startedAtMs) / 60000;
-    return Math.max(0, Math.ceil(ticket.estimatedDurationMin - elapsedMin));
+    return buildTvQueueRows(this.activeQueue(), nowMs);
   }
 }

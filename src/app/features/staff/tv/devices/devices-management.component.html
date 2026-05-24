@@ -22,7 +22,7 @@
     <div class="empty-state">
       <p class="empty-icon">🖥️</p>
       <p class="empty-title">Sin dispositivos vinculados</p>
-      <p class="empty-sub">Genera un código desde tu cuenta y escríbelo luego en la TV desde <strong>/activate</strong>.</p>
+      <p class="empty-sub">Genera un código desde tu cuenta y úsalo en la pantalla interna de activación de TV.</p>
       <a [routerLink]="routes.tvPair" class="btn-add-lg">Vincular primera TV</a>
     </div>
   } @else {
@@ -37,7 +37,7 @@
                 class="rename-input"
                 type="text"
                 [value]="newName()"
-                (input)="newName.set($any($event.target).value)"
+                (input)="onRenameInput($event)"
                 (keydown.enter)="confirmRename()"
                 (keydown.escape)="cancelRename()"
                 autofocus

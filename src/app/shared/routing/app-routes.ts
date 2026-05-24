@@ -1,6 +1,6 @@
 export const APP_ROUTES = {
   root: '/',
-  home: '/home',
+  home: '/',
   contact: '/contacto',
   contactHelp: '/contacto/guia-consultas',
   kiosk: '/kiosk',
@@ -22,3 +22,7 @@ export const APP_ROUTES = {
     tvSetup: '/staff/tv-setup'
   }
 } as const;
+
+export function buildTvQueueRouteCommands(shopId: string | null | undefined): string[] {
+  return shopId ? [APP_ROUTES.tv, shopId] : [APP_ROUTES.tv];
+}

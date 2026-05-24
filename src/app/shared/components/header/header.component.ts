@@ -26,6 +26,13 @@ export class HeaderComponent {
     return `Hola, ${baseName}`;
   }
 
+  get trialBadgeLabel(): string {
+    const days = this.subscriptionStore.trialDaysLeft();
+    if (days <= 0) return 'Prueba expirada';
+    if (days === 1) return '1 día de prueba';
+    return `${days} días de prueba`;
+  }
+
   toggleMobileMenu(): void {
     this.userMenuOpen.set(false);
     this.mobileMenuOpen.update((open) => !open);

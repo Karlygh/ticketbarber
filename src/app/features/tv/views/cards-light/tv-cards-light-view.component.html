@@ -11,7 +11,10 @@
 
       <div class="light-brand-copy">
         <h1>{{ vm.shop.name || 'TicketBarber' }}</h1>
-        <p>Colas en directo</p>
+        <span class="light-brand-subline">
+          <p>Colas en directo</p>
+          <a class="light-back-inline" [routerLink]="routes.staff.root" aria-label="Volver al panel de control">←</a>
+        </span>
       </div>
     </div>
 
@@ -23,10 +26,7 @@
       </div>
       <div class="hours-copy">
         <p class="meta-label">Horario</p>
-        <span class="hours-inline">
-          <strong>{{ vm.shop.todayHours }}</strong>
-          <a class="light-back-inline" routerLink="/staff" aria-label="Volver al panel de control">←</a>
-        </span>
+        <strong>{{ vm.shop.todayHours }}</strong>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
     <section class="light-empty">
       <h2>Sin barberos activos</h2>
       <p>Activa la jornada o selecciona barberos para empezar a mostrar esta vista.</p>
-      <a routerLink="/staff">Volver al panel</a>
+      <a [routerLink]="routes.staff.root">Volver al panel</a>
     </section>
   } @else {
     <section class="cards-grid" [class]="cardClass(vm.groups.length)">
@@ -105,7 +105,9 @@
             }
           </section>
 
-          <section class="card-section card-next">
+          <section
+            class="card-section card-next"
+            [class.has-upcoming]="group.upcomingVisible.length > 0">
             <p class="section-label">Siguientes ({{ group.upcomingAll.length }})</p>
 
             @if (group.upcomingVisible.length > 0) {

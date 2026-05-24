@@ -1,5 +1,5 @@
-import { BarberProfile } from '../../core/models/barber.model';
-import { TvQueueRow } from '../../core/stores/queue.store';
+import { BarberProfile } from '../../../core/models/barber.model';
+import { TvQueueRow } from '../../../core/stores/queue.store';
 
 export type TvViewId = 'default' | 'cards-light' | 'view-3';
 

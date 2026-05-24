@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 export interface ModernExperienceFeature {
   title: string;
@@ -32,6 +32,7 @@ export interface ModernExperienceKpi {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './modern-experience-section.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './modern-experience-section.component.css'
 })
 export class ModernExperienceSectionComponent {
@@ -47,4 +48,5 @@ export class ModernExperienceSectionComponent {
     return [`floating-card--${slot}`, `floating-card--${tone}`];
   }
 }
+
 

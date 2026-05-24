@@ -124,7 +124,7 @@
 }
 
 .plan-card:hover {
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--surface-card-shadow);
   transform: translateY(-3px);
 }
 
@@ -208,7 +208,7 @@
   width: 100%;
   padding: 0.8rem 1.25rem;
   background: linear-gradient(135deg, var(--indigo-700), var(--indigo-500));
-  color: #fff;
+  color: var(--btn-text);
   border: 1px solid var(--section-account-border);
   border-radius: var(--r-md);
   font-size: 0.95rem;
@@ -234,8 +234,8 @@
 .spinner {
   width: 1em;
   height: 1em;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
+  border: 2px solid var(--spinner-ring-muted);
+  border-top-color: var(--btn-text);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

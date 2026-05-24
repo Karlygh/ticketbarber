@@ -4,11 +4,14 @@ import {
   collection,
   collectionData,
   doc,
+  DocumentReference,
   docData,
   getDoc,
   getDocs,
   query,
+  runTransaction,
   setDoc,
+  Transaction,
   writeBatch
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
@@ -25,6 +28,11 @@ import { CreateTicketInput, Ticket, TicketReceipt } from '../models/ticket.model
 import { AuthStore } from '../stores/auth.store';
 
 type TicketRecord = Omit<Ticket, 'id'>;
+type QueueSnapshot = {
+  settings: QueueSettings;
+  tickets: Ticket[];
+  settingsVersion: number;
+};
 
 @Injectable({ providedIn: 'root' })
 export class QueueRepository {
@@ -38,32 +46,32 @@ export class QueueRepository {
     return uid;
   }
 
-  private settingsDocPath(): string {
-    return `shops/${this.shopId}/settings/queue`;
+  private settingsDocPath(shopId = this.shopId): string {
+    return `shops/${shopId}/settings/queue`;
   }
 
-  private servicesColPath(): string {
-    return `shops/${this.shopId}/services`;
+  private servicesColPath(shopId = this.shopId): string {
+    return `shops/${shopId}/services`;
   }
 
-  private ticketsColPath(): string {
-    return `shops/${this.shopId}/tickets`;
+  private ticketsColPath(shopId = this.shopId): string {
+    return `shops/${shopId}/tickets`;
   }
 
-  private barbersColPath(): string {
-    return `shops/${this.shopId}/barbers`;
+  private barbersColPath(shopId = this.shopId): string {
+    return `shops/${shopId}/barbers`;
   }
 
-  private servicesCollectionRef() {
-    return this.runInInjectionContext(() => collection(this.firestore, this.servicesColPath()));
+  private servicesCollectionRef(shopId = this.shopId) {
+    return this.runInInjectionContext(() => collection(this.firestore, this.servicesColPath(shopId)));
   }
 
-  private ticketsCollectionRef() {
-    return this.runInInjectionContext(() => collection(this.firestore, this.ticketsColPath()));
+  private ticketsCollectionRef(shopId = this.shopId) {
+    return this.runInInjectionContext(() => collection(this.firestore, this.ticketsColPath(shopId)));
   }
 
-  private settingsDocRef() {
-    return this.runInInjectionContext(() => doc(this.firestore, this.settingsDocPath()));
+  private settingsDocRef(shopId = this.shopId) {
+    return this.runInInjectionContext(() => doc(this.firestore, this.settingsDocPath(shopId)));
   }
 
   observeServices(): Observable<BarberService[]> {
@@ -95,7 +103,10 @@ export class QueueRepository {
   async bootstrapDefaults(): Promise<void> {
     const settingsRef = this.settingsDocRef();
     const servicesRef = this.servicesCollectionRef();
-    const servicesSnap = await this.runInInjectionContext(() => getDocs(query(servicesRef)));
+    const [settingsSnap, servicesSnap] = await Promise.all([
+      this.runInInjectionContext(() => getDoc(settingsRef)),
+      this.runInInjectionContext(() => getDocs(query(servicesRef)))
+    ]);
 
     if (servicesSnap.empty) {
       const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
@@ -106,297 +117,305 @@ export class QueueRepository {
       await batch.commit();
     }
 
-    await this.runInInjectionContext(() =>
-      setDoc(
-        settingsRef,
-        {
+    if (!settingsSnap.exists()) {
+      await this.runInInjectionContext(() =>
+        setDoc(settingsRef, {
           ...DEFAULT_QUEUE_SETTINGS,
           updatedAtMs: Date.now()
-        },
-        { merge: true }
-      )
-    );
+        })
+      );
+    }
   }
 
   async createTicket(input: CreateTicketInput): Promise<TicketReceipt> {
     const nowMs = Date.now();
-    const settings = await this.getSettings();
-    if (!settings.isOpen) {
-      throw new Error('La jornada esta cerrada');
-    }
-    if (!settings.activeBarberIds.includes(input.barberId)) {
-      throw new Error('Ese barbero no esta disponible en este momento');
-    }
+    return this.executeQueueMutation(async ({ settings, tickets }, transaction, settingsRef) => {
+      const serviceRef = this.runInInjectionContext(() => doc(this.firestore, `${this.servicesColPath()}/${input.serviceId}`));
+      const barberRef = this.runInInjectionContext(() => doc(this.firestore, `${this.barbersColPath()}/${input.barberId}`));
 
-    const serviceRef = this.runInInjectionContext(() => doc(this.firestore, `${this.servicesColPath()}/${input.serviceId}`));
-    const serviceSnap = await this.runInInjectionContext(() => getDoc(serviceRef));
-    if (!serviceSnap.exists()) {
-      throw new Error('Servicio no valido');
-    }
-    const service = serviceSnap.data() as BarberService;
+      const [serviceSnap, barberSnap] = await Promise.all([
+        transaction.get(serviceRef),
+        transaction.get(barberRef)
+      ]);
+      if (!settings.isOpen) {
+        throw new Error('La jornada esta cerrada');
+      }
+      if (!settings.activeBarberIds.includes(input.barberId)) {
+        throw new Error('Ese barbero no esta disponible en este momento');
+      }
+      if (!serviceSnap.exists()) {
+        throw new Error('Servicio no valido');
+      }
+      if (!barberSnap.exists()) {
+        throw new Error('Barbero no valido');
+      }
 
-    const barberRef = this.runInInjectionContext(() => doc(this.firestore, `${this.barbersColPath()}/${input.barberId}`));
-    const barberSnap = await this.runInInjectionContext(() => getDoc(barberRef));
-    if (!barberSnap.exists()) {
-      throw new Error('Barbero no valido');
-    }
-    const barber = barberSnap.data() as BarberProfile;
+      const service = serviceSnap.data() as BarberService;
+      const barber = barberSnap.data() as BarberProfile;
+      const active = this.activeQueueForBarber(tickets, input.barberId);
+      const hasCurrent = active.some((ticket) => ticket.status === 'current');
+      const estimatedWaitMin = this.estimateWaitForNewTicket(active, nowMs);
+      const position = active.length + 1;
+      const newTicketRef = this.runInInjectionContext(() => doc(this.ticketsCollectionRef()));
 
-    const tickets = await this.fetchTickets();
-    const active = this.activeQueueForBarber(tickets, input.barberId);
-    const hasCurrent = active.some((ticket) => ticket.status === 'current');
-    const estimatedWaitMin = this.estimateWaitForNewTicket(active, nowMs);
-    const position = active.length + 1;
-    const newTicketRef = this.runInInjectionContext(() => doc(this.ticketsCollectionRef()));
+      const payload: TicketRecord = {
+        barberId: input.barberId,
+        barberNameSnapshot: barber.name,
+        customerName: input.customerName.trim(),
+        displayName: input.customerName.trim(),
+        serviceId: input.serviceId,
+        serviceNameSnapshot: service.name,
+        estimatedDurationMin: Number(service.durationMin ?? 0),
+        status: hasCurrent ? 'waiting' : 'current',
+        position,
+        createdAtMs: nowMs,
+        startedAtMs: hasCurrent ? null : nowMs,
+        completedAtMs: null,
+        ...(barber.photoUrl ? { barberPhotoUrlSnapshot: barber.photoUrl } : {}),
+        ...(input.phone ? { phone: input.phone } : {})
+      };
 
-    const payload: TicketRecord = {
-      barberId: input.barberId,
-      barberNameSnapshot: barber.name,
-      customerName: input.customerName.trim(),
-      displayName: input.customerName.trim(),
-      serviceId: input.serviceId,
-      serviceNameSnapshot: service.name,
-      estimatedDurationMin: Number(service.durationMin ?? 0),
-      status: hasCurrent ? 'waiting' : 'current',
-      position,
-      createdAtMs: nowMs,
-      startedAtMs: hasCurrent ? null : nowMs,
-      completedAtMs: null,
-      ...(barber.photoUrl ? { barberPhotoUrlSnapshot: barber.photoUrl } : {}),
-      ...(input.phone ? { phone: input.phone } : {})
-    };
-
-    const nextState = this.ensureBarberState(settings, input.barberId);
-    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
-    batch.set(newTicketRef, payload);
-    batch.set(
-      this.settingsDocRef(),
-      {
-        barberStates: {
-          ...settings.barberStates,
-          [input.barberId]: {
-            currentTicketId: hasCurrent ? nextState.currentTicketId : newTicketRef.id,
-            lastAdvance: null
-          }
+      const nextState = this.ensureBarberState(settings, input.barberId);
+      transaction.set(newTicketRef, payload);
+      transaction.set(
+        settingsRef,
+        {
+          barberStates: {
+            ...settings.barberStates,
+            [input.barberId]: {
+              currentTicketId: hasCurrent ? nextState.currentTicketId : newTicketRef.id,
+              lastAdvance: null
+            }
+          },
+          updatedAtMs: nowMs
         },
-        updatedAtMs: nowMs
-      },
-      { merge: true }
-    );
-    await batch.commit();
+        { merge: true }
+      );
 
-    return {
-      ticketId: newTicketRef.id,
-      position,
-      estimatedWaitMin
-    };
+      return {
+        ticketId: newTicketRef.id,
+        position,
+        estimatedWaitMin
+      };
+    });
   }
 
   async moveNext(barberId: string): Promise<void> {
     const nowMs = Date.now();
-    const settings = await this.getSettings();
-    const tickets = await this.fetchTickets();
-    const active = this.activeQueueForBarber(tickets, barberId);
-    if (!active.length) return;
+    await this.executeQueueMutation(async ({ settings, tickets }, transaction, settingsRef) => {
+      const active = this.activeQueueForBarber(tickets, barberId);
+      if (!active.length) return;
 
-    const current = active.find((ticket) => ticket.status === 'current') ?? null;
-    const waiting = active.filter((ticket) => ticket.status === 'waiting').sort((a, b) => a.position - b.position);
-    const promoted = waiting[0] ?? null;
-    const hadCurrent = Boolean(current);
+      const current = active.find((ticket) => ticket.status === 'current') ?? null;
+      const waiting = active.filter((ticket) => ticket.status === 'waiting').sort((a, b) => a.position - b.position);
+      const promoted = waiting[0] ?? null;
+      const hadCurrent = Boolean(current);
 
-    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
-
-    if (current) {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${current.id}`)), {
-        status: 'done',
-        position: -1,
-        completedAtMs: nowMs
-      });
-    }
-
-    if (promoted) {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
-        status: 'current',
-        position: 1,
-        startedAtMs: promoted.startedAtMs ?? nowMs,
-        completedAtMs: null
-      });
-    }
-
-    const restWaiting = waiting.filter((ticket) => ticket.id !== promoted?.id);
-    restWaiting.forEach((ticket, index) => {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
-        position: index + 2
-      });
-    });
-
-    const lastAdvance: LastAdvanceAction = {
-      performedAtMs: nowMs,
-      hadCurrent,
-      previousCurrentId: current?.id ?? null,
-      promotedId: promoted?.id ?? null
-    };
-
-    batch.set(
-      this.settingsDocRef(),
-      {
-        barberStates: {
-          ...settings.barberStates,
-          [barberId]: {
-            currentTicketId: promoted?.id ?? null,
-            lastAdvance
-          }
-        },
-        updatedAtMs: nowMs
-      },
-      { merge: true }
-    );
-
-    await batch.commit();
-  }
-
-  async movePrevious(barberId: string): Promise<void> {
-    const nowMs = Date.now();
-    const settings = await this.getSettings();
-    const last = this.ensureBarberState(settings, barberId).lastAdvance;
-    if (!last) return;
-
-    const ticketMap = new Map<string, Ticket>();
-    const tickets = await this.fetchTickets();
-    tickets.forEach((ticket) => {
-      if (ticket.barberId === barberId) {
-        ticketMap.set(ticket.id, ticket);
+      if (current) {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${current.id}`)), {
+          status: 'done',
+          position: -1,
+          completedAtMs: nowMs
+        });
       }
-    });
 
-    const promoted = last.promotedId ? ticketMap.get(last.promotedId) ?? null : null;
-    const previousCurrent = last.previousCurrentId ? ticketMap.get(last.previousCurrentId) ?? null : null;
-    const waiting = Array.from(ticketMap.values())
-      .filter((ticket) => ticket.status === 'waiting' && ticket.id !== promoted?.id)
-      .sort((a, b) => a.position - b.position);
-
-    let currentTicketId: string | null = null;
-    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
-
-    if (last.hadCurrent && previousCurrent) {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${previousCurrent.id}`)), {
-        status: 'current',
-        position: 1,
-        completedAtMs: null
-      });
-      currentTicketId = previousCurrent.id;
-    }
-
-    let nextWaitingPosition = currentTicketId ? 2 : 1;
-    if (promoted) {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
-        status: 'waiting',
-        position: nextWaitingPosition,
-        startedAtMs: null
-      });
-      nextWaitingPosition += 1;
-    }
-
-    waiting.forEach((ticket, index) => {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
-        position: nextWaitingPosition + index
-      });
-    });
-
-    batch.set(
-      this.settingsDocRef(),
-      {
-        barberStates: {
-          ...settings.barberStates,
-          [barberId]: {
-            currentTicketId,
-            lastAdvance: null
-          }
-        },
-        updatedAtMs: nowMs
-      },
-      { merge: true }
-    );
-
-    await batch.commit();
-  }
-
-  async deleteTicket(ticketId: string): Promise<void> {
-    const nowMs = Date.now();
-    const settings = await this.getSettings();
-    const tickets = await this.fetchTickets();
-    const ticketToDelete = tickets.find((ticket) => ticket.id === ticketId);
-    if (!ticketToDelete) return;
-
-    const barberId = ticketToDelete.barberId;
-    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
-    batch.delete(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticketId}`)));
-
-    const remainingActive = this.activeQueueForBarber(tickets.filter((ticket) => ticket.id !== ticketId), barberId);
-    let currentTicket = remainingActive.find((ticket) => ticket.status === 'current') ?? null;
-
-    if (!currentTicket) {
-      const promoted = remainingActive.find((ticket) => ticket.status === 'waiting') ?? null;
       if (promoted) {
-        currentTicket = {
-          ...promoted,
-          status: 'current',
-          position: 1,
-          startedAtMs: promoted.startedAtMs ?? nowMs,
-          completedAtMs: null
-        };
-        batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
           status: 'current',
           position: 1,
           startedAtMs: promoted.startedAtMs ?? nowMs,
           completedAtMs: null
         });
       }
-    }
 
-    const waiting = remainingActive.filter((ticket) => ticket.id !== currentTicket?.id);
-    const waitingStartPosition = currentTicket ? 2 : 1;
-    waiting.forEach((ticket, index) => {
-      batch.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
-        status: 'waiting',
-        position: waitingStartPosition + index,
-        completedAtMs: null
+      const restWaiting = waiting.filter((ticket) => ticket.id !== promoted?.id);
+      restWaiting.forEach((ticket, index) => {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
+          position: index + 2
+        });
       });
-    });
 
-    batch.set(
-      this.settingsDocRef(),
-      {
-        barberStates: {
-          ...settings.barberStates,
-          [barberId]: {
-            currentTicketId: currentTicket?.id ?? null,
-            lastAdvance: null
-          }
+      const lastAdvance: LastAdvanceAction = {
+        performedAtMs: nowMs,
+        hadCurrent,
+        previousCurrentId: current?.id ?? null,
+        promotedId: promoted?.id ?? null
+      };
+
+      transaction.set(
+        settingsRef,
+        {
+          barberStates: {
+            ...settings.barberStates,
+            [barberId]: {
+              currentTicketId: promoted?.id ?? null,
+              lastAdvance
+            }
+          },
+          updatedAtMs: nowMs
         },
-        updatedAtMs: nowMs
-      },
-      { merge: true }
-    );
+        { merge: true }
+      );
+    });
+  }
 
-    await batch.commit();
+  async movePrevious(barberId: string): Promise<void> {
+    const nowMs = Date.now();
+    await this.executeQueueMutation(async ({ settings, tickets }, transaction, settingsRef) => {
+      const last = this.ensureBarberState(settings, barberId).lastAdvance;
+      if (!last) return;
+
+      const ticketMap = new Map<string, Ticket>();
+      tickets.forEach((ticket) => {
+        if (ticket.barberId === barberId) {
+          ticketMap.set(ticket.id, ticket);
+        }
+      });
+
+      const promoted = last.promotedId ? ticketMap.get(last.promotedId) ?? null : null;
+      const previousCurrent = last.previousCurrentId ? ticketMap.get(last.previousCurrentId) ?? null : null;
+      const waiting = Array.from(ticketMap.values())
+        .filter((ticket) => ticket.status === 'waiting' && ticket.id !== promoted?.id)
+        .sort((a, b) => a.position - b.position);
+
+      let currentTicketId: string | null = null;
+
+      if (last.hadCurrent && previousCurrent) {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${previousCurrent.id}`)), {
+          status: 'current',
+          position: 1,
+          completedAtMs: null
+        });
+        currentTicketId = previousCurrent.id;
+      }
+
+      let nextWaitingPosition = currentTicketId ? 2 : 1;
+      if (promoted) {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
+          status: 'waiting',
+          position: nextWaitingPosition,
+          startedAtMs: null
+        });
+        nextWaitingPosition += 1;
+      }
+
+      waiting.forEach((ticket, index) => {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
+          position: nextWaitingPosition + index
+        });
+      });
+
+      transaction.set(
+        settingsRef,
+        {
+          barberStates: {
+            ...settings.barberStates,
+            [barberId]: {
+              currentTicketId,
+              lastAdvance: null
+            }
+          },
+          updatedAtMs: nowMs
+        },
+        { merge: true }
+      );
+    });
+  }
+
+  async deleteTicket(ticketId: string): Promise<void> {
+    const nowMs = Date.now();
+    await this.executeQueueMutation(async ({ settings, tickets }, transaction, settingsRef) => {
+      const ticketToDelete = tickets.find((ticket) => ticket.id === ticketId);
+      if (!ticketToDelete) return;
+
+      const barberId = ticketToDelete.barberId;
+      transaction.delete(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticketId}`)));
+
+      const remainingActive = this.activeQueueForBarber(tickets.filter((ticket) => ticket.id !== ticketId), barberId);
+      let currentTicket = remainingActive.find((ticket) => ticket.status === 'current') ?? null;
+
+      if (!currentTicket) {
+        const promoted = remainingActive.find((ticket) => ticket.status === 'waiting') ?? null;
+        if (promoted) {
+          currentTicket = {
+            ...promoted,
+            status: 'current',
+            position: 1,
+            startedAtMs: promoted.startedAtMs ?? nowMs,
+            completedAtMs: null
+          };
+          transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${promoted.id}`)), {
+            status: 'current',
+            position: 1,
+            startedAtMs: promoted.startedAtMs ?? nowMs,
+            completedAtMs: null
+          });
+        }
+      }
+
+      const waiting = remainingActive.filter((ticket) => ticket.id !== currentTicket?.id);
+      const waitingStartPosition = currentTicket ? 2 : 1;
+      waiting.forEach((ticket, index) => {
+        transaction.update(this.runInInjectionContext(() => doc(this.firestore, `${this.ticketsColPath()}/${ticket.id}`)), {
+          status: 'waiting',
+          position: waitingStartPosition + index,
+          completedAtMs: null
+        });
+      });
+
+      transaction.set(
+        settingsRef,
+        {
+          barberStates: {
+            ...settings.barberStates,
+            [barberId]: {
+              currentTicketId: currentTicket?.id ?? null,
+              lastAdvance: null
+            }
+          },
+          updatedAtMs: nowMs
+        },
+        { merge: true }
+      );
+    });
   }
 
   async closeDay(): Promise<void> {
-    const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
     const ticketsSnap = await this.runInInjectionContext(() => getDocs(query(this.ticketsCollectionRef())));
-    ticketsSnap.forEach((ticket) => batch.delete(ticket.ref));
-    batch.set(
-      this.settingsDocRef(),
-      {
-        isOpen: false,
-        activeBarberIds: [],
-        barberStates: {},
-        updatedAtMs: Date.now()
-      },
-      { merge: true }
-    );
-    await batch.commit();
+    const ticketRefs = ticketsSnap.docs.map((ticketDoc) => ticketDoc.ref);
+
+    for (let i = 0; i < ticketRefs.length; i += 400) {
+      const batch = this.runInInjectionContext(() => writeBatch(this.firestore));
+      ticketRefs.slice(i, i + 400).forEach((ticketRef) => batch.delete(ticketRef));
+      if (i + 400 >= ticketRefs.length) {
+        batch.set(
+          this.settingsDocRef(),
+          {
+            isOpen: false,
+            activeBarberIds: [],
+            barberStates: {},
+            updatedAtMs: Date.now()
+          },
+          { merge: true }
+        );
+      }
+      await batch.commit();
+    }
+
+    if (ticketRefs.length === 0) {
+      await this.runInInjectionContext(() =>
+        setDoc(
+          this.settingsDocRef(),
+          {
+            isOpen: false,
+            activeBarberIds: [],
+            barberStates: {},
+            updatedAtMs: Date.now()
+          },
+          { merge: true }
+        )
+      );
+    }
   }
 
   async openDay(activeBarberIds: string[]): Promise<void> {
@@ -470,9 +489,57 @@ export class QueueRepository {
     return ticketsSnap.docs.map((ticketDoc) => this.toTicket({ id: ticketDoc.id, ...ticketDoc.data() } as Ticket));
   }
 
-  private async getSettings(): Promise<QueueSettings> {
+  private async readQueueSnapshot(): Promise<QueueSnapshot> {
     const settingsSnap = await this.runInInjectionContext(() => getDoc(this.settingsDocRef()));
-    return this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    const tickets = await this.fetchTickets();
+    const settings = this.toSettings(settingsSnap.data() as Partial<QueueSettings> | undefined);
+    return {
+      settings,
+      tickets,
+      settingsVersion: settings.updatedAtMs
+    };
+  }
+
+  private async executeQueueMutation<T>(
+    callback: (
+      snapshot: QueueSnapshot,
+      transaction: Transaction,
+      settingsRef: DocumentReference
+    ) => Promise<T>
+  ): Promise<T> {
+    const maxAttempts = 3;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const snapshot = await this.readQueueSnapshot();
+
+      try {
+        return await this.executeTransaction(async (transaction) => {
+          const settingsRef = this.settingsDocRef();
+          const currentSettingsSnap = await transaction.get(settingsRef);
+          const currentSettings = this.toSettings(currentSettingsSnap.data() as Partial<QueueSettings> | undefined);
+
+          if (currentSettings.updatedAtMs !== snapshot.settingsVersion) {
+            throw new Error('QUEUE_STATE_CHANGED');
+          }
+
+          return callback(snapshot, transaction, settingsRef);
+        });
+      } catch (error) {
+        if (attempt === maxAttempts || !this.isQueueStateChangedError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    throw new Error('No se pudo aplicar el cambio en la cola');
+  }
+
+  private async executeTransaction<T>(callback: (transaction: Transaction) => Promise<T>): Promise<T> {
+    return this.runInInjectionContext(() => runTransaction(this.firestore, callback));
+  }
+
+  private isQueueStateChangedError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'QUEUE_STATE_CHANGED';
   }
 
   private runInInjectionContext<T>(callback: () => T): T {
@@ -484,7 +551,7 @@ export class QueueRepository {
       return DEFAULT_QUEUE_SETTINGS;
     }
     return {
-      isOpen: value.isOpen ?? true,
+      isOpen: value.isOpen ?? DEFAULT_QUEUE_SETTINGS.isOpen,
       updatedAtMs: value.updatedAtMs ?? 0,
       activeBarberIds: Array.isArray(value.activeBarberIds) ? value.activeBarberIds : [],
       barberStates: value.barberStates ?? {},

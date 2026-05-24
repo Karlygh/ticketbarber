@@ -143,7 +143,7 @@ dd.warning {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--indigo-700), var(--indigo-500));
-  color: #fff;
+  color: var(--btn-text);
   border: 1px solid var(--section-account-border);
   box-shadow: 0 6px 20px var(--section-account-glow);
 }
@@ -188,9 +188,9 @@ dd.warning {
 
 /* ── Extra badges ── */
 .badge-cancel {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: var(--danger-subtle);
+  color: var(--state-error);
+  border: 1px solid var(--danger-border-soft);
 }
 
 /* ── Extra action buttons ── */
@@ -213,15 +213,15 @@ dd.warning {
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.2rem;
-  background: linear-gradient(135deg, #dc2626, #ef4444);
+  background: var(--danger-gradient);
   border: none;
   border-radius: var(--r-md);
-  color: #fff;
+  color: var(--btn-text);
   font: inherit;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 16px var(--danger-glow);
   transition: filter 0.15s, transform 0.14s;
 }
 .btn-danger:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
@@ -262,7 +262,7 @@ dd.warning {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -279,7 +279,7 @@ dd.warning {
   padding: 1.75rem;
   max-width: 480px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--surface-modal-shadow);
   animation: slide-up 0.2s ease;
 }
 
@@ -331,7 +331,7 @@ dd.warning {
 .field-input:focus {
   outline: none;
   border-color: var(--section-account);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+  box-shadow: 0 0 0 3px var(--section-account-subtle);
 }
 
 .field-textarea {
@@ -351,8 +351,8 @@ dd.warning {
 .spinner {
   width: 1em;
   height: 1em;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
+  border: 2px solid var(--spinner-ring-muted);
+  border-top-color: var(--btn-text);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

@@ -1,0 +1,54 @@
+<app-header></app-header>
+
+<div class="success-page">
+  @if (!confirmed() && !timedOut()) {
+    <div class="state-card state-card--syncing">
+      <div class="spinner-ring"></div>
+      <h1 class="state-title">Activando tu cuenta Premium…</h1>
+      <p class="state-sub">Sincronizando con Stripe. Esto tarda solo unos segundos.</p>
+      <button class="btn-ghost" (click)="goToDashboard()">Ir al panel igualmente</button>
+    </div>
+  }
+
+  @if (confirmed()) {
+    <div class="celebration-card">
+      <div class="crown-wrap">
+        <span class="crown" aria-hidden="true">👑</span>
+        <div class="crown-glow"></div>
+      </div>
+
+      <p class="label-premium">PLAN PREMIUM ACTIVADO</p>
+      <h1 class="title-premium">¡Ya eres Premium!</h1>
+      <p class="subtitle">Has desbloqueado todas las funciones de TicketBarber.</p>
+
+      <ul class="benefits-list" aria-label="Beneficios desbloqueados">
+        <li><span class="check" aria-hidden="true">✓</span>Agenda para que tus clientes cojan turno solos</li>
+        <li><span class="check" aria-hidden="true">✓</span>Pantalla TV con la cola en tiempo real</li>
+        <li><span class="check" aria-hidden="true">✓</span>Control total de la cola desde el panel</li>
+      </ul>
+
+      <div class="renew-row">
+        <span class="renew-icon" aria-hidden="true">🗓</span>
+        <span>Próxima renovación:&nbsp;<strong>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</strong></span>
+      </div>
+
+      <div class="cta-group">
+        <button class="btn-primary" (click)="goToDashboard()">Ir al panel&nbsp;→</button>
+        <a class="link-secondary" routerLink="/subscription/manage">Ver mi suscripción</a>
+      </div>
+    </div>
+  }
+
+  @if (timedOut()) {
+    <div class="state-card state-card--timeout">
+      <div class="icon-check" aria-hidden="true">✅</div>
+      <h1 class="state-title">¡Pago procesado!</h1>
+      <p class="state-sub">Tu pago fue recibido correctamente. La activación puede tardar unos segundos más.</p>
+      <p class="hint">Si no ves cambios en 1 minuto, recarga la página.</p>
+      <div class="actions">
+        <button class="btn-primary" (click)="reload()">Recargar página</button>
+        <button class="btn-ghost" (click)="goToDashboard()">Ir al panel</button>
+      </div>
+    </div>
+  }
+</div>

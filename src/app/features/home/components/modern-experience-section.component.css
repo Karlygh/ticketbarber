@@ -6,11 +6,11 @@
   position: relative;
   overflow: hidden;
   border-radius: 1.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
   background:
-    radial-gradient(circle at 9% 12%, rgba(59, 130, 246, 0.2), transparent 28%),
-    radial-gradient(circle at 88% 78%, rgba(37, 99, 235, 0.22), transparent 26%),
-    linear-gradient(180deg, #030d1f 0%, #06132a 44%, #040d1a 100%);
+    radial-gradient(circle at 9% 12%, var(--section-staff-subtle), transparent 28%),
+    radial-gradient(circle at 88% 78%, var(--section-staff-glow), transparent 26%),
+    linear-gradient(180deg, var(--navy-950) 0%, var(--navy-900) 44%, var(--bg-page) 100%);
   box-shadow:
     0 34px 90px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
@@ -71,7 +71,7 @@
 
 .experience-kicker {
   margin: 0;
-  color: #5f97ff;
+  color: var(--blue-400);
   font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -88,13 +88,13 @@
 
 .experience-copy h2 span {
   display: block;
-  color: #3b82f6;
+  color: var(--accent);
 }
 
 .experience-description {
   margin: 1rem 0 0;
   max-width: 31rem;
-  color: #9cb6d8;
+  color: var(--text-copy);
   line-height: 1.75;
 }
 
@@ -116,8 +116,8 @@
   height: 2.6rem;
   padding: 0.58rem;
   border-radius: 0.88rem;
-  color: #5ea0ff;
-  border: 1px solid rgba(95, 155, 255, 0.36);
+  color: var(--blue-400);
+  border: 1px solid var(--section-staff-border);
   background: linear-gradient(180deg, rgba(16, 42, 81, 0.84), rgba(7, 20, 39, 0.95));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -136,7 +136,7 @@
 
 .feature-item p {
   margin: 0.27rem 0 0;
-  color: #89a6cb;
+  color: var(--text-copy);
   line-height: 1.55;
   font-size: 0.92rem;
 }
@@ -231,14 +231,14 @@
 }
 
 .floating-card p {
-  color: #9fbbe1;
+  color: var(--text-copy);
   font-size: 0.75rem;
 }
 
 .floating-card strong {
   display: block;
   margin-top: 0.15rem;
-  color: #f0f6ff;
+  color: var(--text-primary);
   font-size: 1.24rem;
   line-height: 1.08;
 }
@@ -246,7 +246,7 @@
 .floating-card span {
   display: block;
   margin-top: 0.24rem;
-  color: #8eadcf;
+  color: var(--text-copy);
   font-size: 0.76rem;
 }
 
@@ -350,7 +350,7 @@
 
 .kpi-item strong {
   display: block;
-  color: #dce8fb;
+  color: var(--text-primary);
   font-size: 1.65rem;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -359,7 +359,7 @@
 .kpi-item span {
   display: block;
   margin-top: 0.26rem;
-  color: #85a6cb;
+  color: var(--text-copy);
   font-size: 0.83rem;
 }
 

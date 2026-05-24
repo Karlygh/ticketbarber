@@ -17,7 +17,7 @@
             @if (vm.shop.phone) {
               <span class="brand-phone-inline">
                 <p class="brand-phone">{{ vm.shop.phone }}</p>
-                <a class="tv-back-inline" routerLink="/staff" aria-label="Volver al panel">←</a>
+                <a class="tv-back-inline" [routerLink]="routes.staff.root" aria-label="Volver al panel">←</a>
               </span>
             }
           </div>
@@ -198,7 +198,7 @@
   </section>
 
   <footer class="tv-foot">
-    <a routerLink="/kiosk">Agenda</a>
-    <a routerLink="/staff">Panel para barberos</a>
+    <a [routerLink]="routes.kiosk">Kiosk interno</a>
+    <a [routerLink]="routes.staff.root">Panel para barberos</a>
   </footer>
 </main>
