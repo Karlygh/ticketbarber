@@ -11,7 +11,7 @@
     <div>
       <p class="eyebrow">Pantallas</p>
       <h1>Mis dispositivos</h1>
-      <p class="subtitle">TVs y pantallas vinculadas a tu cuenta</p>
+      <p class="subtitle">TVs y pantallas vinculadas a tu cuenta. Aunque una TV esté apagada, seguirá vinculada hasta que la desvincules manualmente.</p>
     </div>
     <a [routerLink]="routes.tvPair" class="btn-add">
       + Vincular nueva TV
@@ -44,7 +44,16 @@
               />
             } @else {
               <div class="device-meta">
-                <strong class="device-name">{{ device.name }}</strong>
+                <div class="device-heading">
+                  <strong class="device-name">{{ device.name }}</strong>
+                  <span
+                    class="device-status"
+                    [class.device-status--recent]="connectionStatus(device) === 'recent'"
+                    [class.device-status--stale]="connectionStatus(device) === 'stale'">
+                    {{ connectionLabel(device) }}
+                  </span>
+                </div>
+                <span class="device-created">Vinculada el {{ formatCreatedAt(device.createdAt) }}</span>
                 <span class="device-last-seen">Última conexión: {{ formatLastSeen(device.lastSeen) }}</span>
               </div>
             }
@@ -76,5 +85,6 @@
 
   <nav class="back-links">
     <a [routerLink]="routes.tvPair">Vincular TV</a>
+    <a [routerLink]="routes.guiaTv">Guía TV</a>
   </nav>
 </main>

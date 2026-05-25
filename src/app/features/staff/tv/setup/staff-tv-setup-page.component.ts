@@ -129,7 +129,7 @@ export class StaffTvSetupPageComponent implements OnDestroy {
           '2.4  Si el navegador pide actualización, acéptala antes de continuar.'
         ],
         warning: 'Comprueba que la TV tiene Wi-Fi o cable de red activo antes de continuar. Sin conexión, la vista no se actualizará.',
-        tip: 'Chrome funciona mejor para mostrar la vista interna de TV sin problemas de compatibilidad.'
+        tip: 'Usa siempre el mismo navegador o app de navegador en la TV para que conserve la vinculación entre apagados.'
       }
     },
     {
@@ -149,7 +149,7 @@ export class StaffTvSetupPageComponent implements OnDestroy {
           '3.4  Espera a que cargue la página de inicio de la aplicación.'
         ],
         warning: 'No busques en Google — escribe la URL directamente en la barra de direcciones para evitar entrar en páginas equivocadas.',
-        tip: 'Puedes usar un teclado Bluetooth conectado a la TV para escribir con más comodidad.Busca en tu navegador el modo F11 o pantalla completa'
+        tip: 'Guarda luego la URL /tv en favoritos para que cada mañana solo tengas que abrir ese acceso directo.'
       }
     },
     {
@@ -161,7 +161,7 @@ export class StaffTvSetupPageComponent implements OnDestroy {
       imageHint: 'Sustituir por una captura de la pantalla Vincular TV con el código visible.',
       imageSrc: 'assets/55.png',
       detail: {
-        body: 'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos. Mientras siga activo, volverás a ver ese mismo código al entrar en la pantalla de Vincular TV.',
+        body: 'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos. Se usa solo para la primera vinculación o para recuperar una TV que haya perdido sus datos locales.',
         subSteps: [
           '4.1  Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
           '4.2  En el navbar pulsa "Vincular TV".',
@@ -169,7 +169,7 @@ export class StaffTvSetupPageComponent implements OnDestroy {
           '4.4  Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
         ],
         warning: 'No compartas un código caducado: cada código solo puede usarse una vez y expira automáticamente.',
-        tip: 'Mantén esta pantalla abierta mientras configuras la TV para no perder de vista el contador.'
+        tip: 'Mantén esta pantalla abierta mientras configuras la TV para no perder de vista el contador. No hace falta generar un código nuevo cada día.'
       }
     },
     {
@@ -181,21 +181,23 @@ export class StaffTvSetupPageComponent implements OnDestroy {
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
       imageSrc: 'assets/5.png',
       detail: {
-        body: 'La TV no necesita iniciar sesión continua. Solo tienes que abrir la pantalla interna de activación, escribir el código y esperar a que se abra automáticamente la cola de turnos.',
+        body: 'La TV no necesita iniciar sesión continua. Solo tienes que abrir la pantalla interna de activación, escribir el código una vez y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [
           '5.1  En la TV escribe la URL de la app y pulsa Enter.',
           '5.2  En la barra de búsqueda de ticketbarber existe un botón que dice Ingresar código TV, pulsa en el enlace.',
           '5.3  Tendras una pantalla donde debes ingresar el codigo que previamente generaste desde tu tablet o móvil.Esto significa haberte logeado previamente. ',
-          '5.4Activa pantalla completa y comprueba desde la sala que los turnos se leen bien.'
+          '5.4  Cuando la TV quede vinculada, guarda la URL /tv en favoritos y activa pantalla completa para dejarla lista para el uso diario.'
         ],
-        tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático.Usa el modo pantalla completa de tu navegador de la TV'
+        tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático. Evita el modo incógnito o limpiadores automáticos de datos.'
       }
     }
   ];
 
   readonly tips: string[] = [
     'Activa el modo pantalla completa para que la información se vea mejor desde lejos.',
-    'Guarda la pantalla de activación en favoritos de la TV para volver a vincularla rápidamente si hace falta.',
+    'Guarda la URL /tv en favoritos de la TV: será la ruta diaria para abrir la cola sin volver a introducir códigos.',
+    'Usa siempre el mismo navegador o app de navegador en la Smart TV para no perder la vinculación guardada.',
+    'Evita el modo incógnito y los limpiadores automáticos de datos del navegador de la TV.',
     'Comprueba la conexión Wi-Fi antes de introducir el código para evitar cortes.',
     'Si necesitas cambiar turnos o revisar la cola, vuelve al panel de barberos desde la tablet.'
   ];

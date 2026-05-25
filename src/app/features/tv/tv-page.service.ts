@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { QueueRepository } from '../../core/data/queue.repository';
 import { BarberService } from '../../core/services/barber.service';
 import { ShopService } from '../../core/services/shop.service';
-import { TvAuthService } from '../../core/services/tv-auth.service';
+import { TvAuthService, TvBindingFailureReason } from '../../core/services/tv-auth.service';
 import { BarberProfile } from '../../core/models/barber.model';
 import { OpeningHoursDay } from '../../core/models/shop.model';
 import { Ticket } from '../../core/models/ticket.model';
@@ -62,10 +62,10 @@ export class TvPageService {
   private clockInterval?: number;
   private heartbeatInterval?: number;
   private bindingCheckInterval?: number;
-  private onBindingInvalid?: () => void;
+  private onBindingInvalid?: (reason: TvBindingFailureReason) => void;
   private bindingInvalidNotified = false;
 
-  init(shopId: string, onBindingInvalid?: () => void): void {
+  init(shopId: string, onBindingInvalid?: (reason: TvBindingFailureReason) => void): void {
     this.shopId.set(shopId);
     this.onBindingInvalid = onBindingInvalid;
     this.bindingInvalidNotified = false;
@@ -135,6 +135,6 @@ export class TvPageService {
     if (result.valid) return;
 
     this.bindingInvalidNotified = true;
-    this.onBindingInvalid?.();
+    this.onBindingInvalid?.(result.reason ?? 'missing');
   }
 }

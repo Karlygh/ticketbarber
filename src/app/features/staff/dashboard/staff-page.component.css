@@ -213,8 +213,8 @@
   padding: 0.45rem 0.9rem;
   font-size: 0.84rem;
   font-weight: 700;
-  align-self: center;
-  margin-inline: auto;
+  align-self: flex-start;
+  margin-inline: 0;
 }
 
 .day-state-pill--open {
@@ -946,6 +946,12 @@
     font-size: 1.15rem;
     min-width: 0;
     text-align: center;
+  }
+
+  .day-state-pill {
+    align-self: center;
+    margin-inline: auto;
+    margin-top: -0.15rem;
   }
 
   .hero {

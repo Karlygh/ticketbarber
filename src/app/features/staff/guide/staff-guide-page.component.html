@@ -30,7 +30,7 @@
     </div>
 
     <h2 id="guide-title">{{ currentStep().title }}</h2>
-    <p>{{ resolvedBody() }}</p>
+    <p [innerHTML]="resolvedBodyHtml()"></p>
 
     @if (targetMissing()) {
       <p class="guide-note">Este paso sigue disponible aunque el elemento no aparezca ahora mismo.</p>

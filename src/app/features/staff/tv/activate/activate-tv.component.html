@@ -17,6 +17,29 @@
     </p>
   </header>
 
+  @if (infoMsg()) {
+    <div class="info-banner" [class.info-banner--warning]="status() !== 'already-linked'">
+      {{ infoMsg() }}
+    </div>
+  }
+
+  @if (status() === 'checking-binding') {
+    <div class="success-card success-card--checking">
+      <div class="success-icon">...</div>
+      <h2>Comprobando esta TV</h2>
+      <p>Estamos verificando si esta pantalla ya estaba vinculada.</p>
+    </div>
+  } @else if (status() === 'already-linked') {
+    <div class="success-card">
+      <div class="success-icon">OK</div>
+      <h2>TV ya vinculada</h2>
+      <p>Esta pantalla ya está asociada a tu cuenta. En un momento abriremos la cola.</p>
+      <div class="success-actions">
+        <button class="primary" (click)="openTvView()">Abrir cola ahora</button>
+      </div>
+    </div>
+  }
+
   @if (status() === 'success') {
     <div class="success-card">
       <div class="success-icon">✅</div>
@@ -27,7 +50,7 @@
         <button class="secondary" (click)="reset()">Ingresar otro código</button>
       </div>
     </div>
-  } @else {
+  } @else if (status() !== 'checking-binding' && status() !== 'already-linked') {
     <form class="activate-form" (ngSubmit)="activate()" #form="ngForm">
       <label for="code-input">Código de 6 dígitos</label>
       <input
@@ -47,7 +70,7 @@
       }
 
       <p class="hint">
-        El código se genera desde la cuenta del barbero, dura 15 minutos y solo puede usarse una vez.
+        El código se genera desde la cuenta del barbero, dura 15 minutos y solo puede usarse una vez. Después, esta misma TV seguirá vinculada hasta que borres sus datos o la desvincules manualmente.
       </p>
 
       <button

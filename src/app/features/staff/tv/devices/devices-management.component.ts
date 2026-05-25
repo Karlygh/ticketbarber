@@ -7,6 +7,8 @@ import { DeviceDoc, TvAuthService } from '../../../../core/services/tv-auth.serv
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
+type DeviceConnectionStatus = 'recent' | 'stale';
+
 @Component({
   selector: 'app-devices-management',
   standalone: true,
@@ -24,6 +26,7 @@ export class DevicesManagementComponent implements OnInit {
   readonly unlinkingId = signal<string | null>(null);
   readonly renamingId = signal<string | null>(null);
   readonly newName = signal('');
+  private readonly recentHeartbeatMs = 15 * 60 * 1000;
 
   ngOnInit(): void {
     this.tvAuthService.watchDevices().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((d) => this.devices.set(d));
@@ -70,5 +73,21 @@ export class DevicesManagementComponent implements OnInit {
     const diffH = Math.floor(diffMin / 60);
     if (diffH < 24) return `hace ${diffH} h`;
     return `hace ${Math.floor(diffH / 24)} días`;
+  }
+
+  formatCreatedAt(ts: number): string {
+    return new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(ts);
+  }
+
+  connectionStatus(device: DeviceDoc): DeviceConnectionStatus {
+    return Date.now() - device.lastSeen <= this.recentHeartbeatMs ? 'recent' : 'stale';
+  }
+
+  connectionLabel(device: DeviceDoc): string {
+    return this.connectionStatus(device) === 'recent' ? 'Activa recientemente' : 'Sin conexión reciente';
   }
 }

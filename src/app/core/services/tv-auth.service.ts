@@ -56,6 +56,8 @@ export interface TvBindingValidation {
   reason?: 'missing' | 'not_found' | 'owner_mismatch' | 'revoked' | 'unavailable';
 }
 
+export type TvBindingFailureReason = NonNullable<TvBindingValidation['reason']>;
+
 @Injectable({ providedIn: 'root' })
 export class TvAuthService {
   private readonly firestore = inject(Firestore);
@@ -127,7 +129,6 @@ export class TvAuthService {
     try {
       deviceSnap = await this.runInCtx(() => getDoc(doc(this.firestore, `devices/${deviceId}`)));
     } catch {
-      this.clearBinding();
       return { valid: false, shopId, deviceId, reason: 'unavailable' };
     }
 

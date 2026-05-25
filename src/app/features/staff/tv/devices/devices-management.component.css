@@ -20,12 +20,12 @@
 .back-btn {
   position: absolute;
   top: 2.1rem;
-  right: 0;
+  left: 0;
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(103, 232, 249, 0.22);
-  background: rgba(7, 22, 37, 0.66);
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  background: rgba(7, 22, 37, 0.58);
   color: var(--section-kiosk-light);
   display: inline-grid;
   place-items: center;
@@ -50,8 +50,8 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.6rem;
-  padding-right: 3.1rem;
+  margin-bottom: 1.4rem;
+  padding-left: 3.1rem;
   flex-wrap: wrap;
 }
 
@@ -80,12 +80,12 @@ h1 {
   background: var(--btn-gradient);
   color: var(--btn-text);
   border: 1px solid var(--border-accent);
-  border-radius: var(--r-md);
+  border-radius: 10px;
   padding: 0.65rem 1.2rem;
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: var(--btn-shadow);
+  box-shadow: 0 8px 16px rgba(4, 38, 74, 0.28);
   white-space: nowrap;
   transition: filter 0.15s, transform 0.15s;
 }
@@ -101,7 +101,7 @@ h1 {
   padding: 3rem 1rem;
   background: var(--bg-card);
   border: 1px dashed var(--border-subtle);
-  border-radius: var(--r-lg);
+  border-radius: 12px;
 }
 
 .empty-icon {
@@ -131,12 +131,12 @@ h1 {
   background: var(--btn-gradient);
   color: var(--btn-text);
   border: 1px solid var(--border-accent);
-  border-radius: var(--r-md);
+  border-radius: 10px;
   padding: 0.8rem 1.8rem;
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: var(--btn-shadow);
+  box-shadow: 0 8px 16px rgba(4, 38, 74, 0.28);
   transition: filter 0.15s, transform 0.15s;
 }
 
@@ -163,15 +163,15 @@ h1 {
   padding: 1rem 1.2rem;
   background: var(--bg-card);
   border: 1px solid var(--section-staff-border);
-  border-radius: var(--r-md);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
   transition: border-color 0.18s, box-shadow 0.18s, opacity 0.18s;
   flex-wrap: wrap;
 }
 
 .device-card:hover {
   border-color: var(--section-staff-light);
-  box-shadow: 0 6px 22px var(--section-staff-glow);
+  box-shadow: 0 8px 18px rgba(11, 75, 112, 0.28);
 }
 
 .device-card.unlinking {
@@ -198,6 +198,13 @@ h1 {
   min-width: 0;
 }
 
+.device-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
 .device-name {
   font-size: 1rem;
   color: var(--text-primary);
@@ -206,20 +213,46 @@ h1 {
   text-overflow: ellipsis;
 }
 
+.device-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+.device-status--recent {
+  color: #b6f7d0;
+  border-color: rgba(34, 197, 94, 0.34);
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.device-status--stale {
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.32);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.device-created,
 .device-last-seen {
   font-size: 0.78rem;
   color: var(--text-copy);
   opacity: 0.75;
+  line-height: 1.35;
 }
 
 .rename-input {
   flex: 1;
-  padding: 0.4rem 0.7rem;
+  min-width: 0;
+  padding: 0.45rem 0.7rem;
   font: inherit;
   font-size: 0.95rem;
   background: var(--bg-page);
   border: 1px solid var(--section-staff-light);
-  border-radius: var(--r-sm);
+  border-radius: 8px;
   color: var(--text-primary);
   outline: none;
 }
@@ -229,11 +262,12 @@ h1 {
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
+  align-items: stretch;
 }
 
 button {
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-sm);
+  border-radius: 8px;
   padding: 0.4rem 0.85rem;
   font: inherit;
   font-size: 0.82rem;
@@ -242,6 +276,7 @@ button {
   background: transparent;
   color: var(--text-copy);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+  min-height: 36px;
 }
 
 button:hover:not(:disabled) {
@@ -286,6 +321,154 @@ button:disabled {
 .back-links a:hover {
   opacity: 1;
   color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+  .devices-shell {
+    width: min(680px, 100vw - 1.4rem);
+    padding: 4.35rem 0 1.6rem;
+  }
+
+  .back-btn {
+    top: 1.55rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .devices-head {
+    padding-left: 2.85rem;
+    margin-bottom: 1.1rem;
+    gap: 0.75rem;
+  }
+
+  h1 {
+    font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+    line-height: 1.18;
+  }
+
+  .subtitle {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    max-width: 34ch;
+  }
+
+  .btn-add,
+  .btn-add-lg {
+    border-radius: 9px;
+    padding: 0.62rem 0.95rem;
+    font-size: 0.84rem;
+    box-shadow: 0 6px 12px rgba(4, 38, 74, 0.24);
+  }
+
+  .empty-state {
+    padding: 2rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .devices-list {
+    gap: 0.65rem;
+  }
+
+  .device-card {
+    gap: 0.72rem;
+    padding: 0.85rem 0.85rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .device-info {
+    width: 100%;
+    align-items: flex-start;
+    gap: 0.68rem;
+  }
+
+  .device-icon {
+    font-size: 1.35rem;
+    margin-top: 0.1rem;
+  }
+
+  .device-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .device-heading {
+    gap: 0.48rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .device-name {
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+
+  .device-status {
+    font-size: 0.68rem;
+    padding: 0.17rem 0.48rem;
+  }
+
+  .device-created,
+  .device-last-seen {
+    font-size: 0.76rem;
+  }
+
+  .rename-input {
+    width: 100%;
+    font-size: 0.9rem;
+    border-radius: 7px;
+  }
+
+  .device-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.52rem 0.6rem;
+    font-size: 0.8rem;
+    min-height: 38px;
+    border-radius: 7px;
+  }
+
+  .back-links {
+    margin-top: 1.15rem;
+    gap: 1rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .devices-shell {
+    width: min(680px, 100vw - 1rem);
+    padding-top: 4.2rem;
+  }
+
+  .devices-head {
+    padding-left: 2.6rem;
+  }
+
+  .subtitle {
+    font-size: 0.82rem;
+  }
+
+  .device-card {
+    padding: 0.8rem 0.74rem 0.86rem;
+  }
+
+  .device-status {
+    font-size: 0.65rem;
+  }
+
+  button {
+    font-size: 0.76rem;
+    padding: 0.5rem 0.5rem;
+  }
 }
 
 @keyframes fade-up {

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TvAuthService } from '../../core/services/tv-auth.service';
+import { TvAuthService, TvBindingFailureReason } from '../../core/services/tv-auth.service';
 import { TvCardsLightViewComponent } from './views/cards-light/tv-cards-light-view.component';
 import { TvDefaultViewComponent } from './views/default/tv-default-view.component';
 import { TvPlaceholderViewComponent } from './views/placeholder/tv-placeholder-view.component';
@@ -27,7 +27,7 @@ export class TvPageComponent implements OnInit, OnDestroy {
     const binding = await this.tvAuthService.validateBinding();
 
     if (!binding.valid || !binding.shopId) {
-      void this.router.navigate(['/activate']);
+      void this.redirectToActivate(binding.reason ?? 'missing');
       return;
     }
 
@@ -36,12 +36,18 @@ export class TvPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.service.init(binding.shopId, () => {
-      void this.router.navigate(['/activate']);
+    this.service.init(binding.shopId, (reason) => {
+      void this.redirectToActivate(reason);
     });
   }
 
   ngOnDestroy(): void {
     this.service.destroy();
+  }
+
+  private redirectToActivate(reason: TvBindingFailureReason): Promise<boolean> {
+    return this.router.navigate(['/activate'], {
+      queryParams: { reason }
+    });
   }
 }

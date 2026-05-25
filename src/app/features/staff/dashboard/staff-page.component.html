@@ -55,6 +55,16 @@
       </div>
     </header>
 
+    <div
+      class="day-state-pill"
+      [class.day-state-pill--open]="queueStore.settings().isOpen"
+      [class.day-state-pill--closed]="!queueStore.settings().isOpen"
+      role="status"
+      aria-live="polite"
+    >
+      {{ queueStore.settings().isOpen ? 'Jornada abierta' : 'Jornada cerrada' }}
+    </div>
+
     <header class="hero">
       <div class="hero-brand">
         <img class="hero-brand-logo" src="assets/logoticketpeq.png" alt="TicketBarber" />
@@ -87,16 +97,6 @@
         </button>
       </div>
     </header>
-
-    <div
-      class="day-state-pill"
-      [class.day-state-pill--open]="queueStore.settings().isOpen"
-      [class.day-state-pill--closed]="!queueStore.settings().isOpen"
-      role="status"
-      aria-live="polite"
-    >
-      {{ queueStore.settings().isOpen ? 'Jornada abierta' : 'Jornada cerrada' }}
-    </div>
 
     @switch (subscriptionStore.subscriptionStatus()) {
       @case ('trial-active') {

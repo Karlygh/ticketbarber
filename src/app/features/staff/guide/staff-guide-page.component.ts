@@ -1,6 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, HostListener, inject, NgZone, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { StaffBarbersPageComponent } from '../barbers/staff-barbers-page.component';
 import { StaffPageComponent } from '../dashboard/staff-page.component';
 import { STAFF_GUIDE_STEPS, StaffGuidePlacement, StaffGuideStep } from './staff-guide-tour';
@@ -29,6 +30,7 @@ export class StaffGuidePageComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly steps = STAFF_GUIDE_STEPS;
   readonly currentIndex = signal(0);
@@ -48,6 +50,9 @@ export class StaffGuidePageComponent implements AfterViewInit {
     }
     return step.body;
   });
+  readonly resolvedBodyHtml = computed<SafeHtml>(() =>
+    this.sanitizer.bypassSecurityTrustHtml(this.toRichText(this.resolvedBody()))
+  );
 
   constructor() {
     effect(() => {
@@ -203,6 +208,10 @@ export class StaffGuidePageComponent implements AfterViewInit {
     style['top'] = `${clampedTop}px`;
     style['left'] = `${clampedLeft}px`;
     return style;
+  }
+
+  private toRichText(text: string): string {
+    return text.replace(/\*\*(.+?)\*\*/g, '<strong class="guide-highlight">$1</strong>');
   }
 }
 
