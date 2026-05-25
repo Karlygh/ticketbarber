@@ -1,6 +1,7 @@
 /**
  * Cloud Functions para contacto y eliminación de cuenta.
  */
+/* eslint-disable require-jsdoc, max-len, linebreak-style */
 
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {setGlobalOptions} from "firebase-functions/v2";
@@ -38,7 +39,7 @@ function escapeHtml(value: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
