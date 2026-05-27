@@ -9,6 +9,7 @@ import {defineSecret, defineString} from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import * as nodemailer from "nodemailer";
+import Stripe from "stripe";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -19,6 +20,7 @@ setGlobalOptions({maxInstances: 10});
 const ADMIN_EMAIL = defineString("ADMIN_EMAIL");
 const GMAIL_USER = defineString("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
+const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 
 interface ContactRequest {
   name: string;
@@ -32,6 +34,14 @@ interface ContactResponse {
   success: boolean;
   message: string;
   contactId?: string;
+}
+
+interface PortalLinkRequest {
+  returnUrl: string;
+}
+
+interface PortalLinkResponse {
+  url: string;
 }
 
 function escapeHtml(value: string): string {
@@ -52,6 +62,51 @@ function requireConfiguredValue(value: string | undefined, label: string): strin
     );
   }
   return trimmed;
+}
+
+function validateReturnUrl(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new HttpsError("invalid-argument", "returnUrl debe ser una URL válida.");
+  }
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new HttpsError("invalid-argument", "returnUrl debe ser una URL válida.");
+  }
+
+  const allowedOrigins = new Set([
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+    "https://ticketbarber-7c16d.web.app",
+    "https://ticketbarber-7c16d.firebaseapp.com",
+  ]);
+
+  if (!allowedOrigins.has(url.origin)) {
+    throw new HttpsError("permission-denied", "returnUrl no está permitido.");
+  }
+
+  return url.toString();
+}
+
+function resolveStripeCustomerId(data: FirebaseFirestore.DocumentData | undefined): string | null {
+  if (!data) {
+    return null;
+  }
+
+  const candidates = [
+    data.stripeId,
+    data.stripe_id,
+    data.customer_id,
+    data.customerId,
+  ];
+
+  const customerId = candidates.find((candidate) =>
+    typeof candidate === "string" && candidate.startsWith("cus_")
+  );
+
+  return typeof customerId === "string" ? customerId : null;
 }
 
 function createMailer(): nodemailer.Transporter {
@@ -318,6 +373,59 @@ export const sendContactEmail = onCall<ContactRequest, Promise<ContactResponse>>
         "Error al procesar tu mensaje. Intenta de nuevo."
       );
     }
+  }
+);
+
+export const createStripePortalLink = onCall<PortalLinkRequest, Promise<PortalLinkResponse>>(
+  {
+    cors: [
+      "http://localhost:4200",
+      "http://127.0.0.1:4200",
+      "https://ticketbarber-7c16d.web.app",
+      "https://ticketbarber-7c16d.firebaseapp.com",
+    ],
+    secrets: [STRIPE_SECRET_KEY],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Debes estar autenticado para gestionar tu suscripción."
+      );
+    }
+
+    const uid = request.auth.uid;
+    const returnUrl = validateReturnUrl(request.data?.returnUrl);
+    const customerDoc = await db.doc(`customers/${uid}`).get();
+    const customerId = resolveStripeCustomerId(customerDoc.data());
+
+    if (!customerId) {
+      logger.warn("Stripe customer not found for portal link", {uid});
+      throw new HttpsError(
+        "failed-precondition",
+        "No se encontró el cliente de Stripe para esta cuenta."
+      );
+    }
+
+    const stripeSecretKey = requireConfiguredValue(
+      STRIPE_SECRET_KEY.value(),
+      "STRIPE_SECRET_KEY"
+    );
+    const stripe = new Stripe(stripeSecretKey);
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl,
+    });
+
+    if (!session.url) {
+      throw new HttpsError(
+        "internal",
+        "Stripe no devolvió una URL válida para el portal."
+      );
+    }
+
+    logger.info("Stripe portal link created", {uid, customerId});
+    return {url: session.url};
   }
 );
 

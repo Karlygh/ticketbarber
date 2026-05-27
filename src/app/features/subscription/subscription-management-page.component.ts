@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
 import { AuthStore } from '../../core/stores/auth.store';
@@ -30,6 +30,7 @@ export class SubscriptionManagementPageComponent {
   readonly subscriptionStore = inject(SubscriptionStore);
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly stripeService = inject(StripeService);
   private readonly firestore = inject(Firestore);
   private readonly fb = inject(FormBuilder);
@@ -38,6 +39,10 @@ export class SubscriptionManagementPageComponent {
 
   readonly portalLoading = signal(false);
   readonly portalError = signal<string | null>(null);
+  readonly returnedFromCancelPortal = signal(this.route.snapshot.queryParamMap.get('portal') === 'cancel-returned');
+  readonly showCancellationSuccess = computed(
+    () => this.returnedFromCancelPortal() && this.subscriptionStore.subscriptionStatus() === 'pro-canceling'
+  );
 
   readonly cancelModalOpen = signal(false);
   readonly cancelSending = signal(false);
@@ -68,10 +73,19 @@ export class SubscriptionManagementPageComponent {
   }
 
   async openPortal(): Promise<void> {
+    await this.openPortalWithReturn('manage-returned');
+  }
+
+  async openCancelPortal(): Promise<void> {
+    await this.openPortalWithReturn('cancel-returned');
+  }
+
+  private async openPortalWithReturn(portalReturn: 'manage-returned' | 'cancel-returned'): Promise<void> {
     this.portalLoading.set(true);
     this.portalError.set(null);
     try {
-      await this.stripeService.createPortalSession();
+      const returnUrl = `${window.location.origin}/subscription/manage?portal=${portalReturn}`;
+      await this.stripeService.createPortalSession(returnUrl);
     } catch (err: unknown) {
       console.error('Portal error:', err);
       this.portalError.set('No se pudo abrir el portal. Inténtalo más tarde.');
@@ -106,7 +120,7 @@ export class SubscriptionManagementPageComponent {
         createdAt: Date.now()
       });
       this.cancelModalOpen.set(false);
-      await this.openPortal();
+      await this.openCancelPortal();
     } catch (err: unknown) {
       console.error('Error guardando feedback:', err);
       this.cancelError.set('No se pudo guardar el motivo. Inténtalo de nuevo.');

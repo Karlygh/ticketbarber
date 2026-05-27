@@ -63,8 +63,17 @@ describe('TvPageService', () => {
     expect(repositoryMock.updateTvViewForShop).toHaveBeenCalledWith('shop-1', 'view-3');
   });
 
-  it('cycleView advances from view-3 to cards-light (wraps around)', async () => {
+  it('cycleView advances from view-3 to rose-soft', async () => {
     settings$.next({ ...DEFAULT_QUEUE_SETTINGS, tvView: 'view-3' });
+    service.init('shop-1');
+
+    await service.cycleView();
+
+    expect(repositoryMock.updateTvViewForShop).toHaveBeenCalledWith('shop-1', 'rose-soft');
+  });
+
+  it('cycleView advances from rose-soft to cards-light (wraps around)', async () => {
+    settings$.next({ ...DEFAULT_QUEUE_SETTINGS, tvView: 'rose-soft' });
     service.init('shop-1');
 
     await service.cycleView();

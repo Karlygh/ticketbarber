@@ -1,0 +1,160 @@
+<main class="rose-shell">
+  <header class="rose-topbar">
+    <section class="rose-brand">
+      <div class="rose-logo">
+        @if (vm.shop.logoUrl) {
+          <img [src]="vm.shop.logoUrl" alt="Logo" />
+        } @else {
+          <span>TB</span>
+        }
+      </div>
+      <div class="rose-brand-copy">
+        <p>Colas en directo</p>
+        <h1>{{ vm.shop.name || 'TicketBarber' }}</h1>
+      </div>
+    </section>
+
+    <section class="rose-meta">
+      <article>
+        <p>Horario</p>
+        <strong>{{ vm.shop.todayHours }}</strong>
+      </article>
+      <article>
+        <p>Hora actual</p>
+        <strong>{{ vm.clockLabel }}</strong>
+      </article>
+      <button
+        type="button"
+        class="rose-view-toggle"
+        [disabled]="switchingView"
+        (click)="changeView.emit()"
+        aria-label="Cambiar vista de TV">
+        <svg viewBox="0 0 24 24">
+          <path d="M14.1 4.2 19.8 10l-7.9 7.9-6.3 1.4 1.4-6.3zM13 5.3l5.7 5.7M5.8 19.4l2.8-2.8" />
+        </svg>
+      </button>
+    </section>
+  </header>
+
+  @if (vm.groups.length === 0) {
+    <section class="rose-empty">
+      <h2>Sin barberos activos</h2>
+      <p>Activa la jornada o selecciona barberos para empezar a mostrar esta vista.</p>
+      <a [routerLink]="routes.staff.root">Volver al panel</a>
+    </section>
+  } @else {
+    @if (featuredGroup(); as featured) {
+      <section class="rose-stage">
+        <article class="rose-hero" [style.--accent]="featured.accentColor">
+          <div class="rose-hero-barber">
+            @if (featured.barber.photoUrl) {
+              <img class="rose-hero-photo" [src]="featured.barber.photoUrl" [alt]="featured.barber.name" />
+            } @else {
+              <div class="rose-hero-photo fallback">{{ featured.initials }}</div>
+            }
+            <div>
+              <p class="rose-kicker">Atendiendo ahora</p>
+              <h2>{{ featured.barber.name }}</h2>
+            </div>
+          </div>
+
+          @if (featured.current) {
+            <div class="rose-current">
+              <p>Turno actual</p>
+              <h3>{{ featured.current.displayName }}</h3>
+              <span>{{ featured.current.serviceName }}</span>
+            </div>
+            <div class="rose-time">
+              <strong>{{ featured.current.row.waitMin }}</strong>
+              <span>min restantes</span>
+            </div>
+          } @else {
+            <div class="rose-current idle">
+              <p>Turno actual</p>
+              <h3>Sin turno</h3>
+              <span>Esperando al siguiente cliente</span>
+            </div>
+            <div class="rose-time idle">
+              <strong>0</strong>
+              <span>min</span>
+            </div>
+          }
+        </article>
+
+        <aside class="rose-next-panel">
+          <header>
+            <p class="rose-kicker">Colas por barbero</p>
+            <strong>{{ vm.groups.length }}</strong>
+          </header>
+          <div class="rose-queue-list">
+            @for (group of vm.groups; track group.barber.id) {
+              <article class="rose-queue-card" [style.--accent]="group.accentColor">
+                <header class="rose-queue-head">
+                  @if (group.barber.photoUrl) {
+                    <img class="rose-queue-photo" [src]="group.barber.photoUrl" [alt]="group.barber.name" />
+                  } @else {
+                    <div class="rose-queue-photo fallback">{{ group.initials }}</div>
+                  }
+                  <div>
+                    <p>{{ group.barber.name }}</p>
+                    @if (group.current) {
+                      <strong>{{ group.current.displayName }}</strong>
+                    } @else {
+                      <strong class="no-ticket">Sin turno</strong>
+                    }
+                  </div>
+                  <span>{{ group.upcomingAll.length }}</span>
+                </header>
+
+                <div class="rose-next-list">
+                  @for (row of group.upcomingVisible; track row.row.ticket.id) {
+                    <article class="rose-next-item">
+                      <span>{{ row.row.ticket.position }}</span>
+                      <div>
+                        <strong>{{ row.displayName }}</strong>
+                        <p>{{ row.serviceName }}</p>
+                      </div>
+                      <small>{{ row.waitLabel }}</small>
+                    </article>
+                  } @empty {
+                    <article class="rose-next-empty">
+                      <strong>Sin clientes en espera.</strong>
+                    </article>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </aside>
+      </section>
+    }
+
+    <section class="rose-barbers" [class]="cardClass(vm.groups.length)">
+      @for (group of vm.groups; track group.barber.id) {
+        <article class="rose-barber-card" [style.--accent]="group.accentColor">
+          <div class="rose-card-head">
+            @if (group.barber.photoUrl) {
+              <img class="rose-card-photo" [src]="group.barber.photoUrl" [alt]="group.barber.name" />
+            } @else {
+              <div class="rose-card-photo fallback">{{ group.initials }}</div>
+            }
+            <div>
+              <p>Barbero</p>
+              <h3>{{ group.barber.name }}</h3>
+            </div>
+          </div>
+
+          <div class="rose-card-current">
+            @if (group.current) {
+              <strong>{{ group.current.displayName }}</strong>
+              <span>{{ group.current.waitLabel }}</span>
+            } @else {
+              <strong>Sin turno</strong>
+              <span>Disponible</span>
+            }
+          </div>
+        </article>
+      }
+    </section>
+  }
+</main>

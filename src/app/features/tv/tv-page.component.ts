@@ -5,12 +5,13 @@ import { TvAuthService, TvBindingFailureReason } from '../../core/services/tv-au
 import { TvCardsLightViewComponent } from './views/cards-light/tv-cards-light-view.component';
 import { TvDefaultViewComponent } from './views/default/tv-default-view.component';
 import { TvPlaceholderViewComponent } from './views/placeholder/tv-placeholder-view.component';
+import { TvRoseSoftViewComponent } from './views/rose-soft/tv-rose-soft-view.component';
 import { TvPageService } from './tv-page.service';
 
 @Component({
   selector: 'app-tv-page',
   standalone: true,
-  imports: [CommonModule, TvDefaultViewComponent, TvCardsLightViewComponent, TvPlaceholderViewComponent],
+  imports: [CommonModule, TvDefaultViewComponent, TvCardsLightViewComponent, TvPlaceholderViewComponent, TvRoseSoftViewComponent],
   providers: [TvPageService],
   templateUrl: './tv-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

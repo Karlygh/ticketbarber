@@ -11,6 +11,12 @@
       [switchingView]="service.switchingView()"
       (changeView)="service.cycleView()" />
   }
+  @case ('rose-soft') {
+    <app-tv-rose-soft-view
+      [vm]="service.viewModel()"
+      [switchingView]="service.switchingView()"
+      (changeView)="service.cycleView()" />
+  }
   @default {
     <app-tv-default-view
       [vm]="service.viewModel()"

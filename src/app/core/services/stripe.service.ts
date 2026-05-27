@@ -256,16 +256,14 @@ export class StripeService {
   // ── Portal de cliente ───────────────────────────────────────────────────
 
   /** Abre el portal de cliente Stripe para gestionar suscripción, facturas y método de pago. */
-  async createPortalSession(): Promise<void> {
+  async createPortalSession(returnUrl = `${window.location.origin}/subscription/manage?portal=manage-returned`): Promise<void> {
     try {
       const createPortalLink = httpsCallable<
         { returnUrl: string },
         { url: string }
-      >(this.functions, 'ext-firestore-stripe-payments-createPortalLink');
+      >(this.functions, 'createStripePortalLink');
 
-      const result = await createPortalLink({
-        returnUrl: `${window.location.origin}/subscription/manage`
-      });
+      const result = await createPortalLink({ returnUrl });
 
       const url = result.data?.url;
       console.info('[Stripe] Portal link response received', {

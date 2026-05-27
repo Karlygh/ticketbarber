@@ -5,25 +5,25 @@ import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 import { TvBarberGroupViewModel, TvViewModel } from '../../models/tv-view.model';
 
 @Component({
-  selector: 'app-tv-placeholder-view',
+  selector: 'app-tv-rose-soft-view',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './tv-placeholder-view.component.html',
+  templateUrl: './tv-rose-soft-view.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './tv-placeholder-view.component.css'
+  styleUrl: './tv-rose-soft-view.component.css'
 })
-export class TvPlaceholderViewComponent {
+export class TvRoseSoftViewComponent {
   @Input({ required: true }) vm!: TvViewModel;
   @Input() switchingView = false;
   @Output() changeView = new EventEmitter<void>();
 
   readonly routes = APP_ROUTES;
 
-  cardClass(groupCount: number): string {
-    return `grid-${Math.min(Math.max(groupCount, 1), 4)}`;
+  featuredGroup(): TvBarberGroupViewModel | null {
+    return this.vm.groups.find((group) => group.current) ?? this.vm.groups[0] ?? null;
   }
 
-  statusClass(group: TvBarberGroupViewModel): string {
-    return group.current || group.upcomingAll.length ? 'is-live' : 'is-idle';
+  cardClass(groupCount: number): string {
+    return `count-${Math.min(Math.max(groupCount, 1), 4)}`;
   }
 }

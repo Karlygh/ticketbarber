@@ -8,29 +8,31 @@
 
 .back-btn {
   position: absolute;
-  top: 1rem;
+  top: 0.25rem;
   left: 0;
   z-index: 3;
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(103, 232, 249, 0.22);
-  background: rgba(7, 22, 37, 0.66);
-  color: var(--section-kiosk-light);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-copy);
   text-decoration: none;
-  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
 .back-btn:hover {
-  border-color: rgba(103, 232, 249, 0.45);
-  background: rgba(6, 182, 212, 0.14);
+  color: var(--text-primary);
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.06);
   transform: translateY(-1px);
 }
 
 .back-btn:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.55);
+  outline: 2px solid var(--border-accent);
   outline-offset: 2px;
 }
 
@@ -659,6 +661,10 @@ h2 {
 }
 
 @media (max-width: 500px) {
+  .back-btn {
+    display: inline-flex;
+  }
+
   .tv-setup-shell {
     width: min(1080px, 96vw);
   }

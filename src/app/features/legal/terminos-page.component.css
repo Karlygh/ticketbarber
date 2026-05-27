@@ -2,30 +2,37 @@
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 12% 20%, var(--section-pricing-subtle) 0%, transparent 42%),
+    radial-gradient(circle at 12% 20%, var(--section-kiosk-subtle) 0%, transparent 42%),
     linear-gradient(145deg, var(--bg-page) 0%, var(--bg-page-mid) 42%, var(--bg-page) 100%);
   color: var(--text-primary);
 }
 
 .back-btn {
-  position: sticky;
-  top: 5.75rem;
-  left: 1.4rem;
-  display: inline-flex;
+  position: absolute;
+  top: 0.25rem;
+  left: 0;
+  display: none;
   align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-copy);
   text-decoration: none;
-  transition: color 0.15s;
-  z-index: 5;
-  margin: 1.25rem 0 0;
-  padding-left: clamp(1rem, 4vw, 2rem);
+  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
-.back-btn:hover { color: var(--section-pricing); }
+.back-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
 
 .page-shell {
+  position: relative;
   max-width: 780px;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 6vw, 4rem);
@@ -34,7 +41,7 @@
 .eyebrow {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--section-pricing);
+  color: var(--section-kiosk);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -54,7 +61,7 @@ h1 {
 
 .legal-card h2 {
   font-size: 1rem;
-  color: var(--section-pricing);
+  color: var(--section-kiosk);
   margin: 1.6rem 0 0.5rem;
 }
 
@@ -75,7 +82,7 @@ h1 {
 .legal-card strong { color: var(--text-primary); }
 
 .legal-card a {
-  color: var(--section-pricing);
+  color: var(--section-kiosk);
   text-decoration: none;
 }
 
@@ -88,8 +95,10 @@ h1 {
   text-align: right;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 500px) {
   .back-btn {
-    top: 5.2rem;
+    display: inline-flex;
+    position: static;
+    margin-bottom: 1rem;
   }
 }

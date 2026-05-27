@@ -2,59 +2,593 @@
   display: block;
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(135deg, var(--bg-page) 0%, var(--navy-800) 100%);
-  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 12% 6%, rgba(255, 43, 82, 0.28), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(255, 126, 66, 0.16), transparent 28%),
+    linear-gradient(135deg, #170308 0%, #090205 48%, #26050b 100%);
+  color: #fff5f5;
 }
 
-.placeholder-shell {
+.neon-shell {
   min-height: 100dvh;
+  padding: 1.6rem 1.8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.neon-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.78), transparent 86%);
+}
+
+.neon-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.9fr) minmax(360px, 1fr);
+  gap: 1.2rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.neon-brand,
+.neon-hours-card,
+.neon-clock-card,
+.neon-card,
+.neon-next-item,
+.neon-empty {
+  background: linear-gradient(180deg, rgba(47, 8, 14, 0.92), rgba(21, 4, 8, 0.94));
+  border: 1px solid rgba(255, 68, 99, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 28px rgba(255, 25, 69, 0.2),
+    0 20px 52px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(14px);
+}
+
+.neon-brand,
+.neon-hours-card,
+.neon-clock-card {
+  border-radius: 1.8rem;
+}
+
+.neon-brand {
+  padding: 1.2rem 1.35rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.neon-brand-mark,
+.neon-icon-tile,
+.neon-view-toggle {
+  width: 4.6rem;
+  height: 4.6rem;
+  border-radius: 1.4rem;
+  background: linear-gradient(180deg, rgba(255, 37, 74, 0.28), rgba(105, 7, 20, 0.8));
+  border: 1px solid rgba(255, 111, 134, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 22px rgba(255, 36, 78, 0.38);
+  color: #ffd6dc;
   display: grid;
   place-items: center;
-  padding: 2rem;
+  flex: 0 0 auto;
 }
 
-.placeholder-card {
-  width: min(720px, 100%);
-  padding: 2rem;
-  border-radius: 1.8rem;
-  background: var(--bg-card-dark);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+.neon-brand-mark img {
+  width: 2.9rem;
+  height: 2.9rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(255, 61, 97, 0.62));
 }
 
-.eyebrow,
-.meta,
-.placeholder-card p {
+.neon-brand-mark span {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(255, 41, 82, 0.95);
+}
+
+.neon-brand-copy h1,
+.neon-barber-copy h2,
+.neon-current-copy h3,
+.neon-next-copy strong,
+.neon-next-empty strong,
+.neon-empty h2 {
+  margin: 0;
+  font-family: 'Sora', 'Manrope', sans-serif;
+}
+
+.neon-brand-copy h1 {
+  font-size: clamp(2rem, 2.55vw, 3.2rem);
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 22px rgba(255, 45, 82, 0.72);
+}
+
+.neon-brand-copy p {
+  margin: 0;
+  color: #ffb3bf;
+  font-size: 1.25rem;
+}
+
+.neon-brand-subline {
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.neon-hours-card,
+.neon-clock-card {
+  padding: 1.15rem 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 8.85rem;
+}
+
+.neon-icon-tile svg,
+.neon-view-toggle svg,
+.neon-next-empty-icon svg {
+  width: 1.65rem;
+  height: 1.65rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.neon-hours-card {
+  color: #ff6a80;
+}
+
+.neon-hours-card strong,
+.neon-clock-card strong {
+  display: block;
+  color: #fff7f8;
+}
+
+.neon-hours-card strong {
+  font-size: 1.65rem;
+}
+
+.neon-hours-copy {
+  min-width: 0;
+}
+
+.neon-back-inline {
+  width: 1.95rem;
+  height: 1.95rem;
+  min-width: 1.95rem;
+  min-height: 1.95rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffe3e8;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 800;
+  border: 1px solid rgba(255, 109, 133, 0.5);
+  background: rgba(65, 8, 17, 0.82);
+  box-shadow: 0 0 18px rgba(255, 40, 78, 0.24);
+}
+
+.neon-back-inline:hover {
+  border-color: rgba(255, 150, 168, 0.86);
+  color: #ffffff;
+}
+
+.neon-meta-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.98rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ff7b91;
+}
+
+.neon-clock-card {
+  justify-content: space-between;
+}
+
+.neon-clock-card strong {
+  font-size: clamp(2.8rem, 4.2vw, 5.1rem);
+  line-height: 1;
+  text-shadow: 0 0 26px rgba(255, 37, 76, 0.82);
+}
+
+.neon-clock-card span {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 1.08rem;
+  color: #ffb2bf;
+}
+
+.neon-view-toggle {
+  width: 4rem;
+  height: 4rem;
+  color: #ffe1e6;
+  cursor: pointer;
+}
+
+.neon-view-toggle:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.neon-view-toggle:hover:not(:disabled) {
+  border-color: rgba(255, 185, 196, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 30px rgba(255, 38, 78, 0.56);
+}
+
+.neon-view-toggle:focus-visible,
+.neon-back-inline:focus-visible {
+  outline: 2px solid rgba(255, 120, 141, 0.92);
+  outline-offset: 2px;
+}
+
+.neon-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.neon-grid.grid-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.neon-grid.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.neon-grid.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.neon-grid.grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.neon-card {
+  border-radius: 1.85rem;
+  overflow: hidden;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  position: relative;
+}
+
+.neon-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(90deg, #ff1748, #ff7a45, var(--accent, #ff1748));
+  box-shadow: 0 0 24px rgba(255, 29, 72, 0.88);
+}
+
+.neon-card.is-idle {
+  border-color: rgba(255, 115, 134, 0.24);
+}
+
+.neon-card-section {
+  padding: 1.18rem 1.2rem;
+}
+
+.neon-card-section + .neon-card-section {
+  border-top: 1px solid rgba(255, 106, 128, 0.2);
+}
+
+.neon-card-barber {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.neon-barber-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  min-width: 0;
+}
+
+.neon-barber-photo {
+  width: 4.9rem;
+  height: 4.9rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 113, 135, 0.68);
+  background: #2e0610;
+  box-shadow: 0 0 22px rgba(255, 38, 78, 0.32);
+}
+
+.neon-barber-photo.fallback {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-shadow: 0 0 18px rgba(255, 42, 82, 0.95);
+}
+
+.neon-barber-copy {
+  min-width: 0;
+}
+
+.neon-barber-copy p,
+.neon-section-label,
+.neon-current-copy p,
+.neon-next-copy p,
+.neon-next-time span,
+.neon-next-empty p {
   margin: 0;
 }
 
-.eyebrow {
+.neon-barber-copy p,
+.neon-section-label {
+  font-size: 0.92rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--cyan-300);
-  font-size: 0.82rem;
-  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: #ff6f84;
 }
 
-.placeholder-card h1 {
-  margin: 0.8rem 0 1rem;
+.neon-barber-copy h2 {
+  margin-top: 0.35rem;
+  font-size: clamp(2rem, 2vw, 2.65rem);
+  line-height: 1;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.placeholder-card p + p {
-  margin-top: 0.8rem;
-}
-
-.meta {
-  color: var(--text-copy);
-}
-
-.placeholder-card button {
-  margin-top: 1.5rem;
-  padding: 0.8rem 1.2rem;
-  border: 0;
+.neon-status-badge {
+  flex: 0 0 auto;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 33, 74, 0.14);
+  border: 1px solid rgba(255, 90, 116, 0.55);
+  color: #ffd7de;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 0 18px rgba(255, 34, 74, 0.22);
+}
+
+.neon-status-badge::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #ff2452;
+  display: inline-block;
+  margin-right: 0.55rem;
+  vertical-align: middle;
+  box-shadow: 0 0 12px rgba(255, 36, 82, 0.9);
+}
+
+.neon-card-current {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.neon-current-content,
+.neon-current-empty {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.neon-current-copy h3 {
+  font-size: clamp(2.1rem, 2.9vw, 3.8rem);
+  line-height: 0.98;
+  color: #fffafa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 18px rgba(255, 42, 82, 0.46);
+}
+
+.neon-current-copy p {
+  margin-top: 0.7rem;
+  font-size: 1.04rem;
+  color: #ffb8c3;
+}
+
+.neon-time-chip {
+  width: clamp(6.3rem, 8vw, 7.25rem);
+  min-height: clamp(8rem, 10vw, 8.8rem);
+  border-radius: 1.45rem;
+  background: linear-gradient(180deg, rgba(255, 38, 78, 0.28), rgba(83, 5, 18, 0.95));
+  border: 1px solid rgba(255, 111, 134, 0.54);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.1rem;
+  text-align: center;
+  box-shadow: 0 0 28px rgba(255, 36, 78, 0.34);
+}
+
+.neon-time-chip strong {
+  font-size: clamp(3rem, 4vw, 4.3rem);
+  line-height: 0.95;
+  color: #ffffff;
+  text-shadow: 0 0 22px rgba(255, 41, 82, 0.88);
+}
+
+.neon-time-chip span {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ff8fa0;
+}
+
+.neon-time-chip.idle {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(35, 5, 10, 0.9));
+  border-color: rgba(255, 124, 142, 0.25);
+  box-shadow: none;
+}
+
+.neon-time-chip.idle strong,
+.neon-time-chip.idle span {
+  color: #b77984;
+  text-shadow: none;
+}
+
+.neon-card-next {
+  display: grid;
+  gap: 1rem;
+}
+
+.neon-card-next.has-upcoming {
+  align-content: start;
+  align-items: start;
+}
+
+.neon-card-next.has-upcoming .neon-next-list {
+  align-self: start;
+}
+
+.neon-next-list {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.neon-next-item {
+  padding: 0.9rem 0.95rem;
+  border-radius: 1.3rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.neon-next-position {
+  width: 3.2rem;
+  height: 3.2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  background: rgba(255, 35, 74, 0.15);
+  border: 1px solid rgba(255, 93, 119, 0.38);
+  color: #ffdce2;
+  font-size: 1.6rem;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(255, 34, 74, 0.18);
+}
+
+.neon-next-copy strong {
+  font-size: 1.1rem;
+  color: #fff8f9;
+}
+
+.neon-next-copy p {
+  margin-top: 0.35rem;
+  color: #ffadb9;
+}
+
+.neon-next-time {
+  text-align: right;
+}
+
+.neon-next-time strong {
+  display: block;
+  color: #fff3f5;
+  font-size: 1rem;
+}
+
+.neon-next-time span {
+  margin-top: 0.35rem;
+  display: block;
+  color: #ff9aad;
+  font-size: 0.95rem;
+}
+
+.neon-next-empty {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.7rem;
+  text-align: center;
+  color: #fff6f7;
+  padding: 1rem 0.6rem;
+}
+
+.neon-next-empty-icon {
+  color: #ff667c;
+  filter: drop-shadow(0 0 16px rgba(255, 39, 78, 0.6));
+}
+
+.neon-next-empty-icon svg {
+  width: 3.15rem;
+  height: 3.15rem;
+}
+
+.neon-next-empty strong {
+  font-size: 1rem;
+}
+
+.neon-next-empty p {
+  color: #ff9bad;
+}
+
+.neon-empty {
+  min-height: 52vh;
+  border-radius: 2rem;
+  padding: 2rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.neon-empty p {
+  color: #ffb2bf;
+}
+
+.neon-empty a {
+  color: #ffe4e8;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 1680px) {
+  .neon-grid.grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1360px) {
+  .neon-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .neon-grid.grid-3,
+  .neon-grid.grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

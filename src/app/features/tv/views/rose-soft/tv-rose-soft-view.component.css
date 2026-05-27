@@ -1,0 +1,652 @@
+:host {
+  --rose-primary: #8b3d56;
+  --rose-primary-soft: #d8a6b2;
+  --rose-dark: #4a1c2a;
+  --rose-surface: #fff7f8;
+  --rose-text-soft: #845062;
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(218, 139, 154, 0.34), transparent 28%),
+    radial-gradient(circle at 86% 0%, rgba(123, 42, 67, 0.16), transparent 26%),
+    linear-gradient(135deg, #fff5f6 0%, #f4d8dc 48%, #e8bfc7 100%);
+  color: #3d1722;
+}
+
+.rose-shell {
+  min-height: 100dvh;
+  padding: 1.95rem 2.2rem 2.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  overflow: hidden;
+}
+
+.rose-topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.2rem;
+  align-items: stretch;
+}
+
+.rose-brand,
+.rose-meta,
+.rose-hero,
+.rose-next-panel,
+.rose-barber-card,
+.rose-empty {
+  background: rgba(255, 250, 250, 0.78);
+  border: 1px solid rgba(122, 54, 73, 0.18);
+  box-shadow: 0 18px 42px rgba(100, 42, 58, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.rose-brand,
+.rose-meta,
+.rose-hero,
+.rose-next-panel,
+.rose-empty {
+  border-radius: 1.55rem;
+}
+
+.rose-brand {
+  padding: 1.3rem 1.45rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.rose-logo,
+.rose-view-toggle {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.2rem;
+  background: linear-gradient(180deg, #fff9fa, #edc8cf);
+  border: 1px solid rgba(137, 68, 87, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 24px rgba(133, 67, 84, 0.16);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.rose-logo img {
+  width: 2.9rem;
+  height: 2.9rem;
+  object-fit: contain;
+}
+
+.rose-logo span {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #7a3147;
+}
+
+.rose-brand-copy {
+  min-width: 0;
+}
+
+.rose-brand-copy p,
+.rose-kicker,
+.rose-meta p,
+.rose-current p,
+.rose-card-head p,
+.rose-next-item p,
+.rose-next-empty p,
+.rose-card-current span,
+.rose-time span {
+  margin: 0;
+}
+
+.rose-brand-copy p,
+.rose-kicker,
+.rose-meta p,
+.rose-current p,
+.rose-card-head p {
+  color: var(--rose-text-soft);
+  font-size: 0.94rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rose-brand-copy h1,
+.rose-hero h2,
+.rose-current h3,
+.rose-empty h2 {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #431724;
+}
+
+.rose-brand-copy h1 {
+  margin-top: 0.15rem;
+  font-size: clamp(2.25rem, 3.2vw, 4.2rem);
+  line-height: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-meta {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.rose-meta article {
+  min-width: 11rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.rose-meta strong {
+  display: block;
+  color: #451623;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.rose-view-toggle {
+  border: 0;
+  color: #692238;
+  cursor: pointer;
+}
+
+.rose-view-toggle svg {
+  width: 1.65rem;
+  height: 1.65rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rose-view-toggle:hover:not(:disabled) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 14px 30px rgba(119, 46, 68, 0.26);
+}
+
+.rose-view-toggle:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.rose-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.55fr);
+  gap: 1.2rem;
+}
+
+.rose-hero {
+  padding: clamp(1.6rem, 2.5vw, 2.45rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  gap: 1.2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.rose-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.45rem;
+  background: linear-gradient(90deg, var(--rose-primary), var(--rose-primary-soft), var(--rose-primary));
+}
+
+.rose-hero-barber {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.rose-hero-photo {
+  width: clamp(5.6rem, 7vw, 7.5rem);
+  height: clamp(5.6rem, 7vw, 7.5rem);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 30px rgba(103, 45, 62, 0.22);
+}
+
+.rose-hero-photo.fallback,
+.rose-card-photo.fallback {
+  display: grid;
+  place-items: center;
+  background: #efd0d6;
+  color: #6f263c;
+  font-weight: 800;
+}
+
+.rose-hero h2 {
+  margin-top: 0.1rem;
+  font-size: clamp(2.8rem, 4.5vw, 5.4rem);
+  line-height: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-current {
+  align-self: end;
+  min-width: 0;
+}
+
+.rose-current h3 {
+  margin-top: 0.25rem;
+  font-size: clamp(4.2rem, 8vw, 9rem);
+  line-height: 0.86;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-current span {
+  display: block;
+  margin-top: 1.1rem;
+  color: #744052;
+  font-size: clamp(1.25rem, 1.7vw, 2rem);
+  font-weight: 800;
+}
+
+.rose-current.idle h3 {
+  color: #8a5a68;
+}
+
+.rose-time {
+  align-self: end;
+  width: clamp(11.8rem, 16vw, 17.4rem);
+  min-height: clamp(13.2rem, 18vw, 19rem);
+  border-radius: 1.45rem;
+  background: linear-gradient(180deg, #7b2f46, #431925);
+  color: #fffafb;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: 0 20px 42px rgba(82, 25, 42, 0.25);
+}
+
+.rose-time strong {
+  font-size: clamp(6.4rem, 9.8vw, 11rem);
+  line-height: 0.85;
+  font-weight: 900;
+  text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.rose-time span {
+  margin-top: 0.75rem;
+  color: #f3cbd2;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.rose-time.idle {
+  background: linear-gradient(180deg, #ead2d7, #d9b5bd);
+  color: #7d4656;
+  box-shadow: none;
+}
+
+.rose-time.idle span {
+  color: #7d4656;
+}
+
+.rose-next-panel {
+  padding: 1.4rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.rose-next-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.rose-next-panel header strong {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 1rem;
+  background: #7d2b43;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+}
+
+.rose-next-list {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+}
+
+.rose-queue-list {
+  min-height: 0;
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  overflow: hidden;
+}
+
+.rose-queue-card {
+  min-width: 0;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(122, 54, 73, 0.12);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.rose-queue-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.rose-queue-head > div {
+  min-width: 0;
+}
+
+.rose-queue-photo {
+  width: 3.05rem;
+  height: 3.05rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 18px rgba(103, 45, 62, 0.16);
+}
+
+.rose-queue-photo.fallback {
+  display: grid;
+  place-items: center;
+  background: #efd0d6;
+  color: #6f263c;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.rose-queue-head p,
+.rose-queue-head strong {
+  margin: 0;
+}
+
+.rose-queue-head p {
+  color: var(--rose-text-soft);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-queue-head strong {
+  display: block;
+  margin-top: 0.18rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 0.8rem;
+  background: rgba(139, 61, 86, 0.08);
+  color: #3f1723;
+  font-size: 1.22rem;
+  line-height: 1.05;
+  min-width: 6.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-queue-head strong.no-ticket {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.2rem 0.45rem;
+  background: rgba(139, 61, 86, 0.04);
+  font-size: 1.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-queue-head > span {
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 0.85rem;
+  background: var(--rose-primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.rose-next-item {
+  padding: 0.8rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.62);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.rose-next-item > span {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 0.8rem;
+  background: #f3dde2;
+  color: var(--rose-primary);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.rose-next-item strong,
+.rose-card-current strong {
+  color: #3f1723;
+  font-size: 1.08rem;
+}
+
+.rose-next-item strong,
+.rose-next-item p {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-next-item p {
+  margin-top: 0.12rem;
+  color: var(--rose-text-soft);
+  font-size: 0.9rem;
+}
+
+.rose-next-item small {
+  color: #692238;
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.rose-next-empty {
+  padding: 0.9rem 0.95rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.56);
+  color: #5a2636;
+}
+
+.rose-next-empty strong {
+  display: block;
+  font-size: 0.98rem;
+}
+
+.rose-next-empty p {
+  margin-top: 0.35rem;
+  color: #815364;
+}
+
+.rose-barbers {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.rose-barbers.count-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.rose-barbers.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rose-barbers.count-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rose-barbers.count-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rose-barber-card {
+  border-radius: 1.2rem;
+  padding: 1.15rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.rose-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.rose-card-photo {
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  flex: 0 0 auto;
+}
+
+.rose-card-head h3 {
+  margin: 0.1rem 0 0;
+  color: #3f1723;
+  font-size: clamp(1.45rem, 1.7vw, 2rem);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-card-current {
+  text-align: right;
+  min-width: 8rem;
+}
+
+.rose-card-current strong {
+  display: block;
+  max-width: 13rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rose-card-current span {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--rose-text-soft);
+  font-weight: 800;
+}
+
+.rose-empty {
+  min-height: 58vh;
+  padding: 2rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.rose-empty h2 {
+  font-size: clamp(3rem, 5vw, 5.5rem);
+}
+
+.rose-empty p {
+  margin: 0.7rem 0 1rem;
+  color: #764154;
+  font-size: 1.2rem;
+}
+
+.rose-empty a {
+  color: #672239;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+@media (max-width: 1460px) {
+  .rose-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rose-next-panel {
+    min-height: 12rem;
+  }
+
+  .rose-queue-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rose-barbers.count-3,
+  .rose-barbers.count-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .rose-topbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rose-meta {
+    flex-wrap: wrap;
+  }
+
+  .rose-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rose-time {
+    width: 100%;
+    min-height: 8.8rem;
+  }
+
+  .rose-queue-list,
+  .rose-barbers.count-2,
+  .rose-barbers.count-3,
+  .rose-barbers.count-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

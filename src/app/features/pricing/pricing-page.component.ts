@@ -115,12 +115,12 @@ export class PricingPageComponent implements OnInit {
     const raw = product.metadata?.['features'];
     if (!raw) {
       return [
-        'Cola digital en tiempo real',
-        'Panel de staff completo',
-        'Pantalla TV para clientes',
+        'Cola para varias TV en directo',
+        'Múltiples barberos',
+        'Control de clientes y jornada laboral',
         'Tickets ilimitados',
-        'Estadísticas de afluencia',
-        'Soporte prioritario',
+        'Clientes saben los minutos para su turno',
+        'Múltiples plantillas para las vistas TV ',
       ];
     }
     try {

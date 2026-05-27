@@ -19,6 +19,16 @@
       <button class="btn-secondary" type="button" (click)="goToPlans()">Ver planes</button>
     </div>
   } @else {
+    @if (showCancellationSuccess()) {
+      <div class="success-banner" role="status" aria-live="polite">
+        <strong>Tu suscripción se ha dado de baja correctamente.</strong>
+        <span>
+          Seguirás teniendo acceso hasta el
+          <strong>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</strong>.
+        </span>
+      </div>
+    }
+
     @switch (subscriptionStore.subscriptionStatus()) {
 
       @case ('pro-active') {

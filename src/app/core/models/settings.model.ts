@@ -15,7 +15,7 @@ export interface QueueSettings {
   updatedAtMs: number;
   activeBarberIds: string[];
   barberStates: Record<string, BarberQueueState>;
-  tvView: 'default' | 'cards-light' | 'view-3';
+  tvView: 'default' | 'cards-light' | 'view-3' | 'rose-soft';
 }
 
 export const DEFAULT_QUEUE_SETTINGS: QueueSettings = {

@@ -20,10 +20,12 @@ export class TvPageService {
   private readonly shopService = inject(ShopService);
   private readonly barberService = inject(BarberService);
 
-  private readonly viewOrder: TvViewId[] = ['cards-light', 'default', 'view-3'];
+  private readonly viewOrder: TvViewId[] = ['cards-light', 'default', 'view-3', 'rose-soft'];
+  private readonly viewStoragePrefix = 'ticketbarber:tv:view:';
 
   readonly shopId = signal<string | null>(null);
   readonly switchingView = signal(false);
+  private readonly selectedView = signal<TvViewId | null>(null);
 
   private readonly now = signal(Date.now());
   private readonly shopName = signal<string>('');
@@ -40,7 +42,7 @@ export class TvPageService {
     this.barbers().filter((barber) => this.settings().activeBarberIds.includes(barber.id))
   );
 
-  private readonly activeView = computed<TvViewId>(() => this.settings().tvView ?? 'default');
+  private readonly activeView = computed<TvViewId>(() => this.selectedView() ?? this.settings().tvView ?? 'default');
 
   readonly viewModel = computed<TvViewModel>(() =>
     buildTvViewModel({
@@ -67,6 +69,7 @@ export class TvPageService {
 
   init(shopId: string, onBindingInvalid?: (reason: TvBindingFailureReason) => void): void {
     this.shopId.set(shopId);
+    this.selectedView.set(this.readStoredView(shopId));
     this.onBindingInvalid = onBindingInvalid;
     this.bindingInvalidNotified = false;
 
@@ -116,8 +119,13 @@ export class TvPageService {
     const nextView = this.viewOrder[(currentIndex + 1) % this.viewOrder.length] ?? this.viewOrder[0];
 
     this.switchingView.set(true);
+    this.selectedView.set(nextView);
+    this.storeView(shopId, nextView);
     try {
       await this.repository.updateTvViewForShop(shopId, nextView);
+    } catch {
+      // The TV route can be unauthenticated and read-only for settings writes.
+      // We keep the selected view locally so UX does not revert.
     } finally {
       this.switchingView.set(false);
     }
@@ -136,5 +144,30 @@ export class TvPageService {
 
     this.bindingInvalidNotified = true;
     this.onBindingInvalid?.(result.reason ?? 'missing');
+  }
+
+  private storageKey(shopId: string): string {
+    return `${this.viewStoragePrefix}${shopId}`;
+  }
+
+  private readStoredView(shopId: string): TvViewId | null {
+    try {
+      const raw = window.localStorage.getItem(this.storageKey(shopId));
+      return this.isTvViewId(raw) ? raw : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private storeView(shopId: string, view: TvViewId): void {
+    try {
+      window.localStorage.setItem(this.storageKey(shopId), view);
+    } catch {
+      // Ignore storage failures and keep runtime selection.
+    }
+  }
+
+  private isTvViewId(value: string | null): value is TvViewId {
+    return value === 'default' || value === 'cards-light' || value === 'view-3' || value === 'rose-soft';
   }
 }

@@ -48,6 +48,27 @@ h1 {
   opacity: 0.85;
 }
 
+.success-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--state-success-border);
+  border-radius: var(--r-lg);
+  background: var(--state-success-bg);
+  color: var(--state-success);
+  line-height: 1.45;
+}
+
+.success-banner span {
+  color: var(--text-copy);
+}
+
+.success-banner strong {
+  color: var(--state-success);
+}
+
 .sub-card {
   border: 1px solid var(--section-account-border);
   border-radius: var(--r-lg);
