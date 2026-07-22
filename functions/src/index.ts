@@ -178,8 +178,13 @@ function validateContactData(data: unknown): ContactRequest {
 }
 
 async function checkRateLimit(email: string): Promise<void> {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  const snapshot = await db.collection("contactos").where("email", "==", email).get();
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  const snapshot = await db
+    .collection("contactos")
+    .where("email", "==", email)
+    .orderBy("createdAt", "desc")
+    .limit(10)
+    .get();
 
   const recentCount = snapshot.docs.filter((contactDoc) => {
     const createdAt = contactDoc.data().createdAt;
@@ -187,7 +192,7 @@ async function checkRateLimit(email: string): Promise<void> {
       return false;
     }
     const createdDate = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-    return createdDate > oneHourAgo;
+    return createdDate.getTime() > oneHourAgo;
   }).length;
 
   if (recentCount >= 3) {

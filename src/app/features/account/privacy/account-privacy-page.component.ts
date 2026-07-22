@@ -63,8 +63,7 @@ export class AccountPrivacyPageComponent {
       await deleteFn({});
       await this.authStore.signOut();
       void this.router.navigateByUrl('/');
-    } catch (err: unknown) {
-      console.error('Error eliminando cuenta:', err);
+    } catch {
       this.deleteError.set('No se pudo eliminar la cuenta. Contacta con soporte si el problema persiste.');
       this.deleteStep.set('error');
     }
@@ -108,8 +107,7 @@ export class AccountPrivacyPageComponent {
       a.download = `ticketbarber-datos-${uid.slice(0, 8)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err: unknown) {
-      console.error('Error exportando datos:', err);
+    } catch {
       this.exportError.set('No se pudo exportar. Inténtalo de nuevo.');
     } finally {
       this.exporting.set(false);

@@ -1,1 +1,7 @@
+@if (errorNotify.message()) {
+  <div class="global-error-banner" role="alert">
+    <span>{{ errorNotify.message() }}</span>
+    <button type="button" (click)="errorNotify.clear()" aria-label="Cerrar aviso">✕</button>
+  </div>
+}
 <router-outlet />

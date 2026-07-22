@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, EnvironmentInjector, inject, OnInit, runInInjectionContext, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Storage, deleteObject, getDownloadURL, ref, uploadBytesResumable } from '@angular/fire/storage';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthStore } from '../../../core/stores/auth.store';
 import { ShopService } from '../../../core/services/shop.service';
 import { OpeningHoursDay, OpeningHoursSlot, defaultOpeningHours } from '../../../core/models/shop.model';
-import { normalizeOpeningHoursDays, validateOpeningHoursDay } from '../../../core/utils/opening-hours.util';
+import { normalizeOpeningHoursDays } from '../../../core/utils/opening-hours.util';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import {

@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.spec.json",
+    "lint": "eslint src && tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.spec.json",
     "check": "npm run build && npm run test && npm run lint"
   },
   "private": true,
@@ -30,12 +30,17 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^20.3.23",
+    "@angular-eslint/eslint-plugin": "^22.1.0",
+    "@angular-eslint/eslint-plugin-template": "^22.1.0",
+    "@angular-eslint/template-parser": "^22.1.0",
     "@angular/cli": "^20.3.23",
     "@angular/compiler-cli": "^20.3.18",
     "@types/jest": "^30.0.0",
+    "eslint": "^10.7.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jest-preset-angular": "^16.1.5",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.65.0"
   }
 }

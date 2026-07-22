@@ -86,8 +86,7 @@ export class SubscriptionManagementPageComponent {
     try {
       const returnUrl = `${window.location.origin}/subscription/manage?portal=${portalReturn}`;
       await this.stripeService.createPortalSession(returnUrl);
-    } catch (err: unknown) {
-      console.error('Portal error:', err);
+    } catch {
       this.portalError.set('No se pudo abrir el portal. Inténtalo más tarde.');
     } finally {
       this.portalLoading.set(false);
@@ -121,8 +120,7 @@ export class SubscriptionManagementPageComponent {
       });
       this.cancelModalOpen.set(false);
       await this.openCancelPortal();
-    } catch (err: unknown) {
-      console.error('Error guardando feedback:', err);
+    } catch {
       this.cancelError.set('No se pudo guardar el motivo. Inténtalo de nuevo.');
     } finally {
       this.cancelSending.set(false);

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Rutas privadas — requieren autenticación o son vistas internas
+Disallow: /account/
+Disallow: /kiosk
+Disallow: /tv/
+Disallow: /subscription/
+Disallow: /staff/barberos
+Disallow: /staff/guia
+Disallow: /staff/devices
+Disallow: /staff/tv-setup
+
+# TODO: actualizar la URL del sitemap cuando tengas dominio de producción propio
+Sitemap: https://ticketbarber-7c16d.web.app/sitemap.xml

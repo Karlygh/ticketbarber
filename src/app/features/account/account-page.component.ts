@@ -62,8 +62,7 @@ export class AccountPageComponent implements OnInit {
         this.payments.set(p);
         this.paymentsLoading.set(false);
       },
-      error: (err: unknown) => {
-        console.error('Error cargando pagos:', err);
+      error: () => {
         this.paymentsError.set('No se pudo cargar el historial de pagos. Intentalo de nuevo.');
         this.paymentsLoading.set(false);
       }
@@ -79,8 +78,7 @@ export class AccountPageComponent implements OnInit {
     this.portalError.set(null);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err: unknown) {
-      console.error('Portal error:', err);
+    } catch {
       this.portalError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {
       this.portalLoading.set(false);

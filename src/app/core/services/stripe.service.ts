@@ -266,9 +266,6 @@ export class StripeService {
       const result = await createPortalLink({ returnUrl });
 
       const url = result.data?.url;
-      console.info('[Stripe] Portal link response received', {
-        hasUrl: typeof url === 'string' && url.length > 0
-      });
 
       if (!url || typeof url !== 'string') {
         throw new Error('La función de portal respondió sin URL válida.');
@@ -276,7 +273,6 @@ export class StripeService {
 
       window.location.assign(url);
     } catch (err: unknown) {
-      console.error('[Stripe] Error al crear portal de cliente:', err);
       const message = err instanceof Error ? err.message : 'Error desconocido al abrir el portal.';
       throw new Error(`No se pudo abrir el portal de gestión: ${message}`);
     }

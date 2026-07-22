@@ -56,8 +56,7 @@ export class SubscriptionPageComponent implements OnInit {
         this.products.set(prods);
         this.productsLoading.set(false);
       },
-      error: (err: unknown) => {
-        console.error('Error cargando productos:', err);
+      error: () => {
         this.productsError.set('No se pudieron cargar los planes en este momento. Intentalo de nuevo.');
         this.productsLoading.set(false);
       }
@@ -115,9 +114,8 @@ export class SubscriptionPageComponent implements OnInit {
     this.checkoutError.set(null);
     try {
       await this.stripeService.startCheckoutRedirect(user.uid, price.id);
-    } catch (err: unknown) {
+    } catch {
       this.checkoutError.set('No se pudo iniciar el pago. Inténtalo de nuevo.');
-      console.error('Checkout error:', err);
       this.loadingPriceId.set(null);
       return;
     }
@@ -127,8 +125,7 @@ export class SubscriptionPageComponent implements OnInit {
     this.portalLoading.set(true);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err: unknown) {
-      console.error('Portal error:', err);
+    } catch {
       this.checkoutError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {
       this.portalLoading.set(false);

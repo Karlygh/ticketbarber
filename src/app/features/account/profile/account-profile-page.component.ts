@@ -90,8 +90,7 @@ export class AccountProfilePageComponent implements OnInit {
     task.on(
       'state_changed',
       snap => this.avatarProgress.set(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-      err => {
-        console.error('Avatar upload error:', err);
+      () => {
         this.avatarError.set('Error al subir la imagen. Inténtalo de nuevo.');
         this.avatarUploading.set(false);
       },
@@ -127,8 +126,7 @@ export class AccountProfilePageComponent implements OnInit {
 
       this.saveSuccess.set(true);
       this.scheduleSuccessReset();
-    } catch (err: unknown) {
-      console.error('Error guardando perfil:', err);
+    } catch {
       this.saveError.set('No se pudo guardar. Inténtalo de nuevo.');
     } finally {
       this.saving.set(false);

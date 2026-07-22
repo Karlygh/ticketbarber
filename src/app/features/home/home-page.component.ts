@@ -13,12 +13,7 @@ import {
   inject
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  ModernExperienceFeature,
-  ModernExperienceFloatingCard,
-  ModernExperienceKpi,
-  ModernExperienceSectionComponent
-} from './components/modern-experience-section.component';
+import { ModernExperienceSectionComponent } from './components/modern-experience-section.component';
 import { AuthStore } from '../../core/stores/auth.store';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../shared/components/header/header.component';

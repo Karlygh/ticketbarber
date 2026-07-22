@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject, InjectionToken } from '@angular/core';
-import { Auth, GoogleAuthProvider, User, getAdditionalUserInfo as _getAdditionalUserInfo, onAuthStateChanged as _onAuthStateChanged, signInWithPopup as _signInWithPopup, signOut as _signOut, UserCredential } from '@angular/fire/auth';
+import { Auth, GoogleAuthProvider, User, getAdditionalUserInfo as _getAdditionalUserInfo, onAuthStateChanged as _onAuthStateChanged, signInWithPopup as _signInWithPopup, signOut as _signOut } from '@angular/fire/auth';
 import { BrowserStorageService } from '../services/browser-storage.service';
 import { UserService } from '../services/user.service';
 

@@ -2,6 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { QueueRepository } from '../data/queue.repository';
 import { DEFAULT_QUEUE_SETTINGS } from '../models/settings.model';
+import { logWarn } from '../utils/logger.util';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsStore {
@@ -23,7 +24,7 @@ export class SettingsStore {
     } catch (error: unknown) {
       // Kiosk/TV can run in read-only mode if Firestore rules deny bootstrap writes.
       // Staff view can still create defaults after authentication.
-      console.warn('Bootstrap skipped due to Firestore permissions:', error);
+      logWarn('Bootstrap skipped due to Firestore permissions:', error);
     }
   }
 

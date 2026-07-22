@@ -210,8 +210,7 @@ export class PricingPageComponent implements OnInit {
     this.portalLoading.set(true);
     try {
       await this.stripeService.createPortalSession();
-    } catch (err: unknown) {
-      console.error('[Pricing] Portal error:', err);
+    } catch {
       this.checkoutError.set('No se pudo abrir el portal de gestión. Inténtalo más tarde.');
     } finally {
       this.portalLoading.set(false);

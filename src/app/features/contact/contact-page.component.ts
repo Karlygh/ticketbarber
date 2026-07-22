@@ -91,8 +91,6 @@ export class ContactPageComponent {
       }
 
     } catch (err: unknown) {
-      console.error('Error al enviar mensaje:', err);
-
       const callableError = err as CallableError;
 
       // Manejar diferentes tipos de errores
