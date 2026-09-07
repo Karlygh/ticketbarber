@@ -685,6 +685,46 @@
   }
 }
 
+/* Tablet range: hero se centra en lugar de quedar pegado a la izquierda,
+   evitando el salto visual de la imagen al pasar a una sola columna. */
+@media (min-width: 641px) and (max-width: 1150px) {
+  .hero {
+    justify-items: center;
+  }
+
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 42rem;
+  }
+
+  .hero h1,
+  .hero-text {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-metrics {
+    justify-content: center;
+  }
+
+  .hero-avatars {
+    padding-right: 0;
+  }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 860px) {
   :host {
     --reveal-distance: 16px;
