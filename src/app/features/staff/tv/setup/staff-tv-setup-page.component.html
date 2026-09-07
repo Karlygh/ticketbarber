@@ -1,158 +1,103 @@
 <app-header></app-header>
 
 <main class="tv-setup-shell">
-  <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-  </a>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-a"></div>
+  <div class="bg-glow bg-glow-b"></div>
 
-  <!-- HERO -->
+  <div class="tv-setup-inner">
   <section class="tv-setup-hero">
-    <div class="hero-content">
-      <p class="eyebrow">Configuración fácil</p>
-      <h1>Tu barbería con pantalla TV en menos de 5 minutos</h1>
-      <p class="intro">
-        Sin instalaciones, sin técnicos. Si tienes una TV con internet y una cuenta de Ticketbarber, ya lo tienes todo. Sigue estos 5 pasos y tendrás la pantalla lista para tus clientes.
-      </p>
-
-      <div class="hero-badge">
-        <span class="badge-icon">⏱</span>
-        <span>Configuración de unos 5 minutos</span>
-      </div>
-
-      <div class="prereqs">
-        <p class="prereqs-title">Necesitas tener:</p>
-        <ul class="prereqs-list">
-          @for (req of prereqs; track req.label) {
-            <li>
-              <span class="prereq-icon">{{ req.icon }}</span>
-              <span>{{ req.label }}</span>
-            </li>
-          }
-        </ul>
-      </div>
+    <div class="hero-text">
+      <p class="eyebrow">Configuración fácil · Unos 5 minutos</p>
+      <h1>Prepara tu pantalla TV</h1>
+      <p class="intro">Sigue estos {{ steps.length }} pasos y deja los turnos visibles para tus clientes, sin instalar nada extra.</p>
     </div>
-
-    <div class="hero-actions">
-      @if (authStore.isAuthenticated()) {
-        <a class="primary-link" [routerLink]="routes.staff.root">Abrir panel staff</a>
-      } @else {
-        <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta gratuita</a>
-      }
-      <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
-    </div>
-  </section>
-
-  <!-- PASOS -->
-  <section class="setup-steps">
-    @for (step of steps; track step.number) {
-      <article class="step-card">
-        <div class="step-copy">
-          <div class="step-badge">Paso {{ step.number }}</div>
-          <h2>{{ step.title }}</h2>
-          <p>{{ step.description }}</p>
-          <button class="more-info-btn" (click)="openModal(step)" type="button">
-            Ver detalles del paso
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </button>
-        </div>
-
-        <div class="step-media" role="img" [attr.aria-label]="step.imageLabel">
-          @if (step.imageSrc) {
-            <button
-              class="step-media__frame step-media__trigger"
-              type="button"
-              (click)="openImageModal(step)"
-              [attr.aria-label]="'Ampliar imagen del paso ' + step.number">
-              <img class="step-media__img" [src]="step.imageSrc" [alt]="step.imageLabel" />
-              <span class="step-media__zoom-label">Pulsa para ampliar</span>
-            </button>
-          } @else {
-            <div class="step-media__frame">
-              <span class="step-media__label">{{ step.imageLabel }}</span>
-              <span class="step-media__hint">{{ step.imageHint }}</span>
-            </div>
-          }
-        </div>
-      </article>
-    }
-  </section>
-
-  <!-- CONSEJOS -->
-  <section class="tips-card">
-    <div class="tips-head">
-      <p class="eyebrow eyebrow-soft">Consejos rápidos</p>
-      <h2>Antes de dejar la TV funcionando</h2>
-    </div>
-
-    <ul class="tips-list">
-      @for (tip of tips; track tip) {
-        <li>{{ tip }}</li>
+    <ul class="hero-chips">
+      @for (req of prereqs; track req.label) {
+        <li><span class="prereq-icon">{{ req.icon }}</span><span>{{ req.label }}</span></li>
       }
     </ul>
-
-    <div class="tips-actions">
-      <a class="secondary-link" [routerLink]="secondaryCtaLink">{{ secondaryCtaLabel }}</a>
-      @if (authStore.isAuthenticated()) {
-        <a class="primary-link" [routerLink]="routes.tvPair">Vincular TV</a>
-      } @else {
-        <a class="primary-link" [routerLink]="routes.staff.register">Crear cuenta</a>
-      }
-    </div>
+    <button class="primary-btn hero-cta" type="button" (click)="selectStep(0)">Comenzar guía</button>
   </section>
+
+  <section class="setup-stepper" aria-label="Guía de configuración de TV">
+    <nav class="step-progress" aria-label="Pasos de configuración">
+      @for (step of steps; track step.number; let index = $index) {
+        <button
+          class="step-progress__dot"
+          type="button"
+          [class.is-active]="activeStepIndex === index"
+          [class.is-done]="index < activeStepIndex"
+          [attr.aria-current]="activeStepIndex === index ? 'step' : null"
+          [attr.aria-label]="'Ir al paso ' + (index + 1) + ': ' + step.title"
+          (click)="selectStep(index)"
+        >
+          <span class="step-progress__num">{{ index + 1 }}</span>
+          <span class="step-progress__title">{{ step.title }}</span>
+        </button>
+        @if (!$last) { <span class="step-progress__line" [class.is-done]="index < activeStepIndex"></span> }
+      }
+    </nav>
+
+    <article class="step-panel" aria-live="polite">
+      <div class="step-panel__header">
+        <div>
+          <p class="step-panel__progress">{{ progressLabel }}</p>
+          <h2>{{ activeStep.title }}</h2>
+        </div>
+        <div class="step-panel__header-actions">
+          <button class="icon-btn" type="button" (click)="previousStep()" [disabled]="isFirstStep" aria-label="Paso anterior">&#8592;</button>
+          <button class="icon-btn" type="button" (click)="nextStep()" [attr.aria-label]="isLastStep ? primaryCtaLabel : 'Paso siguiente'">&#8594;</button>
+        </div>
+      </div>
+
+      <div class="step-panel__body">
+        @if (activeStep.imageSrc || activeStep.imageSrc2) {
+          <div class="step-media-group">
+            @if (activeStep.imageSrc) {
+              <button class="step-media step-media__trigger" type="button" (click)="openImageModal(activeStep, 'primary')" [attr.aria-label]="'Ampliar imagen 1 del paso ' + activeStep.number">
+                <img class="step-media__img" [src]="activeStep.imageSrc" [alt]="activeStep.imageLabel" />
+                <span class="step-media__zoom-label">Ampliar</span>
+              </button>
+            }
+            @if (activeStep.imageSrc2) {
+              <button class="step-media step-media__trigger" type="button" (click)="openImageModal(activeStep, 'secondary')" [attr.aria-label]="'Ampliar imagen 2 del paso ' + activeStep.number">
+                <img class="step-media__img" [src]="activeStep.imageSrc2" [alt]="activeStep.imageLabel2" />
+                <span class="step-media__zoom-label">Ampliar</span>
+              </button>
+            }
+          </div>
+        }
+        <div class="step-panel__content">
+          <p class="step-panel__description">{{ activeStep.description }}</p>
+          <ol class="instruction-list">@for (sub of activeStep.detail.subSteps; track sub) { <li>{{ sub }}</li> }</ol>
+          <div class="step-panel__notices">
+            @if (activeStep.detail.warning) { <div class="notice notice--warning"><strong>Importante</strong><p>{{ activeStep.detail.warning }}</p></div> }
+            @if (activeStep.detail.tip) { <div class="notice notice--tip"><strong>Consejo</strong><p>{{ activeStep.detail.tip }}</p></div> }
+          </div>
+        </div>
+      </div>
+
+      <footer class="step-panel__footer">
+        <button class="secondary-btn" type="button" (click)="previousStep()" [disabled]="isFirstStep">Anterior</button>
+        @if (isLastStep) { <a class="primary-link" [routerLink]="primaryCtaLink">{{ primaryCtaLabel }}</a> }
+        @else { <button class="primary-btn" type="button" (click)="nextStep()">Siguiente paso</button> }
+      </footer>
+    </article>
+  </section>
+
+  <section class="tips-card">
+    <p class="tips-label">Consejos rápidos</p>
+    <ul class="tips-list">@for (tip of tips; track tip) { <li>{{ tip }}</li> }</ul>
+  </section>
+  </div>
 </main>
 
-<!-- MODAL DE IMAGEN -->
-@if (activeImageStep && activeImageStep.imageSrc) {
+@if (activeImageStep && activeImageSrc) {
   <div class="modal-overlay image-modal-overlay" (click)="closeImageModal()" role="dialog" aria-modal="true" [attr.aria-label]="'Imagen ampliada del paso ' + activeImageStep.number">
     <div class="image-modal-dialog" (click)="$event.stopPropagation()">
-      <button class="modal-close image-modal-close" (click)="closeImageModal()" type="button" aria-label="Cerrar imagen ampliada">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <img class="image-modal-img" [src]="activeImageStep.imageSrc" [alt]="activeImageStep.imageLabel" />
-    </div>
-  </div>
-}
-
-<!-- MODAL DE DETALLE -->
-@if (activeStep) {
-  <div class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" [attr.aria-label]="'Detalles del paso ' + activeStep.number">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
-
-      <div class="modal-header">
-        <div class="modal-step-badge">Paso {{ activeStep.number }}</div>
-        <h3 class="modal-title">{{ activeStep.title }}</h3>
-        <button class="modal-close" (click)="closeModal()" type="button" aria-label="Cerrar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <p class="modal-intro">{{ activeStep.detail.body }}</p>
-
-        <ol class="modal-substeps">
-          @for (sub of activeStep.detail.subSteps; track sub) {
-            <li>{{ sub }}</li>
-          }
-        </ol>
-
-        @if (activeStep.detail.warning) {
-          <div class="modal-warning">
-            <span class="modal-warning__icon">⚠️</span>
-            <p>{{ activeStep.detail.warning }}</p>
-          </div>
-        }
-
-        @if (activeStep.detail.tip) {
-          <div class="modal-tip">
-            <span class="modal-tip__icon">💡</span>
-            <p>{{ activeStep.detail.tip }}</p>
-          </div>
-        }
-      </div>
-
-      <div class="modal-footer">
-        <button class="primary-btn" (click)="closeModal()" type="button">Entendido</button>
-      </div>
+      <button class="modal-close image-modal-close" (click)="closeImageModal()" type="button" aria-label="Cerrar imagen ampliada">&#10005;</button>
+      <img class="image-modal-img" [src]="activeImageSrc" [alt]="activeImageLabel" />
     </div>
   </div>
 }

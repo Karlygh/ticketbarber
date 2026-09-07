@@ -1,6 +1,11 @@
 <app-header></app-header>
 
 <main class="contact-shell">
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-a"></div>
+  <div class="bg-glow bg-glow-b"></div>
+
+  <div class="contact-inner">
   <a [routerLink]="routes.root" class="back-btn" aria-label="Volver al inicio">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
   </a>
@@ -138,6 +143,7 @@
       carlosgrandio6&#64;gmail.com
     </a>
   </section>
+  </div>
 </main>
 
 <app-footer [currentYear]="currentYear"></app-footer>

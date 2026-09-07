@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostListener, inject, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
 
 interface StepDetail {
-  body: string;
   subSteps: string[];
   warning?: string;
   tip?: string;
@@ -20,8 +19,13 @@ interface SetupStep {
   imageLabel: string;
   imageHint: string;
   imageSrc?: string;
+  imageLabel2: string;
+  imageHint2: string;
+  imageSrc2?: string;
   detail: StepDetail;
 }
+
+type ImageSlot = 'primary' | 'secondary';
 
 interface Prereq {
   icon: string;
@@ -39,25 +43,69 @@ interface Prereq {
 export class StaffTvSetupPageComponent implements OnDestroy {
   readonly authStore = inject(AuthStore);
   readonly routes = APP_ROUTES;
+  private readonly router = inject(Router);
 
-  activeStep: SetupStep | null = null;
+  activeStepIndex = 0;
   activeImageStep: SetupStep | null = null;
+  activeImageSlot: ImageSlot = 'primary';
 
-  openModal(step: SetupStep): void {
-    this.activeStep = step;
-    this.updateBodyScrollLock();
+  get activeImageSrc(): string | undefined {
+    if (!this.activeImageStep) return undefined;
+    return this.activeImageSlot === 'primary' ? this.activeImageStep.imageSrc : this.activeImageStep.imageSrc2;
   }
 
-  closeModal(): void {
-    this.activeStep = null;
-    this.updateBodyScrollLock();
+  get activeImageLabel(): string {
+    if (!this.activeImageStep) return '';
+    return this.activeImageSlot === 'primary' ? this.activeImageStep.imageLabel : this.activeImageStep.imageLabel2;
   }
 
-  openImageModal(step: SetupStep): void {
-    if (!step.imageSrc) {
+  get activeStep(): SetupStep {
+    return this.steps[this.activeStepIndex];
+  }
+
+  get isFirstStep(): boolean {
+    return this.activeStepIndex === 0;
+  }
+
+  get isLastStep(): boolean {
+    return this.activeStepIndex === this.steps.length - 1;
+  }
+
+  get progressLabel(): string {
+    return `Paso ${this.activeStepIndex + 1} de ${this.steps.length}`;
+  }
+
+  get primaryCtaLabel(): string {
+    return this.authStore.isAuthenticated() ? 'Vincular TV ahora' : 'Crear cuenta gratuita';
+  }
+
+  get primaryCtaLink(): string {
+    return this.authStore.isAuthenticated() ? this.routes.tvPair : this.routes.staff.register;
+  }
+
+  selectStep(index: number): void {
+    this.activeStepIndex = Math.min(Math.max(index, 0), this.steps.length - 1);
+  }
+
+  previousStep(): void {
+    this.selectStep(this.activeStepIndex - 1);
+  }
+
+  nextStep(): void {
+    if (this.isLastStep) {
+      void this.router.navigateByUrl(this.primaryCtaLink);
+      return;
+    }
+    this.selectStep(this.activeStepIndex + 1);
+  }
+
+  openImageModal(step: SetupStep, slot: ImageSlot = 'primary'): void {
+    const src = slot === 'primary' ? step.imageSrc : step.imageSrc2;
+    if (!src) {
       return;
     }
     this.activeImageStep = step;
+    this.activeImageSlot = slot;
     this.updateBodyScrollLock();
   }
 
@@ -70,15 +118,11 @@ export class StaffTvSetupPageComponent implements OnDestroy {
   onEscape(): void {
     if (this.activeImageStep) {
       this.closeImageModal();
-      return;
-    }
-    if (this.activeStep) {
-      this.closeModal();
     }
   }
 
   private updateBodyScrollLock(): void {
-    document.body.style.overflow = this.activeStep || this.activeImageStep ? 'hidden' : '';
+    document.body.style.overflow = this.activeImageStep ? 'hidden' : '';
   }
 
   ngOnDestroy(): void {
@@ -96,110 +140,117 @@ export class StaffTvSetupPageComponent implements OnDestroy {
       number: '01',
       title: 'Inicia sesión en la tablet',
       description:
-        'Abre Ticketbarber en la tablet del negocio e inicia sesión con tu cuenta de barbero para acceder al panel de gestión de turnos.',
-      imageLabel: 'Imagen del paso 1',
+        'Accede al panel de barberos desde tu tablet o móvil: desde ahí controlarás los turnos en tiempo real mientras la TV los muestra a tus clientes.',
+      imageLabel: 'Imagen 1 del paso 1',
       imageHint: 'Sustituir por una captura del login staff en la tablet.',
       imageSrc: 'assets/1.png',
+      imageLabel2: 'Imagen 2 del paso 1',
+      imageHint2: 'Añadir una segunda captura complementaria del paso 1.',
+      imageSrc2: 'assets/capinicio1.png',
       detail: {
-        body: 'Antes de poner en marcha la pantalla TV, necesitas tener acceso al panel de barberos desde tu tablet o móvil. Desde ahí controlarás los turnos en tiempo real mientras la TV los muestra automáticamente a tus clientes.',
         subSteps: [
-          '1.1  Abre el navegador (Chrome recomendado) en tu tablet o móvil.',
-          '1.2  Ve a la URL oficial de Ticketbarber ',
-          '1.3  Pulsa "Iniciar sesión" ,rellena tus credenciales y accede a tu cuenta de barbero.Si no tienes cuenta, regístrate primero para crearla.',
-          '1.4  Cuando hayas iniciado sesión correctamente, podrás acceder al panel de gestión de turnos.'
+          '1.1 Abre el navegador (Chrome recomendado) en tu tablet o móvil.',
+          '1.2 Ve a la URL oficial de Ticketbarber.',
+          '1.3 Pulsa "Iniciar sesión", rellena tus credenciales y accede a tu cuenta de barbero. Si no tienes cuenta, regístrate primero.',
+          '1.4 Con la sesión iniciada, ya puedes entrar al panel de gestión de turnos.'
         ],
-        warning: 'Asegúrate de iniciar sesión con la cuenta de barbero.',
-        tip: 'Guarda la URL en favoritos de la tablet y TV para abrirla más rápido cada día.'
+        warning: 'Inicia sesión siempre con la cuenta de barbero, no con una cuenta de cliente.',
+        tip: 'Guarda la URL en favoritos de la tablet y de la TV para abrirla más rápido cada día.'
       }
     },
     {
       number: '02',
       title: 'Abre el navegador en la TV',
       description:
-        'En la televisión con el mando dirígete a "Ingresar codigo TV". No hace falta instalar nada extra.',
-      imageLabel: 'Imagen del paso 2',
+        'La TV solo necesita un navegador web, sin instalar ninguna app: funciona con cualquier smart TV, Chromecast, Fire TV Stick o dispositivo conectado a la pantalla.',
+      imageLabel: 'Imagen 1 del paso 2',
       imageHint: 'Sustituir por una captura del navegador abierto en la TV.',
       imageSrc: 'assets/2.png',
+      imageLabel2: 'Imagen 2 del paso 2',
+      imageHint2: 'Añadir una segunda captura complementaria del paso 2.',
+      imageSrc2: 'assets/cap2tv.jpg',
       detail: {
-        body: 'La TV solo necesita un navegador web, sin instalar ninguna app adicional. Funciona con cualquier smart TV, Chromecast, Fire TV Stick o cualquier dispositivo conectado a la pantalla.',
         subSteps: [
-          '2.1  Enciende la TV y selecciona la entrada correcta (HDMI, TV, Chromecast, Fire TV Stick, etc.).',
-          '2.2  Localiza el navegador web del sistema (Chrome, Silk Browser, etc.).',
-          '2.3  Ábrelo y comprueba que tienes conexión a internet.Si no tienes internet debes de activarlo antes de realizar este paso.',
-          '2.4  Si el navegador pide actualización, acéptala antes de continuar.'
+          '2.1 Enciende la TV y selecciona la entrada correcta (HDMI, TV, Chromecast, Fire TV Stick, etc.).',
+          '2.2 Localiza el navegador web del sistema (Chrome, Silk Browser, etc.).',
+          '2.3 Ábrelo y comprueba que hay conexión a internet; actívala antes si hace falta.',
+          '2.4 Si el navegador pide una actualización, acéptala antes de continuar.'
         ],
-        warning: 'Comprueba que la TV tiene Wi-Fi o cable de red activo antes de continuar. Sin conexión, la vista no se actualizará.',
-        tip: 'Usa siempre el mismo navegador o app de navegador en la TV para que conserve la vinculación entre apagados.'
+        warning: 'Comprueba que la TV tiene Wi-Fi o cable de red activo: sin conexión, la vista no se actualizará.',
+        tip: 'Usa siempre el mismo navegador en la TV para que conserve la vinculación entre apagados.'
       }
     },
     {
       number: '03',
       title: 'Escribe el dominio de la app',
       description:
-        'Con el navegador abierto en la TV, escribe directamente la URL de Ticketbarber en la barra de direcciones para acceder.',
-      imageLabel: 'Imagen del paso 3',
+        'Con el navegador abierto en la TV, escribe directamente la URL de Ticketbarber en la barra de direcciones: no hace falta buscar nada en Google.',
+      imageLabel: 'Imagen 1 del paso 3',
       imageHint: 'Sustituir por una captura mostrando la URL de la app.',
       imageSrc: 'assets/4.png',
+      imageLabel2: 'Imagen 2 del paso 3',
+      imageHint2: 'Añadir una segunda captura complementaria del paso 3.',
+      imageSrc2: 'assets/4b.png',
       detail: {
-        body: 'Con el navegador abierto en la TV, accede a Ticketbarber escribiendo la dirección directamente. No necesitas buscar nada en Google — solo escribir la URL exacta para llegar más rápido.',
         subSteps: [
-          '3.1  Haz clic en la barra de direcciones del navegador.',
-          '3.2  Escribe el dominio completo de Ticketbarber (sin espacios ni errores).',
-          '3.3  Pulsa Enter o el botón de ir del teclado.',
-          '3.4  Espera a que cargue la página de inicio de la aplicación.'
+          '3.1 Haz clic en la barra de direcciones del navegador.',
+          '3.2 Escribe el dominio completo de Ticketbarber, sin espacios ni errores.',
+          '3.3 Pulsa Enter o el botón de ir del teclado.',
+          '3.4 Espera a que cargue la página de inicio de la aplicación.'
         ],
-        warning: 'No busques en Google — escribe la URL directamente en la barra de direcciones para evitar entrar en páginas equivocadas.',
-        tip: 'Guarda luego la URL /tv en favoritos para que cada mañana solo tengas que abrir ese acceso directo.'
+        warning: 'No busques en Google: escribe la URL directamente en la barra de direcciones para evitar páginas equivocadas.',
+        tip: 'Guarda luego la URL /tv en favoritos para abrir ese acceso directo cada mañana.'
       }
     },
     {
       number: '04',
       title: 'Genera el código desde tu móvil',
       description:
-        'Con sesión iniciada en Ticketbarber, abre la opción Vincular TV desde el navbar para generar un código temporal para la TV.',
-      imageLabel: 'Imagen del paso 4',
+        'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos; solo hace falta para la primera vinculación o para recuperar una TV.',
+      imageLabel: 'Imagen 1 del paso 4',
       imageHint: 'Sustituir por una captura de la pantalla Vincular TV con el código visible.',
       imageSrc: 'assets/55.png',
+      imageLabel2: 'Imagen 2 del paso 4',
+      imageHint2: 'Añadir una segunda captura complementaria del paso 4.',
+      imageSrc2: 'assets/captcodigo.png',
       detail: {
-        body: 'El código de vinculación se genera desde la cuenta del barbero y dura 15 minutos. Se usa solo para la primera vinculación o para recuperar una TV que haya perdido sus datos locales.',
         subSteps: [
-          '4.1  Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
-          '4.2  En el navbar pulsa "Vincular TV".',
-          '4.3  Puedes generar un nuevo código o visualizar el código activo si ya lo generaste antes. Copia el código de 6 dígitos para introducirlo en la TV.',
-          '4.4  Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
+          '4.1 Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
+          '4.2 En el navbar pulsa "Vincular TV".',
+          '4.3 Genera un código nuevo o copia el activo si ya tienes uno: son 6 dígitos para introducir en la TV.',
+          '4.4 Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
         ],
-        warning: 'No compartas un código caducado: cada código solo puede usarse una vez y expira automáticamente.',
-        tip: 'Mantén esta pantalla abierta mientras configuras la TV para no perder de vista el contador. No hace falta generar un código nuevo cada día.'
+        warning: 'No compartas un código caducado: cada código se usa una sola vez y expira automáticamente.',
+        tip: 'Mantén esta pantalla abierta mientras configuras la TV; no hace falta generar un código nuevo cada día.'
       }
     },
     {
       number: '05',
-      title: 'Introduce el código en la TV y deja la pantalla lista',
+      title: 'Introduce el código y deja la TV lista',
       description:
-        'En la TV pulsa el boton de la barra de búsqueda , introduce el código y, cuando termine la vinculación, deja la vista preparada para tus clientes.',
-      imageLabel: 'Imagen del paso 5',
+        'La TV no necesita sesión permanente: abre la pantalla de activación, escribe el código una vez y espera a que se abra la cola de turnos.',
+      imageLabel: 'Imagen 1 del paso 5',
       imageHint: 'Sustituir por una captura final de la vista TV funcionando.',
       imageSrc: 'assets/5.png',
+      imageLabel2: 'Imagen 2 del paso 5',
+      imageHint2: 'Añadir una segunda captura complementaria del paso 5.',
+      imageSrc2: 'assets/cap5.png',
       detail: {
-        body: 'La TV no necesita iniciar sesión continua. Solo tienes que abrir la pantalla interna de activación, escribir el código una vez y esperar a que se abra automáticamente la cola de turnos.',
         subSteps: [
-          '5.1  En la TV escribe la URL de la app y pulsa Enter.',
-          '5.2  En la barra de búsqueda de ticketbarber existe un botón que dice Ingresar código TV, pulsa en el enlace.',
-          '5.3  Tendras una pantalla donde debes ingresar el codigo que previamente generaste desde tu tablet o móvil.Esto significa haberte logeado previamente. ',
-          '5.4  Cuando la TV quede vinculada, guarda la URL /tv en favoritos y activa pantalla completa para dejarla lista para el uso diario.'
+          '5.1 En la TV escribe la URL de la app y pulsa Enter.',
+          '5.2 En la barra de búsqueda de Ticketbarber pulsa el botón "Ingresar código TV".',
+          '5.3 Introduce el código que generaste antes desde tu tablet o móvil (paso 4).',
+          '5.4 Con la TV vinculada, guarda la URL /tv en favoritos y activa pantalla completa para el uso diario.'
         ],
-        tip: 'Si la TV se apaga sola pasado un rato, entra en los ajustes de la TV y desactiva el modo de ahorro de energía o apagado automático. Evita el modo incógnito o limpiadores automáticos de datos.'
+        tip: 'Si la TV se apaga sola, desactiva el ahorro de energía o apagado automático en sus ajustes, y evita el modo incógnito o los limpiadores de datos.'
       }
     }
   ];
 
   readonly tips: string[] = [
-    'Activa el modo pantalla completa para que la información se vea mejor desde lejos.',
-    'Guarda la URL /tv en favoritos de la TV: será la ruta diaria para abrir la cola sin volver a introducir códigos.',
-    'Usa siempre el mismo navegador o app de navegador en la Smart TV para no perder la vinculación guardada.',
-    'Evita el modo incógnito y los limpiadores automáticos de datos del navegador de la TV.',
-    'Comprueba la conexión Wi-Fi antes de introducir el código para evitar cortes.',
-    'Si necesitas cambiar turnos o revisar la cola, vuelve al panel de barberos desde la tablet.'
+    'Activa pantalla completa para que se vea mejor desde lejos.',
+    'Comprueba el Wi-Fi antes de introducir el código para evitar cortes.',
+    'Para cambiar turnos o revisar la cola, vuelve al panel desde la tablet.'
   ];
 
   get secondaryCtaLabel(): string {

@@ -5,10 +5,22 @@
 :host {
   display: block;
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 15% 10%, var(--section-staff-subtle) 0%, transparent 40%),
-    linear-gradient(145deg, var(--bg-page) 0%, var(--bg-page-mid) 100%);
+  background: var(--bg-page);
 }
+
+/* ---- Decorative background lights (same pattern as /precios y /guia-tv) ---- */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--section-kiosk-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--section-kiosk-subtle) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: .28;
+}
+.bg-glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+.bg-glow-a { width: 480px; height: 480px; background: var(--section-kiosk-glow); top: -160px; left: -120px; }
+.bg-glow-b { width: 420px; height: 420px; background: var(--section-kiosk-subtle); right: -140px; bottom: 20px; }
+
+.contact-inner { position: relative; z-index: 1; }
 
 .back-btn {
   position: absolute;
@@ -36,8 +48,10 @@
 
 .contact-shell {
   position: relative;
+  overflow: hidden;
   min-height: 100vh;
   padding: 2rem 1rem;
+  background: radial-gradient(circle at 15% 10%, var(--section-kiosk-glow), transparent 36%), var(--bg-page);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -355,10 +369,13 @@
 
 @media (min-width: 1024px) {
   .contact-shell {
-    width: min(1180px, 100%);
     min-height: auto;
-    margin: 0 auto;
     padding: 1.1rem 1.5rem 1.5rem;
+  }
+
+  .contact-inner {
+    width: min(1180px, 100%);
+    margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.84fr);
     grid-template-areas:

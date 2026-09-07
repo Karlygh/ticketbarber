@@ -16,6 +16,7 @@ const STEP_WITH_IMAGE = { ...STEP_NO_IMAGE, imageSrc: '/assets/screen.png' };
 
 describe('StaffTvSetupPageComponent', () => {
   let component: StaffTvSetupPageComponent;
+  let router: Router;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -28,20 +29,45 @@ describe('StaffTvSetupPageComponent', () => {
     });
     const fixture = TestBed.createComponent(StaffTvSetupPageComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
   });
 
   afterEach(() => TestBed.resetTestingModule());
 
-  describe('openModal / closeModal', () => {
-    it('sets activeStep when opening', () => {
-      component.openModal(STEP_NO_IMAGE);
-      expect(component.activeStep).toEqual(STEP_NO_IMAGE);
+  describe('step navigation', () => {
+    it('selects a step directly and exposes its progress', () => {
+      component.selectStep(2);
+      expect(component.activeStepIndex).toBe(2);
+      expect(component.activeStep).toEqual(component.steps[2]);
+      expect(component.progressLabel).toBe('Paso 3 de 5');
     });
 
-    it('clears activeStep when closing', () => {
-      component.openModal(STEP_NO_IMAGE);
-      component.closeModal();
-      expect(component.activeStep).toBeNull();
+    it('keeps navigation within the first and last step', () => {
+      component.previousStep();
+      expect(component.activeStepIndex).toBe(0);
+      component.selectStep(99);
+      expect(component.activeStepIndex).toBe(component.steps.length - 1);
+      component.nextStep();
+      expect(component.activeStepIndex).toBe(component.steps.length - 1);
+    });
+
+    it('moves forward one step', () => {
+      component.nextStep();
+      expect(component.activeStepIndex).toBe(1);
+    });
+
+    it('navigates to the authenticated completion CTA from the last step', () => {
+      const navigateByUrl = jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+      component.selectStep(component.steps.length - 1);
+      component.nextStep();
+      expect(navigateByUrl).toHaveBeenCalledWith('/tv/pair');
+    });
+
+    it('uses registration as the completion CTA for a visitor', () => {
+      mockAuthStore.isAuthenticated.set(false);
+      expect(component.primaryCtaLink).toBe('/staff/register');
+      expect(component.primaryCtaLabel).toBe('Crear cuenta gratuita');
+      mockAuthStore.isAuthenticated.set(true);
     });
   });
 
@@ -64,18 +90,10 @@ describe('StaffTvSetupPageComponent', () => {
   });
 
   describe('onEscape', () => {
-    it('closes image modal first when both are open', () => {
-      component.openModal(STEP_NO_IMAGE);
+    it('closes the image modal with Escape', () => {
       component.openImageModal(STEP_WITH_IMAGE);
       component.onEscape();
       expect(component.activeImageStep).toBeNull();
-      expect(component.activeStep).toEqual(STEP_NO_IMAGE);
-    });
-
-    it('closes step modal when only step modal is open', () => {
-      component.openModal(STEP_NO_IMAGE);
-      component.onEscape();
-      expect(component.activeStep).toBeNull();
     });
 
     it('is a no-op when no modals are open', () => {
