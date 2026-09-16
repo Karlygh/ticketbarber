@@ -66,6 +66,10 @@
               </div>
             </div>
 
+            @if (group.isOnBreak) {
+              <span class="break-badge">En descanso · Ahora vuelvo</span>
+            }
+
             @if (group.current) {
               <div class="single-ticket">
                 <p class="pill-label">Turno actual</p>
@@ -119,6 +123,9 @@
                   <h2>{{ group.barber.name }}</h2>
                 </div>
               </div>
+              @if (group.isOnBreak) {
+                <span class="break-badge">En descanso · Ahora vuelvo</span>
+              }
             </header>
 
             <div class="current-box">

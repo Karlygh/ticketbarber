@@ -75,7 +75,7 @@
                 <h2>{{ group.barber.name }}</h2>
               </div>
             </div>
-            <span class="neon-status-badge">Activo</span>
+            <span class="neon-status-badge">{{ group.isOnBreak ? 'En descanso · Ahora vuelvo' : 'Activo' }}</span>
           </section>
 
           <section class="neon-card-section neon-card-current">

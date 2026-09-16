@@ -95,6 +95,7 @@ function buildBarberTvGroups(activeBarbers: BarberProfile[], tickets: Ticket[], 
       barber: group.barber,
       accentColor: barberAccentColor(group.barber.id),
       initials: barberInitials(group.barber.name),
+      isOnBreak: group.barber.status === 'break',
       current: group.current
         ? {
             row: group.current,

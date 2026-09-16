@@ -13,14 +13,14 @@
   @if (subscriptionStore.loading()) {
     <p class="syncing">Cargando información de suscripción…</p>
   } @else if (subscriptionStore.error()) {
-    <div class="error-panel" role="alert">
+    <div class="notice notice-error" role="alert">
       <p>No se pudo cargar tu suscripción.</p>
-      <p class="error-detail">{{ subscriptionStore.error() }}</p>
+      <p class="notice-detail">{{ subscriptionStore.error() }}</p>
       <button class="btn-secondary" type="button" (click)="goToPlans()">Ver planes</button>
     </div>
   } @else {
     @if (showCancellationSuccess()) {
-      <div class="success-banner" role="status" aria-live="polite">
+      <div class="notice notice-success" role="status" aria-live="polite">
         <strong>Tu suscripción se ha dado de baja correctamente.</strong>
         <span>
           Seguirás teniendo acceso hasta el
@@ -33,14 +33,19 @@
 
       @case ('pro-active') {
         <div class="sub-card">
-          <div class="sub-header">
-            <span class="badge badge-active">● Activo</span>
+          <div class="status-row">
+            <span class="status-dot status-dot--active" aria-hidden="true"></span>
+            <span class="status-text">Activo</span>
           </div>
           <dl class="sub-details">
-            <dt>Inicio del período</dt>
-            <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
-            <dt>Próxima renovación</dt>
-            <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            <div class="detail-row">
+              <dt>Inicio del período</dt>
+              <dd>{{ (subscriptionStore.subscription()!.currentPeriodStart * 1000) | date:'mediumDate':'':'es' }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Próxima renovación</dt>
+              <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </div>
           </dl>
           @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
           <div class="actions">
@@ -48,42 +53,50 @@
               @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Gestionar facturación }
             </button>
             <button class="btn-secondary" type="button" (click)="goToPlans()">Cambiar plan</button>
-            <button class="btn-ghost-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
           </div>
+          <button class="link-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
         </div>
       }
 
       @case ('pro-trialing') {
         <div class="sub-card">
-          <div class="sub-header">
-            <span class="badge badge-active">● Activo</span>
-            <span class="badge badge-trial">Período de prueba</span>
+          <div class="status-row">
+            <span class="status-dot status-dot--active" aria-hidden="true"></span>
+            <span class="status-text">Activo</span>
+            <span class="status-tag status-tag--trial">Período de prueba</span>
           </div>
           <dl class="sub-details">
-            <dt>Fin de prueba</dt>
-            <dd>{{ (subscriptionStore.subscription()!.trialEnd! * 1000) | date:'longDate':'':'es' }}</dd>
-            <dt>Primera renovación</dt>
-            <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            <div class="detail-row">
+              <dt>Fin de prueba</dt>
+              <dd>{{ (subscriptionStore.subscription()!.trialEnd! * 1000) | date:'longDate':'':'es' }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Primera renovación</dt>
+              <dd>{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </div>
           </dl>
           @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
           <div class="actions">
             <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
               @if (portalLoading()) { <span class="spinner" aria-hidden="true"></span> Abriendo… } @else { Gestionar facturación }
             </button>
-            <button class="btn-ghost-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
           </div>
+          <button class="link-danger" type="button" (click)="openCancelModal()">Cancelar suscripción</button>
         </div>
       }
 
       @case ('pro-canceling') {
         <div class="sub-card">
-          <div class="sub-header">
-            <span class="badge badge-active">● Activo</span>
-            <span class="badge badge-cancel">Cancelación programada</span>
+          <div class="status-row">
+            <span class="status-dot status-dot--active" aria-hidden="true"></span>
+            <span class="status-text">Activo</span>
+            <span class="status-tag status-tag--warning">Cancelación programada</span>
           </div>
           <dl class="sub-details">
-            <dt>Acceso hasta</dt>
-            <dd class="warning">{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            <div class="detail-row">
+              <dt>Acceso hasta</dt>
+              <dd class="warning">{{ subscriptionStore.renewsOn() | date:'longDate':'':'es' }}</dd>
+            </div>
           </dl>
           @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
           <div class="actions">
@@ -97,10 +110,11 @@
 
       @case ('pro-past-due') {
         <div class="sub-card">
-          <div class="sub-header">
-            <span class="badge badge-cancel">● Pago pendiente</span>
+          <div class="status-row">
+            <span class="status-dot status-dot--danger" aria-hidden="true"></span>
+            <span class="status-text">Pago pendiente</span>
           </div>
-          <p class="trial-msg">Tu último pago no pudo procesarse. Actualiza tu método de pago para evitar la cancelación.</p>
+          <p class="body-text">Tu último pago no pudo procesarse. Actualiza tu método de pago para evitar la cancelación.</p>
           @if (portalError()) { <p class="error-msg">{{ portalError() }}</p> }
           <div class="actions">
             <button class="btn-primary" [class.btn-loading]="portalLoading()" [disabled]="portalLoading()" type="button" (click)="openPortal()">
@@ -111,34 +125,42 @@
       }
 
       @case ('pro-expired') {
-        <div class="no-sub">
+        <div class="sub-card">
           <p><strong>Tu suscripción ha finalizado.</strong></p>
-          <p>Elige un plan para recuperar el acceso a todas las funciones.</p>
-          <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          <p class="body-text">Elige un plan para recuperar el acceso a todas las funciones.</p>
+          <div class="actions">
+            <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          </div>
         </div>
       }
 
       @case ('trial-active') {
-        <div class="trial-card">
-          <p>Estás en el período de prueba gratuita. Te quedan
-            <strong>{{ subscriptionStore.trialDaysLeft() }} días</strong>.
+        <div class="sub-card">
+          <p class="body-text">Estás en el período de prueba gratuita. Te quedan
+            <strong class="highlight">{{ subscriptionStore.trialDaysLeft() }} días</strong>.
           </p>
-          <p class="trial-expires">Acceso gratuito hasta {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.</p>
-          <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
+          <p class="body-text-muted">Acceso gratuito hasta {{ subscriptionStore.trialExpiresAt() | date:'longDate':'':'es' }}.</p>
+          <div class="actions">
+            <button class="btn-primary" (click)="goToPlans()">Ver planes y suscribirme</button>
+          </div>
         </div>
       }
 
       @case ('trial-expired') {
-        <div class="no-sub">
-          <p>Tu período de prueba ha terminado. Elige un plan para seguir usando TicketBarber.</p>
-          <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+        <div class="sub-card">
+          <p class="body-text">Tu período de prueba ha terminado. Elige un plan para seguir usando TicketBarber.</p>
+          <div class="actions">
+            <button class="btn-primary" (click)="goToPlans()">Ver planes Pro</button>
+          </div>
         </div>
       }
 
       @default {
-        <div class="no-sub">
-          <p>No tienes ningún plan activo. ¡Hazte Pro para desbloquear todas las funciones!</p>
-          <button class="btn-primary" (click)="goToPlans()">Ver planes</button>
+        <div class="sub-card">
+          <p class="body-text">No tienes ningún plan activo. ¡Hazte Pro para desbloquear todas las funciones!</p>
+          <div class="actions">
+            <button class="btn-primary" (click)="goToPlans()">Ver planes</button>
+          </div>
         </div>
       }
 
@@ -206,4 +228,3 @@
 }
 
 <app-footer></app-footer>
-

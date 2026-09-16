@@ -226,7 +226,83 @@ a {
   .back-btn {
     position: static;
     align-self: flex-start;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Compactar todo para que entre sin scroll */
+  .login-shell {
+    justify-content: flex-start;
+    gap: 0.7rem;
+    padding: 0.9rem 0.9rem 1.2rem;
+  }
+
+  .brand-logo {
+    width: min(150px, 42vw);
+  }
+
+  .page-title {
+    font-size: 1.15rem;
+  }
+
+  .login-card {
+    padding: 1.1rem 1.2rem;
+  }
+
+  .icon-wrap {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0.6rem;
+  }
+
+  h1 {
+    font-size: 1.15rem;
+    margin: 0.3rem 0;
+  }
+
+  .divider {
+    margin: 0.9rem 0;
+  }
+
+  .security-note {
+    margin-top: 0.7rem;
+  }
+
+  .google-info {
+    margin-top: 0.6rem;
+    font-size: 0.74rem;
+  }
+
+  .register-link {
+    margin-top: 0.7rem;
+  }
+}
+
+/* Pantallas muy bajas: reduce aún más para evitar scroll */
+@media (max-width: 500px) and (max-height: 720px) {
+  .brand-logo {
+    width: min(120px, 34vw);
+  }
+
+  .page-title {
+    display: none;
+  }
+
+  .login-card {
+    padding: 1rem 1.1rem;
+  }
+
+  .login-card > p {
+    font-size: 0.85rem;
+  }
+
+  .google-info {
+    display: none;
+  }
+
+  .divider {
+    margin: 0.7rem 0;
   }
 }
 

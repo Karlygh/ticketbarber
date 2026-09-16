@@ -32,7 +32,6 @@ export class TvPageService {
   private readonly shopLogoUrl = signal<string>('');
   private readonly shopAddress = signal<string>('');
   private readonly shopPhone = signal<string>('');
-  private readonly todayHours = signal<string>('Cerrado');
   private readonly openingHours = signal<OpeningHoursDay[]>([]);
   private readonly tickets = signal<Ticket[]>([]);
   private readonly settings = signal<QueueSettings>(DEFAULT_QUEUE_SETTINGS);
@@ -43,6 +42,17 @@ export class TvPageService {
   );
 
   private readonly activeView = computed<TvViewId>(() => this.selectedView() ?? this.settings().tvView ?? 'default');
+
+  // El texto de "Horario" debe coincidir con el estado real de la jornada (isOpen),
+  // que es el mismo flag manual que el panel de staff usa para "Jornada abierta/cerrada".
+  // Mientras la jornada esté abierta manualmente, nunca debe mostrar "Cerrado".
+  private readonly todayHoursLabel = computed<string>(() => {
+    const scheduleLabel = formatOpeningHoursForToday(this.openingHours(), new Date(this.now()), 'Europe/Madrid');
+    if (this.settings().isOpen) {
+      return scheduleLabel === 'Cerrado' ? 'Abierto' : scheduleLabel;
+    }
+    return 'Cerrado';
+  });
 
   readonly viewModel = computed<TvViewModel>(() =>
     buildTvViewModel({
@@ -55,7 +65,7 @@ export class TvPageService {
         logoUrl: this.shopLogoUrl(),
         address: this.shopAddress(),
         phone: this.shopPhone(),
-        todayHours: this.todayHours(),
+        todayHours: this.todayHoursLabel(),
         openingHours: this.openingHours()
       }
     })
@@ -92,7 +102,6 @@ export class TvPageService {
         this.shopAddress.set(profile.address || '');
         this.shopPhone.set(profile.phone || '');
         this.openingHours.set(profile.openingHours);
-        this.todayHours.set(formatOpeningHoursForToday(profile.openingHours, new Date(), 'Europe/Madrid'));
       }
     });
 

@@ -22,6 +22,14 @@ const GMAIL_USER = defineString("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 
+// Orígenes permitidos para las funciones callable expuestas al frontend.
+const ALLOWED_ORIGINS = [
+  "http://localhost:4200",
+  "http://127.0.0.1:4200",
+  "https://ticketbarber-7c16d.web.app",
+  "https://ticketbarber-7c16d.firebaseapp.com",
+];
+
 interface ContactRequest {
   name: string;
   email: string;
@@ -310,7 +318,7 @@ async function deleteUserStorage(uid: string): Promise<void> {
 }
 
 export const sendContactEmail = onCall<ContactRequest, Promise<ContactResponse>>(
-  {secrets: [GMAIL_APP_PASSWORD]},
+  {cors: ALLOWED_ORIGINS, secrets: [GMAIL_APP_PASSWORD]},
   async (request) => {
     try {
       logger.info("Iniciando proceso de contacto", {data: request.data});
@@ -383,12 +391,7 @@ export const sendContactEmail = onCall<ContactRequest, Promise<ContactResponse>>
 
 export const createStripePortalLink = onCall<PortalLinkRequest, Promise<PortalLinkResponse>>(
   {
-    cors: [
-      "http://localhost:4200",
-      "http://127.0.0.1:4200",
-      "https://ticketbarber-7c16d.web.app",
-      "https://ticketbarber-7c16d.firebaseapp.com",
-    ],
+    cors: ALLOWED_ORIGINS,
     secrets: [STRIPE_SECRET_KEY],
   },
   async (request) => {
@@ -434,7 +437,7 @@ export const createStripePortalLink = onCall<PortalLinkRequest, Promise<PortalLi
   }
 );
 
-export const deleteAccount = onCall(async (request) => {
+export const deleteAccount = onCall({cors: ALLOWED_ORIGINS}, async (request) => {
   if (!request.auth) {
     throw new HttpsError(
       "unauthenticated",

@@ -1,5 +1,19 @@
 :host {
   display: block;
-  min-height: 100vh;
-  min-height: 100dvh;
+}
+
+.tv-viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #05070d;
+}
+
+.tv-stage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
 }

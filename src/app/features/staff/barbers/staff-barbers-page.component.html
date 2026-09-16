@@ -82,12 +82,22 @@
             </label>
 
             @if (pendingPhotoFileName()) {
-              <p class="helper-text">Foto cargada: {{ pendingPhotoFileName() }}</p>
+              <p class="helper-text photo-pending-notice">
+                ⚠️ Foto cargada: {{ pendingPhotoFileName() }}. Todavia no se guardo: haz clic en "Guardar cambios" para aplicarla.
+              </p>
             }
 
             <div class="editor-actions">
               <button type="button" class="ghost-btn" (click)="cancelEdit()" [disabled]="isBusy()">Cancelar</button>
-              <button type="button" class="primary-btn" (click)="saveEdit(barber)" [disabled]="isBusy() || !editingName().trim()">Guardar cambios</button>
+              <button
+                type="button"
+                class="primary-btn"
+                [class.needs-save]="pendingPhotoFileName()"
+                (click)="saveEdit(barber)"
+                [disabled]="isBusy() || !editingName().trim()"
+              >
+                Guardar cambios
+              </button>
             </div>
           </div>
         }

@@ -142,12 +142,18 @@
               <p>Barbero</p>
               <h3>{{ group.barber.name }}</h3>
             </div>
+            @if (group.isOnBreak) {
+              <span class="rose-break-badge">En descanso · Ahora vuelvo</span>
+            }
           </div>
 
           <div class="rose-card-current">
             @if (group.current) {
               <strong>{{ group.current.displayName }}</strong>
               <span>{{ group.current.waitLabel }}</span>
+            } @else if (group.isOnBreak) {
+              <strong>Sin turno</strong>
+              <span class="rose-break-text">En descanso</span>
             } @else {
               <strong>Sin turno</strong>
               <span>Disponible</span>

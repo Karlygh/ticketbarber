@@ -22,6 +22,7 @@ export interface TvBarberGroupViewModel {
   barber: BarberProfile;
   accentColor: string;
   initials: string;
+  isOnBreak: boolean;
   current: TvCurrentTicketViewModel | null;
   upcomingAll: TvUpcomingTicketViewModel[];
   upcomingVisible: TvUpcomingTicketViewModel[];

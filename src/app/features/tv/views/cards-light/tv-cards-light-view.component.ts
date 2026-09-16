@@ -24,6 +24,7 @@ export class TvCardsLightViewComponent {
   }
 
   statusClass(group: TvBarberGroupViewModel): string {
+    if (group.isOnBreak) return 'is-break';
     return group.current || group.upcomingAll.length ? 'is-busy' : 'is-idle';
   }
 }

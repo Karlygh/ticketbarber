@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { QueueStore } from '../../core/stores/queue.store';
 import { AuthStore } from '../../core/stores/auth.store';
 import { ShopService } from '../../core/services/shop.service';
-import { TicketReceipt } from '../../core/models/ticket.model';
+import { CreateTicketInput, TicketReceipt } from '../../core/models/ticket.model';
 import { BarberService } from '../../core/services/barber.service';
 import { BarberProfile } from '../../core/models/barber.model';
 import { barberInitials } from '../../core/utils/barber-display.util';
@@ -29,6 +29,8 @@ export class KioskPageComponent implements OnInit {
   private readonly shopService = inject(ShopService);
   private readonly barberService = inject(BarberService);
   readonly navConfirmTarget = signal<'staff' | 'tv' | null>(null);
+  readonly breakConfirmVisible = signal(false);
+  private readonly pendingTicketPayload = signal<CreateTicketInput | null>(null);
 
   readonly shopName = signal<string>('');
   readonly shopLogoUrl = signal<string>('');
@@ -119,17 +121,43 @@ export class KioskPageComponent implements OnInit {
     }
 
     const { barberId, customerName, serviceId, phone } = this.form.getRawValue();
+    const payload: CreateTicketInput = {
+      barberId,
+      customerName,
+      serviceId,
+      phone: phone?.trim() || undefined
+    };
+
+    const barber = this.barbers().find((b) => b.id === barberId);
+    if (barber?.status === 'break') {
+      this.pendingTicketPayload.set(payload);
+      this.breakConfirmVisible.set(true);
+      return;
+    }
+
+    await this.createTicketAndShowReceipt(payload);
+  }
+
+  async confirmBreakAndCreateTicket(): Promise<void> {
+    const payload = this.pendingTicketPayload();
+    this.breakConfirmVisible.set(false);
+    this.pendingTicketPayload.set(null);
+    if (!payload) return;
+    await this.createTicketAndShowReceipt(payload);
+  }
+
+  cancelBreakConfirm(): void {
+    this.breakConfirmVisible.set(false);
+    this.pendingTicketPayload.set(null);
+  }
+
+  private async createTicketAndShowReceipt(payload: CreateTicketInput): Promise<void> {
     this.isSubmitting.set(true);
     try {
-      const receipt = await this.queueStore.createTicket({
-        barberId,
-        customerName,
-        serviceId,
-        phone: phone?.trim() || undefined
-      });
+      const receipt = await this.queueStore.createTicket(payload);
       this.receipt.set(receipt);
       this.form.reset({
-        barberId,
+        barberId: payload.barberId,
         customerName: '',
         serviceId: '',
         phone: ''

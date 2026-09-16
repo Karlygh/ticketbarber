@@ -135,3 +135,16 @@
     </div>
   </div>
 }
+
+@if (breakConfirmVisible()) {
+  <div class="kiosk-modal-overlay" (click)="cancelBreakConfirm()" role="dialog" aria-modal="true" aria-label="Barbero en descanso">
+    <div class="kiosk-modal" (click)="$event.stopPropagation()">
+      <h2>Tu barbero está en descanso</h2>
+      <p>Ahora mismo está en descanso, pero puedes coger turno igualmente: se lo reservamos y te esperará en la cola para cuando vuelva.</p>
+      <div class="kiosk-modal-actions">
+        <button type="button" class="modal-btn ghost" (click)="cancelBreakConfirm()">Cancelar</button>
+        <button type="button" class="modal-btn solid" (click)="confirmBreakAndCreateTicket()">Coger turno igualmente</button>
+      </div>
+    </div>
+  </div>
+}
