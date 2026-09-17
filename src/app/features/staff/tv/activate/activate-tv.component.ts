@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TvAuthService, TvBindingFailureReason } from '../../../../core/services/tv-auth.service';
+import { PAIRING_CODE_LENGTH, TvAuthService, TvBindingFailureReason } from '../../../../core/services/tv-auth.service';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { APP_ROUTES } from '../../../../shared/routing/app-routes';
@@ -44,25 +44,31 @@ export class ActivateTvComponent implements OnInit {
     this.status.set('idle');
   }
 
+  readonly codeLength = PAIRING_CODE_LENGTH;
+
+  /** Los dígitos se agrupan por la mitad para que sean fáciles de leer. */
+  private groupCode(digits: string): string {
+    const half = Math.ceil(PAIRING_CODE_LENGTH / 2);
+    return digits.length <= half ? digits : `${digits.slice(0, half)}-${digits.slice(half)}`;
+  }
+
   get formattedCode(): string {
-    const c = this.rawCode();
-    if (c.length <= 3) return c;
-    return `${c.slice(0, 3)}-${c.slice(3)}`;
+    return this.groupCode(this.rawCode());
   }
 
   onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 6);
+    const digits = input.value.replace(/\D/g, '').slice(0, PAIRING_CODE_LENGTH);
     this.rawCode.set(digits);
     // Mostrar con guión visualmente
-    input.value = digits.length > 3 ? `${digits.slice(0, 3)}-${digits.slice(3)}` : digits;
+    input.value = this.groupCode(digits);
   }
 
   async activate(): Promise<void> {
     const code = this.rawCode();
-    if (code.length !== 6) {
+    if (code.length !== PAIRING_CODE_LENGTH) {
       this.status.set('error');
-      this.errorMsg.set('El código debe tener 6 dígitos');
+      this.errorMsg.set(`El código debe tener ${PAIRING_CODE_LENGTH} dígitos`);
       return;
     }
 

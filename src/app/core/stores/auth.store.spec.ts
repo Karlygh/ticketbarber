@@ -8,24 +8,33 @@ import {
   AUTH_SIGN_IN_WITH_POPUP,
   AUTH_SIGN_OUT,
   AUTH_GET_ADDITIONAL_USER_INFO,
+  AUTH_SIGN_IN_ANONYMOUSLY,
+  AUTH_REAUTHENTICATE_WITH_POPUP,
+  INACTIVITY_LIMIT_MS,
 } from './auth.store';
 
 describe('AuthStore', () => {
   const mockAuth = {};
 
   const userServiceMock = {
-    ensureUserProfile: jasmine.createSpy('ensureUserProfile').and.resolveTo()
+    ensureUserProfile: jasmine.createSpy('ensureUserProfile').and.resolveTo(),
+    recordLogin: jasmine.createSpy('recordLogin').and.resolveTo(null),
+    recordAuthEvent: jasmine.createSpy('recordAuthEvent').and.resolveTo()
   };
 
   const storageMock = {
     removeSessionItem: jasmine.createSpy('removeSessionItem'),
-    removeLocalItem: jasmine.createSpy('removeLocalItem')
+    removeLocalItem: jasmine.createSpy('removeLocalItem'),
+    setLocalItem: jasmine.createSpy('setLocalItem'),
+    getLocalItem: jasmine.createSpy('getLocalItem').and.returnValue(null)
   };
 
   const onAuthStateChangedSpy = jasmine.createSpy('onAuthStateChanged');
   const signInWithPopupSpy = jasmine.createSpy('signInWithPopup');
   const signOutSpy = jasmine.createSpy('signOut').and.resolveTo();
   const getAdditionalUserInfoSpy = jasmine.createSpy('getAdditionalUserInfo');
+  const signInAnonymouslySpy = jasmine.createSpy('signInAnonymously');
+  const reauthenticateWithPopupSpy = jasmine.createSpy('reauthenticateWithPopup').and.resolveTo();
 
   function setup(initialUser: any = null): AuthStore {
     onAuthStateChangedSpy.and.callFake((_: any, cb: any) => {
@@ -42,6 +51,8 @@ describe('AuthStore', () => {
         { provide: AUTH_SIGN_IN_WITH_POPUP, useValue: signInWithPopupSpy },
         { provide: AUTH_SIGN_OUT, useValue: signOutSpy },
         { provide: AUTH_GET_ADDITIONAL_USER_INFO, useValue: getAdditionalUserInfoSpy },
+        { provide: AUTH_SIGN_IN_ANONYMOUSLY, useValue: signInAnonymouslySpy },
+        { provide: AUTH_REAUTHENTICATE_WITH_POPUP, useValue: reauthenticateWithPopupSpy },
       ]
     });
     return TestBed.inject(AuthStore);
@@ -50,12 +61,20 @@ describe('AuthStore', () => {
   afterEach(() => {
     TestBed.resetTestingModule();
     userServiceMock.ensureUserProfile.calls.reset();
+    userServiceMock.recordLogin.calls.reset();
+    userServiceMock.recordLogin.and.resolveTo(null);
+    userServiceMock.recordAuthEvent.calls.reset();
     storageMock.removeSessionItem.calls.reset();
     storageMock.removeLocalItem.calls.reset();
+    storageMock.setLocalItem.calls.reset();
+    storageMock.getLocalItem.calls.reset();
+    storageMock.getLocalItem.and.returnValue(null);
     onAuthStateChangedSpy.calls.reset();
     signInWithPopupSpy.calls.reset();
     signOutSpy.calls.reset();
     getAdditionalUserInfoSpy.calls.reset();
+    signInAnonymouslySpy.calls.reset();
+    reauthenticateWithPopupSpy.calls.reset();
   });
 
   describe('initial state', () => {
@@ -149,6 +168,65 @@ describe('AuthStore', () => {
       const result = await store.signInWithGoogle();
 
       expect(result.isNewUser).toBeFalse();
+    });
+  });
+
+  describe('sesiones de dispositivo (TV)', () => {
+    it('no considera autenticada una sesión anónima', () => {
+      // Si user() devolviese la sesión anónima, una TV vinculada pasaría
+      // staffAuthGuard y entraría al panel de gestión.
+      const store = setup({ uid: 'anon-1', isAnonymous: true } as any);
+
+      expect(store.user()).toBeNull();
+      expect(store.isAuthenticated()).toBeFalse();
+      expect(store.deviceUser()?.uid).toBe('anon-1');
+    });
+
+    it('reutiliza la sesión anónima existente', async () => {
+      const store = setup({ uid: 'anon-1', isAnonymous: true } as any);
+
+      const result = await store.signInAsDevice();
+
+      expect(result.uid).toBe('anon-1');
+      expect(signInAnonymouslySpy).not.toHaveBeenCalled();
+    });
+
+    it('abre una sesión anónima cuando no hay ninguna', async () => {
+      const store = setup(null);
+      signInAnonymouslySpy.and.resolveTo({ user: { uid: 'anon-new' } } as any);
+
+      const result = await store.signInAsDevice();
+
+      expect(signInAnonymouslySpy).toHaveBeenCalled();
+      expect(result.uid).toBe('anon-new');
+    });
+  });
+
+  describe('enforceInactivityLimit', () => {
+    it('cierra la sesión cuando se supera el límite', async () => {
+      const store = setup({ uid: 'uid-1', isAnonymous: false } as any);
+      storageMock.getLocalItem.and.returnValue(
+        String(Date.now() - INACTIVITY_LIMIT_MS - 1000)
+      );
+
+      await expectAsync(store.enforceInactivityLimit()).toBeResolvedTo(true);
+      expect(signOutSpy).toHaveBeenCalled();
+    });
+
+    it('mantiene la sesión dentro del límite', async () => {
+      const store = setup({ uid: 'uid-1', isAnonymous: false } as any);
+      storageMock.getLocalItem.and.returnValue(String(Date.now() - 1000));
+
+      await expectAsync(store.enforceInactivityLimit()).toBeResolvedTo(false);
+      expect(signOutSpy).not.toHaveBeenCalled();
+    });
+
+    it('no caduca sesiones anteriores a la política', async () => {
+      const store = setup({ uid: 'uid-1', isAnonymous: false } as any);
+      storageMock.getLocalItem.and.returnValue(null);
+
+      await expectAsync(store.enforceInactivityLimit()).toBeResolvedTo(false);
+      expect(signOutSpy).not.toHaveBeenCalled();
     });
   });
 });

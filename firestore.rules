@@ -8,14 +8,52 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    // ── Sesión de dispositivo (TV) ────────────────────────────────────────
+    // La TV se autentica de forma anónima y registra su sesión en
+    // device_sessions/{uid}. Esto permite autorizar sus lecturas contra un
+    // vínculo real en lugar de abrir la cola al público, que expondría
+    // nombre y teléfono de los clientes (RGPD art. 5.1.f / ENS mp.info.1).
+    function deviceSession() {
+      return get(/databases/$(database)/documents/device_sessions/$(request.auth.uid)).data;
+    }
+
+    function boundDevice() {
+      return get(/databases/$(database)/documents/devices/$(deviceSession().deviceId)).data;
+    }
+
+    // Se revalida el dispositivo en cada lectura, no solo al vincularlo: de
+    // lo contrario, revocar una TV dejaría su sesión leyendo la cola
+    // indefinidamente (ENS op.acc.5.5).
+    function isBoundDevice(shopId) {
+      return request.auth != null
+             && exists(/databases/$(database)/documents/device_sessions/$(request.auth.uid))
+             && deviceSession().userId == shopId
+             && exists(/databases/$(database)/documents/devices/$(deviceSession().deviceId))
+             && boundDevice().userId == shopId
+             && boundDevice().anonUid == request.auth.uid
+             && boundDevice().revokedAt == 0
+             && boundDevice().active == true;
+    }
+
+    // Puede ver los datos de una tienda: su dueño o una TV vinculada a ella.
+    function canViewShop(shopId) {
+      return isOwner(shopId) || isBoundDevice(shopId);
+    }
+
     function isCodeInactive() {
       return resource.data.expiresAt <= request.time.toMillis()
              || resource.data.consumedAt > 0
              || resource.data.revokedAt > 0;
     }
 
+    // Una TV en proceso de vinculación: sesión anónima, nunca una cuenta staff.
+    function isAnonymousSession() {
+      return request.auth != null
+             && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
     function canRedeemPairingCode(codeId) {
-      return request.auth == null
+      return isAnonymousSession()
              && resource.data.user_code == codeId
              && resource.data.expiresAt > request.time.toMillis()
              && resource.data.consumedAt == 0
@@ -31,7 +69,7 @@ service cloud.firestore {
     }
 
     function canCreateDeviceFromCode(deviceId) {
-      return request.auth == null
+      return isAnonymousSession()
              && request.resource.data.deviceId == deviceId
              && request.resource.data.activationCode is string
              && getAfter(/databases/$(database)/documents/device_codes/$(request.resource.data.activationCode)).data.userId == request.resource.data.userId
@@ -47,12 +85,21 @@ service cloud.firestore {
     }
 
     function canUpdateDeviceHeartbeat(deviceId) {
-      return request.auth == null
+      return isAnonymousSession()
              && request.resource.data.deviceId == deviceId
              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen'])
              && request.resource.data.lastSeen is number
              && request.resource.data.lastSeen >= resource.data.lastSeen
              && request.resource.data.lastSeen <= request.time.toMillis()
+             && isActiveDevice();
+    }
+
+    // Re-vinculación tras rotar la sesión anónima (navegador limpiado, TV
+    // reiniciada). Solo cambia anonUid y exige conocer el deviceId.
+    function canRebindDeviceSession(deviceId) {
+      return isAnonymousSession()
+             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['anonUid'])
+             && request.resource.data.anonUid == request.auth.uid
              && isActiveDevice();
     }
 
@@ -63,6 +110,15 @@ service cloud.firestore {
       allow read, update: if isOwner(userId);
       allow create: if isOwner(userId);
       allow delete: if false;
+
+      // ── Registro de accesos (ENS op.acc.5.r5.1) ─────────────────────────
+      // Solo se puede añadir y consultar. No se permite modificar ni borrar
+      // eventos ya registrados: un registro alterable no sirve como
+      // evidencia (ENS op.exp.8).
+      match /auth_events/{eventId} {
+        allow read, create: if isOwner(userId);
+        allow update, delete: if false;
+      }
     }
 
     // ── Colecciones gestionadas por la extensión "Run Payments with Stripe"
@@ -108,35 +164,38 @@ service cloud.firestore {
 
     // ── Tienda (shop) ──────────────────────────────────────────────────────
     match /shops/{shopId} {
-      allow read: if true;
+      allow read: if canViewShop(shopId);
       // Solo el propietario puede crear/actualizar el perfil del negocio
       allow create, update: if isOwner(shopId);
       allow delete: if false;
 
       match /barbers/{barberId} {
-        allow read: if true;
+        allow read: if canViewShop(shopId);
         allow write: if isOwner(shopId);
       }
 
       match /settings/{document=**} {
-        allow read: if true;
+        allow read: if canViewShop(shopId);
         allow write: if isOwner(shopId);
       }
 
       match /services/{document=**} {
-        allow read: if true;
+        allow read: if canViewShop(shopId);
         allow write: if isOwner(shopId);
       }
 
+      // Contienen datos personales de clientes finales (nombre y teléfono):
+      // nunca deben ser legibles ni creables de forma anónima.
+      // El kiosco opera dentro de la sesión del propietario.
       match /tickets/{ticketId} {
-        allow create: if true;
-        allow read:   if true;
+        allow read:   if canViewShop(shopId);
+        allow create: if isOwner(shopId);
         allow update: if isOwner(shopId);
         allow delete: if isOwner(shopId);
       }
 
       match /queue/{document=**} {
-        allow read:  if true;
+        allow read:  if canViewShop(shopId);
         allow write: if isOwner(shopId);
       }
     }
@@ -148,7 +207,9 @@ service cloud.firestore {
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.user_code == codeId
                     && request.resource.data.expiresAt > request.time.toMillis();
-      allow read:   if true;
+      // Ya no es público: exige sesión (la TV abre una anónima antes de
+      // canjear). El código sigue siendo el secreto que hay que conocer.
+      allow read:   if request.auth != null;
       allow update: if (
                       request.auth != null
                       && resource.data.userId == request.auth.uid
@@ -166,17 +227,39 @@ service cloud.firestore {
 
     // ── Dispositivos vinculados (permanentes) ─────────────────────────────
     match /devices/{deviceId} {
-      // La TV conoce un identificador aleatorio y necesita validar su propio vínculo sin login.
-      allow get: if request.auth == null
+      // La TV conoce un identificador aleatorio y valida su propio vínculo
+      // desde una sesión anónima. Ya no se expone a peticiones sin sesión.
+      allow get: if isAnonymousSession()
                  || (request.auth != null && resource.data.userId == request.auth.uid);
       allow list, delete: if request.auth != null
                          && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
                     || canCreateDeviceFromCode(deviceId);
+      // canCreateDeviceFromCode también se admite aquí: si el documento ya
+      // existía (TV re-vinculada, o la misma prueba repetida), Firestore
+      // trata el set() de redeemCode() como un update, no un create.
       allow update: if request.auth != null
                     && resource.data.userId == request.auth.uid
-                    || canUpdateDeviceHeartbeat(deviceId);
+                    || canUpdateDeviceHeartbeat(deviceId)
+                    || canRebindDeviceSession(deviceId)
+                    || canCreateDeviceFromCode(deviceId);
+    }
+
+    // ── Sesión activa de cada dispositivo TV ──────────────────────────────
+    // Índice inverso anonUid -> tienda, para que las reglas de lectura de la
+    // cola puedan resolver el vínculo con un único get().
+    match /device_sessions/{sessionUid} {
+      allow read, delete: if request.auth != null && request.auth.uid == sessionUid;
+      allow create, update: if request.auth != null
+                    && request.auth.uid == sessionUid
+                    && request.resource.data.deviceId is string
+                    && exists(/databases/$(database)/documents/devices/$(request.resource.data.deviceId))
+                    // Solo se puede declarar un vínculo que realmente exista,
+                    // pertenezca a esa tienda y no esté revocado.
+                    && get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.userId == request.resource.data.userId
+                    && get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.anonUid == request.auth.uid
+                    && get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.revokedAt == 0;
     }
 
     // ── Contactos (formulario de contacto) ────────────────────────────────

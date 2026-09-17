@@ -116,6 +116,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/legal/cookies-page.component').then((m) => m.CookiesPageComponent)
   },
+  {
+    path: 'legal/aviso-legal',
+    loadComponent: () =>
+      import('./features/legal/aviso-legal-page.component').then((m) => m.AvisoLegalPageComponent)
+  },
   // ── Página de precios (pública) ─────────────────────────────────────────────
   {
     path: 'pricing',

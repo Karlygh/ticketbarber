@@ -95,6 +95,16 @@
             <span>Telefono (opcional)</span>
             <input formControlName="phone" type="tel" inputmode="numeric" pattern="[0-9]{9,15}" maxlength="15" autocomplete="tel" placeholder="Ej: 612345678" />
           </label>
+
+          <!-- Informacion en primera capa (RGPD art. 13). El cliente debe saber
+               quien trata sus datos y para que antes de introducirlos. -->
+          <p class="privacy-notice">
+            Tu nombre y telefono los usa
+            <strong>{{ shopName() || 'este establecimiento' }}</strong>
+            solo para gestionar la cola y avisarte de tu turno. Se borran al cerrar la jornada.
+            Puedes pedir su acceso o supresion al personal del local.
+            <a routerLink="/legal/privacidad" target="_blank" rel="noopener">Mas informacion</a>.
+          </p>
         </div>
 
         <button type="submit" class="submit-btn" [disabled]="isSubmitting()">

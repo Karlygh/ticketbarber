@@ -9,10 +9,12 @@ import { AuthStore } from '../../../core/stores/auth.store';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { SubscriptionStore } from '../../../core/stores/subscription.store';
+import { UserService } from '../../../core/services/user.service';
 
 const userSignal = signal<any>(null);
 
 const mockAuthStore = { user: userSignal, isAuthenticated: signal(false), signOut: jest.fn() };
+const mockUserService = { getUserProfile: jest.fn().mockResolvedValue(null) };
 const mockSubscriptionStore = { subscriptionStatus: signal('no-subscription' as any), trialDaysLeft: signal(0) };
 
 describe('AccountSecurityPageComponent', () => {
@@ -25,7 +27,8 @@ describe('AccountSecurityPageComponent', () => {
       providers: [
         provideRouter([]),
         { provide: AuthStore, useValue: mockAuthStore },
-        { provide: SubscriptionStore, useValue: mockSubscriptionStore }
+        { provide: SubscriptionStore, useValue: mockSubscriptionStore },
+        { provide: UserService, useValue: mockUserService }
       ]
     });
     const fixture = TestBed.createComponent(AccountSecurityPageComponent);

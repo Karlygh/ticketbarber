@@ -18,28 +18,66 @@
     <p>Ticketbarber &mdash; hola@ticketbarber.app &mdash; Madrid, Espana.</p>
 
     <h2>2. Datos que recopilamos</h2>
+
+    <h3>2.1 Datos de la cuenta profesional</h3>
     <p>Al registrarte con Google obtenemos los siguientes datos de tu perfil:</p>
     <ul>
       <li>Nombre y apellidos (o nombre de perfil).</li>
       <li>Direccion de correo electronico.</li>
       <li>Foto de perfil (si esta disponible en tu cuenta).</li>
     </ul>
-    <p>No recopilamos datos de pago ni informacion sensible segun el art. 9 RGPD.</p>
+    <p>Tambien registramos la fecha y hora de tus accesos al panel, con el unico fin de detectar accesos no autorizados y poder mostrarte tu ultimo acceso.</p>
+
+    <h3>2.2 Datos de tu negocio</h3>
+    <p>Nombre comercial, direccion, telefono de contacto, logotipo, horarios, catalogo de servicios y datos de los barberos que das de alta (nombre y fotografia).</p>
+
+    <h3>2.3 Datos de los clientes que sacan turno</h3>
+    <p>Cuando un cliente saca turno desde el kiosco se registra su <strong>nombre</strong> y, opcionalmente, su <strong>telefono</strong>, junto al barbero y servicio elegidos y las marcas de tiempo del turno.</p>
+
+    <h3>2.4 Datos del formulario de contacto</h3>
+    <p>Nombre, correo electronico, telefono (opcional), asunto y contenido del mensaje.</p>
+
+    <h3>2.5 Datos de facturacion</h3>
+    <p>La contratacion y el pago de la suscripcion se realizan integramente a traves de Stripe. <strong>Ticketbarber no almacena ni tiene acceso a los datos de tu tarjeta.</strong> Solo conservamos el estado de la suscripcion, los importes y las fechas de los pagos.</p>
+
+    <p>No tratamos categorias especiales de datos de las previstas en el art. 9 RGPD.</p>
 
     <h2>3. Finalidad del tratamiento</h2>
     <ul>
       <li>Gestionar tu acceso al panel de staff de Ticketbarber.</li>
       <li>Identificarte como miembro autorizado de tu barberia.</li>
-      <li>Enviarte comunicaciones relacionadas con el funcionamiento del servicio.</li>
+      <li>Prestar el servicio de gestion de turnos: ordenar la cola, mostrarla en la pantalla del local y estimar tiempos de espera.</li>
+      <li>Gestionar la suscripcion y la facturacion.</li>
+      <li>Atender las consultas que nos envies por el formulario de contacto.</li>
+      <li>Garantizar la seguridad del servicio y detectar accesos indebidos.</li>
     </ul>
 
     <h2>4. Base juridica</h2>
-    <p>El tratamiento se basa en tu consentimiento (art. 6.1.a RGPD), otorgado al autenticarte con Google. Puedes retirarlo eliminando tu cuenta en cualquier momento.</p>
+    <ul>
+      <li><strong>Cuenta y prestacion del servicio:</strong> ejecucion del contrato de suscripcion (art. 6.1.b RGPD).</li>
+      <li><strong>Datos de los clientes en cola:</strong> interes legitimo del establecimiento en organizar la atencion por orden de llegada y avisar al cliente de su turno (art. 6.1.f RGPD).</li>
+      <li><strong>Formulario de contacto:</strong> tu consentimiento (art. 6.1.a RGPD), revocable en cualquier momento.</li>
+      <li><strong>Registro de accesos y medidas de seguridad:</strong> cumplimiento de la obligacion de seguridad del tratamiento (art. 32 RGPD).</li>
+    </ul>
 
-    <h2>5. Conservacion de datos</h2>
-    <p>Conservamos tus datos mientras tu cuenta este activa. Tras la eliminacion, los datos se borran en un plazo maximo de 30 dias, salvo obligacion legal de conservacion.</p>
+    <h2>5. Quien es responsable de cada dato</h2>
+    <p>
+      Respecto a los datos de tu cuenta, tu negocio y tu suscripcion, Ticketbarber actua como <strong>responsable del tratamiento</strong>.
+    </p>
+    <p>
+      Respecto a los datos de los clientes que sacan turno, el <strong>responsable del tratamiento es el establecimiento</strong> que utiliza Ticketbarber, y Ticketbarber actua unicamente como <strong>encargado del tratamiento</strong> (art. 28 RGPD), tratando esos datos siguiendo sus instrucciones y solo para prestar el servicio. Corresponde al establecimiento informar a sus clientes de este tratamiento.
+    </p>
 
-    <h2>6. Tus derechos</h2>
+    <h2>6. Conservacion de datos</h2>
+    <ul>
+      <li><strong>Datos de la cuenta y del negocio:</strong> mientras la cuenta este activa. Tras eliminarla, se borran en un plazo maximo de 30 dias, salvo obligacion legal de conservacion.</li>
+      <li><strong>Turnos de clientes:</strong> se eliminan automaticamente a los 90 dias de su creacion, y antes si el establecimiento cierra la jornada o los borra.</li>
+      <li><strong>Registro de accesos:</strong> 12 meses.</li>
+      <li><strong>Mensajes de contacto:</strong> hasta 12 meses desde la resolucion de la consulta.</li>
+      <li><strong>Datos de facturacion:</strong> el plazo exigido por la normativa fiscal y mercantil (6 anos, art. 30 Codigo de Comercio).</li>
+    </ul>
+
+    <h2>7. Tus derechos</h2>
     <p>En virtud del RGPD y la LOPDGDD tienes derecho a:</p>
     <ul>
       <li><strong>Acceso:</strong> conocer que datos tratamos sobre ti.</li>
@@ -53,10 +91,20 @@
       <a href="mailto:hola@ticketbarber.app">hola@ticketbarber.app</a>.
     </p>
 
-    <h2>7. Transferencias internacionales</h2>
-    <p>Utilizamos Google Firebase como infraestructura, que puede procesar datos fuera del Espacio Economico Europeo bajo las garantias establecidas por las Clausulas Contractuales Tipo aprobadas por la Comision Europea.</p>
+    <h2>8. Destinatarios y transferencias internacionales</h2>
+    <p>Para prestar el servicio recurrimos a los siguientes proveedores, que actuan como encargados del tratamiento:</p>
+    <ul>
+      <li><strong>Google Ireland Ltd. (Firebase / Google Cloud):</strong> alojamiento, base de datos y autenticacion. Los datos se almacenan en la region europea <code>eur3</code>.</li>
+      <li><strong>Stripe Payments Europe Ltd.:</strong> procesamiento de pagos y facturacion.</li>
+      <li><strong>Google Ireland Ltd. (Gmail):</strong> envio de los mensajes del formulario de contacto.</li>
+    </ul>
+    <p>Alguno de estos proveedores puede procesar datos fuera del Espacio Economico Europeo, en cuyo caso la transferencia se ampara en las Clausulas Contractuales Tipo aprobadas por la Comision Europea y, cuando resulta aplicable, en el Marco de Privacidad de Datos UE-EE. UU.</p>
+    <p>No cedemos tus datos a terceros para finalidades distintas de las descritas, ni los vendemos.</p>
 
-    <h2>8. Reclamaciones</h2>
+    <h2>9. Medidas de seguridad</h2>
+    <p>Aplicamos las medidas tecnicas y organizativas exigidas por el art. 32 RGPD, entre ellas: cifrado en transito (HTTPS/TLS) y en reposo, control de acceso por identidad con autenticacion delegada en Google, reglas de autorizacion que restringen cada dato a su titular, registro de accesos y copias de seguridad.</p>
+
+    <h2>10. Reclamaciones</h2>
     <p>
       Si consideras que el tratamiento vulnera la normativa vigente, puedes reclamar ante la
       Agencia Espanola de Proteccion de Datos en

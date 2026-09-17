@@ -16,7 +16,7 @@ import { buildTvQueueRouteCommands } from '../../shared/routing/app-routes';
 @Component({
   selector: 'app-kiosk-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './kiosk-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './kiosk-page.component.css'

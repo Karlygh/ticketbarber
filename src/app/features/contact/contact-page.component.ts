@@ -45,7 +45,9 @@ export class ContactPageComponent {
     email: ['', [Validators.required, Validators.email]],
     subject: ['', [Validators.required, Validators.minLength(3)]],
     phone: [''], // Opcional
-    message: ['', [Validators.required, Validators.minLength(20)]]
+    message: ['', [Validators.required, Validators.minLength(20)]],
+    // Consentimiento expreso e inequívoco (RGPD art. 4.11 y 7).
+    privacyConsent: [false, [Validators.requiredTrue]]
   });
 
   async sendMessage(): Promise<void> {
@@ -122,8 +124,11 @@ export class ContactPageComponent {
       return null;
     }
 
+    // Validators.requiredTrue también emite la clave 'required'.
     if (control.hasError('required')) {
-      return 'Este campo es obligatorio';
+      return fieldName === 'privacyConsent'
+        ? 'Debes aceptar la Política de Privacidad para enviar el mensaje'
+        : 'Este campo es obligatorio';
     }
 
     if (control.hasError('email')) {

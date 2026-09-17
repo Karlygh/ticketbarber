@@ -1,15 +1,17 @@
 /* eslint-disable no-console */
 /**
  * Utilidad de logging condicional.
- * En producción (environment.production = true) todas las funciones son no-ops,
- * por lo que el compilador con tree-shaking elimina las llamadas del bundle final.
+ * logWarn/logInfo son no-ops en producción (ruido no crítico).
+ * logError SIEMPRE imprime, incluso en producción: es la única forma de
+ * diagnosticar errores reales en el entorno donde realmente ocurren, y no
+ * expone nada que el usuario no pueda ya ver en el aviso de error.
  */
 import { environment } from '../../../environments/environment';
 
 const isDev = !environment.production;
 
 export function logError(message: string, ...args: unknown[]): void {
-  if (isDev) console.error(message, ...args);
+  console.error(message, ...args);
 }
 
 export function logWarn(message: string, ...args: unknown[]): void {

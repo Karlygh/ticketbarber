@@ -9,11 +9,15 @@ export const staffAuthGuard: CanActivateFn = async (_, state) => {
 
   await authStore.waitUntilReady();
 
+  // ENS op.acc.7: una sesión inactiva demasiado tiempo se cierra antes de
+  // conceder acceso.
+  const expired = await authStore.enforceInactivityLimit();
+
   return authStore.isAuthenticated()
     ? true
     : router.createUrlTree(['/staff/login'], {
       queryParams: {
-        reason: 'auth-required',
+        reason: expired ? 'session-expired' : 'auth-required',
         returnUrl: sanitizeReturnUrl(state.url)
       }
     });

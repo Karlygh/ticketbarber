@@ -59,6 +59,16 @@ export class AccountPrivacyPageComponent {
     this.deleteStep.set('deleting');
     this.deleteError.set(null);
     try {
+      // Identificación singular antes de una operación irreversible: no basta
+      // con la sesión establecida (ENS op.acc.6.r6.1).
+      await this.authStore.reauthenticate();
+    } catch {
+      this.deleteError.set('Debes volver a identificarte con Google para eliminar la cuenta.');
+      this.deleteStep.set('error');
+      return;
+    }
+
+    try {
       const deleteFn = this.runInCtx(() => httpsCallable(this.functions, 'deleteAccount'));
       await deleteFn({});
       await this.authStore.signOut();
@@ -76,6 +86,16 @@ export class AccountPrivacyPageComponent {
 
     this.exporting.set(true);
     this.exportError.set(null);
+    try {
+      // La exportación vuelca todos los datos de la cuenta, incluidos los de
+      // clientes: exige identificación singular (ENS op.acc.6.r6.1).
+      await this.authStore.reauthenticate();
+    } catch {
+      this.exportError.set('Debes volver a identificarte con Google para exportar tus datos.');
+      this.exporting.set(false);
+      return;
+    }
+
     try {
       // Perfil personal
       const profile = {

@@ -39,6 +39,28 @@
     <p class="section-note">
       Cada vez que inicias sesión en TicketBarber, Google verifica tu identidad de forma segura. Nunca compartimos tu contraseña con terceros ni la almacenamos en nuestros servidores.
     </p>
+
+    <!-- Último acceso: permite al usuario detectar un acceso que no reconoce. -->
+    <div class="info-card" role="note">
+      <div class="info-card-icon" aria-hidden="true">🕒</div>
+      <div class="info-card-body">
+        <h3>Último acceso</h3>
+        @if (!previousLoginLoaded()) {
+          <p>Comprobando…</p>
+        } @else if (previousLoginAtMs(); as previous) {
+          <p>
+            Tu acceso anterior fue el
+            <!-- El locale se pasa explícitamente: la app no provee LOCALE_ID. -->
+            <strong>{{ previous | date: "d 'de' MMMM 'de' y, HH:mm" : undefined : 'es' }}</strong>.
+          </p>
+          <p class="tip-note">
+            Si no reconoces este acceso, cambia tu contraseña de Google y activa la verificación en dos pasos.
+          </p>
+        } @else {
+          <p>Este es el primer acceso que registramos en tu cuenta.</p>
+        }
+      </div>
+    </div>
   </div>
 
   <!-- ─── 2. Contraseña ─────────────────────────────────────────────── -->

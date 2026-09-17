@@ -27,6 +27,17 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "_comment": "Purga de retención de turnos (RGPD art. 5.1.e). Ámbito de grupo de colección: los tickets viven bajo shops/{shopId}/tickets.",
+      "collectionGroup": "tickets",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

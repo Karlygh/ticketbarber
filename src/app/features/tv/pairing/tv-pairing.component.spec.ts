@@ -21,7 +21,7 @@ describe('TvPairingComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    ensurePairingCodeMock.mockResolvedValue({ code: '123456', expiresAt: Date.now() + 120_000 });
+    ensurePairingCodeMock.mockResolvedValue({ code: '12345678', expiresAt: Date.now() + 120_000 });
 
     TestBed.configureTestingModule({
       imports: [TvPairingComponent],
@@ -43,9 +43,9 @@ describe('TvPairingComponent', () => {
   });
 
   describe('formattedCode computed', () => {
-    it('inserts a dash between the 3rd and 4th character', () => {
-      component.code.set('123456');
-      expect(component.formattedCode()).toBe('123-456');
+    it('agrupa el código por la mitad con un guion', () => {
+      component.code.set('12345678');
+      expect(component.formattedCode()).toBe('1234-5678');
     });
 
     it('returns empty string when code is empty', () => {

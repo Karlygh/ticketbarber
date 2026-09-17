@@ -12,7 +12,7 @@
     <h1>Ingresa el código de vinculación</h1>
     <p class="subtitle">
       <strong>Paso 1:</strong> Inicia sesión en tu móvil y abre <strong>Vincular TV</strong><br>
-      <strong>Paso 2:</strong> Copia el código de 6 dígitos que aparece ahí<br>
+      <strong>Paso 2:</strong> Copia el código de 8 dígitos que aparece ahí<br>
       <strong>Paso 3:</strong> Escríbelo en esta pantalla para completar la vinculación
     </p>
   </header>
@@ -52,17 +52,17 @@
     </div>
   } @else if (status() !== 'checking-binding' && status() !== 'already-linked') {
     <form class="activate-form" (ngSubmit)="activate()" #form="ngForm">
-      <label for="code-input">Código de 6 dígitos</label>
+      <label for="code-input">Código de 8 dígitos</label>
       <input
         id="code-input"
         type="text"
         inputmode="numeric"
-        placeholder="123-456"
+        placeholder="1234-5678"
         autocomplete="off"
         [class.input-error]="status() === 'error'"
         (input)="onInput($event)"
         [value]="formattedCode"
-        maxlength="7"
+        maxlength="9"
       />
 
       @if (status() === 'error') {
@@ -76,7 +76,7 @@
       <button
         type="submit"
         class="primary btn-activate"
-        [disabled]="status() === 'loading' || rawCode().length !== 6">
+        [disabled]="status() === 'loading' || rawCode().length !== codeLength">
         @if (status() === 'loading') {
           Vinculando...
         } @else {

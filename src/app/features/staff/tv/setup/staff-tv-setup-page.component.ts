@@ -217,7 +217,7 @@ export class StaffTvSetupPageComponent implements OnDestroy {
         subSteps: [
           '4.1 Inicia sesión con la cuenta del negocio desde tu móvil, tablet o portátil.',
           '4.2 En el navbar pulsa "Vincular TV".',
-          '4.3 Genera un código nuevo o copia el activo si ya tienes uno: son 6 dígitos para introducir en la TV.',
+          '4.3 Genera un código nuevo o copia el activo si ya tienes uno: son 8 dígitos para introducir en la TV.',
           '4.4 Si lo necesitas, pulsa "Generar nuevo código" para invalidar el anterior y crear otro.'
         ],
         warning: 'No compartas un código caducado: cada código se usa una sola vez y expira automáticamente.',

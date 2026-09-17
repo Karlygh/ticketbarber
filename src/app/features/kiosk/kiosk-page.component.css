@@ -393,3 +393,21 @@ select {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Aviso de privacidad en primera capa (RGPD art. 13) */
+.privacy-notice {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.privacy-notice strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.privacy-notice a {
+  color: var(--cyan-300);
+  text-decoration: underline;
+}

@@ -14,6 +14,19 @@ export interface UserProfile {
   displayName: string | null;
   photoURL: string | null;
   createdAt: number; // timestamp ms
+  /** Acceso actual. ENS op.acc.5.r5.2 */
+  lastLoginAtMs?: number;
+  /** Acceso inmediatamente anterior, el que se muestra al usuario. ENS op.acc.5.r5.2 */
+  previousLoginAtMs?: number;
+}
+
+/** Evento de acceso auditable. ENS op.acc.5.r5.1 */
+export interface AuthEvent {
+  type: 'login_success' | 'login_failure' | 'logout' | 'session_expired';
+  atMs: number;
+  /** Solo el motivo, nunca la credencial. */
+  reason?: string;
+  userAgent?: string;
 }
 
 export interface StripeSubscription {

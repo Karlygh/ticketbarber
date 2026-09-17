@@ -14,7 +14,16 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { AuthStore } from '../stores/auth.store';
+import { logError } from '../utils/logger.util';
 import { BrowserStorageService } from './browser-storage.service';
+
+/**
+ * Longitud del código de vinculación de TV.
+ * Con 6 dígitos el espacio era de 10^6, enumerable por fuerza bruta; con 8 es
+ * de 10^8, y el código sigue siendo de un solo uso y con 15 min de vigencia
+ * (ENS op.acc.2).
+ */
+export const PAIRING_CODE_LENGTH = 8;
 
 export interface DeviceDoc {
   deviceId: string;
@@ -25,6 +34,12 @@ export interface DeviceDoc {
   activationCode?: string;
   active?: boolean;
   revokedAt?: number;
+  /**
+   * uid de la sesión anónima de este dispositivo. Es lo que permite a las
+   * reglas de Firestore autorizar la lectura de la cola sin abrirla al
+   * público (ENS op.acc.2 / mp.info.1).
+   */
+  anonUid?: string;
 }
 
 export interface ActiveTvCode {
@@ -127,8 +142,12 @@ export class TvAuthService {
 
     let deviceSnap;
     try {
+      // La TV necesita una sesión (anónima) para que las reglas puedan
+      // comprobar su vínculo antes de dejarle leer la cola.
+      await this.authStore.signInAsDevice();
       deviceSnap = await this.runInCtx(() => getDoc(doc(this.firestore, `devices/${deviceId}`)));
-    } catch {
+    } catch (error) {
+      logError('No se pudo validar el vínculo de la TV', error);
       return { valid: false, shopId, deviceId, reason: 'unavailable' };
     }
 
@@ -148,6 +167,21 @@ export class TvAuthService {
     if (revoked || inactive) {
       this.clearBinding();
       return { valid: false, shopId, deviceId, reason: 'revoked' };
+    }
+
+    // La sesión anónima puede rotar (datos del navegador borrados, TV
+    // reiniciada). Se re-vincula al uid actual para no perder el acceso.
+    const anonUid = this.authStore.deviceUser()?.uid;
+    if (anonUid) {
+      try {
+        if (device.anonUid !== anonUid) {
+          await this.runInCtx(() => updateDoc(doc(this.firestore, `devices/${deviceId}`), { anonUid }));
+        }
+        await this.registerDeviceSession(anonUid, shopId, deviceId);
+      } catch (error) {
+        logError('No se pudo restablecer la sesión del dispositivo', error);
+        return { valid: false, shopId, deviceId, reason: 'unavailable' };
+      }
     }
 
     this.storage.setLocalItem(this.DEVICE_ID_KEY, deviceId);
@@ -222,11 +256,24 @@ export class TvAuthService {
   }
 
   generateCode(): string {
-    return String(Math.floor(100000 + Math.random() * 900000));
+    // crypto en lugar de Math.random: un generador predecible haría inútil
+    // ampliar el espacio de códigos.
+    const digits = crypto.getRandomValues(new Uint8Array(PAIRING_CODE_LENGTH));
+    return Array.from(digits, (byte) => String(byte % 10)).join('');
+  }
+
+  /** Deja el código en su forma canónica: solo dígitos y longitud fija. */
+  private normalizeCode(code: string): string {
+    return code.replace(/\D/g, '').slice(0, PAIRING_CODE_LENGTH);
   }
 
   async redeemCode(code: string): Promise<{ userId: string; deviceId: string }> {
-    const normalizedCode = code.replace(/\D/g, '').slice(0, 6);
+    const normalizedCode = this.normalizeCode(code);
+
+    // Sesión de dispositivo antes de leer el código: las reglas ya no exponen
+    // device_codes de forma pública.
+    const session = await this.authStore.signInAsDevice();
+
     const codeRef = doc(this.firestore, `device_codes/${normalizedCode}`);
     const snap = await this.runInCtx(() => getDoc(codeRef));
 
@@ -253,17 +300,31 @@ export class TvAuthService {
       lastSeen: now,
       activationCode: normalizedCode,
       active: true,
-      revokedAt: 0
+      revokedAt: 0,
+      anonUid: session.uid
     });
 
     await this.runInCtx(() => batch.commit());
+    // Debe ir después del commit: la regla de device_sessions comprueba que
+    // el documento del dispositivo ya existe.
+    await this.registerDeviceSession(session.uid, data.userId, deviceId);
     this.saveBinding(data.userId, deviceId);
 
     return { userId: data.userId, deviceId };
   }
 
+  /**
+   * Publica el índice anonUid -> tienda que usan las reglas de Firestore para
+   * autorizar la lectura de la cola desde la TV.
+   */
+  private async registerDeviceSession(anonUid: string, userId: string, deviceId: string): Promise<void> {
+    await this.runInCtx(() =>
+      setDoc(doc(this.firestore, `device_sessions/${anonUid}`), { userId, deviceId })
+    );
+  }
+
   async getPairingCodeStatus(code: string): Promise<PairingCodeStatus> {
-    const normalizedCode = code.replace(/\D/g, '').slice(0, 6);
+    const normalizedCode = this.normalizeCode(code);
     const snap = await this.runInCtx(() => getDoc(doc(this.firestore, `device_codes/${normalizedCode}`)));
 
     if (!snap.exists()) {
@@ -308,8 +369,10 @@ export class TvAuthService {
   async updateLastSeen(deviceId: string): Promise<void> {
     try {
       await this.runInCtx(() => updateDoc(doc(this.firestore, `devices/${deviceId}`), { lastSeen: Date.now() }));
-    } catch {
-      // El dispositivo ya no existe, ignorar.
+    } catch (error) {
+      // El dispositivo ya no existe o se ha revocado. No es fatal para la
+      // vista, pero debe quedar registrado (ENS op.exp.8).
+      logError('No se pudo actualizar lastSeen del dispositivo', error);
     }
   }
 

@@ -26,6 +26,7 @@ import {
 import { DEFAULT_SERVICES, BarberService } from '../models/service.model';
 import { CreateTicketInput, Ticket, TicketReceipt } from '../models/ticket.model';
 import { AuthStore } from '../stores/auth.store';
+import { logError } from '../utils/logger.util';
 
 type TicketRecord = Omit<Ticket, 'id'>;
 type QueueSnapshot = {
@@ -88,7 +89,10 @@ export class QueueRepository {
           })
           .sort((a, b) => a.name.localeCompare(b.name))
       ),
-      catchError(() => of([]))
+      catchError((error) => {
+        logError('No se pudieron cargar los servicios', error);
+        return of([]);
+      })
     );
   }
 
@@ -458,7 +462,10 @@ export class QueueRepository {
             return a.position - b.position || a.createdAtMs - b.createdAtMs;
           })
       ),
-      catchError(() => of([]))
+      catchError((error) => {
+        logError('No se pudo observar la cola de tickets', error);
+        return of([]);
+      })
     );
   }
 
@@ -466,7 +473,10 @@ export class QueueRepository {
     const ref = this.runInInjectionContext(() => doc(this.firestore, `shops/${shopId}/settings/queue`));
     return this.runInInjectionContext(() => docData(ref, { idField: 'id' })).pipe(
       map((row) => this.toSettings(row as Partial<QueueSettings> | undefined)),
-      catchError(() => of(DEFAULT_QUEUE_SETTINGS))
+      catchError((error) => {
+        logError('No se pudo observar la configuración de la cola', error);
+        return of(DEFAULT_QUEUE_SETTINGS);
+      })
     );
   }
 

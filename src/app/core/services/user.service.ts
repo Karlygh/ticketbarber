@@ -1,13 +1,16 @@
 import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
 import {
   Firestore,
+  addDoc,
+  collection,
   doc,
   setDoc,
   getDoc,
   serverTimestamp
 } from '@angular/fire/firestore';
 import { User } from '@angular/fire/auth';
-import { UserProfile } from '../models/user.model';
+import { AuthEvent, UserProfile } from '../models/user.model';
+import { logError } from '../utils/logger.util';
 
 /**
  * Gestiona el documento users/{uid} en Firestore.
@@ -44,5 +47,40 @@ export class UserService {
     const ref = this.runInCtx(() => doc(this.firestore, `users/${uid}`));
     const snap = await this.runInCtx(() => getDoc(ref));
     return snap.exists() ? (snap.data() as UserProfile) : null;
+  }
+
+  /**
+   * Rota lastLoginAtMs -> previousLoginAtMs y devuelve el acceso anterior,
+   * que es el que se muestra al usuario. ENS op.acc.5.r5.2.
+   */
+  async recordLogin(uid: string): Promise<number | null> {
+    const ref = this.runInCtx(() => doc(this.firestore, `users/${uid}`));
+    const snap = await this.runInCtx(() => getDoc(ref));
+    const previous = snap.exists() ? (snap.data() as UserProfile).lastLoginAtMs ?? null : null;
+
+    await this.runInCtx(() =>
+      setDoc(ref, { lastLoginAtMs: Date.now(), previousLoginAtMs: previous }, { merge: true })
+    );
+    return previous;
+  }
+
+  /**
+   * Registra un evento de acceso en users/{uid}/auth_events.
+   * Nunca debe interrumpir el flujo de login: los fallos solo se loguean.
+   * ENS op.acc.5.r5.1.
+   */
+  async recordAuthEvent(uid: string, event: Omit<AuthEvent, 'atMs' | 'userAgent'>): Promise<void> {
+    try {
+      const col = this.runInCtx(() => collection(this.firestore, `users/${uid}/auth_events`));
+      await this.runInCtx(() =>
+        addDoc(col, {
+          ...event,
+          atMs: Date.now(),
+          userAgent: navigator.userAgent.slice(0, 256)
+        } satisfies AuthEvent)
+      );
+    } catch (error) {
+      logError('No se pudo registrar el evento de acceso', error);
+    }
   }
 }

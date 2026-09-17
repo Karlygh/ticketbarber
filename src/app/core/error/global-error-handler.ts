@@ -24,7 +24,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   handleError(error: unknown): void {
     const message = error instanceof Error ? error.message : String(error);
 
-    logError('[GlobalErrorHandler]', error);
+    logError('[GlobalErrorHandler]', error instanceof Error ? error.stack ?? error.message : error);
 
     if (IGNORED_PATTERNS.some((p) => message.includes(p))) {
       return;

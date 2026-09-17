@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  app:
+    name: App (lint, test, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # environment.ts está gitignored: se genera desde el ejemplo para que el
+      # build de CI no dependa de claves reales.
+      - name: Preparar environments
+        run: |
+          cp src/environments/environment.example.ts src/environments/environment.ts
+          cp src/environments/environment.example.ts src/environments/environment.prod.ts
+
+      # TODO: quitar continue-on-error cuando se resuelvan los 12 errores de
+      # lint preexistentes (ficheros .spec.ts y src/types/jasmine-compat.d.ts).
+      - run: npx eslint .
+        continue-on-error: true
+
+      - run: npx jest --ci
+
+      - run: npx ng build --configuration production
+
+  functions:
+    name: Functions (lint, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  audit:
+    name: Auditoría de dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Solo falla ante vulnerabilidades altas o críticas, para que el aviso
+      # sea accionable y no ruido (ENS op.exp.1 / mp.sw.2).
+      - run: npm audit --audit-level=high
+      - run: npm audit --audit-level=high
+        working-directory: functions

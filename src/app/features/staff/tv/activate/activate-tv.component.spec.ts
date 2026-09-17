@@ -55,9 +55,9 @@ describe('ActivateTvComponent', () => {
   });
 
   describe('formattedCode getter', () => {
-    it('inserts a dash after the third digit', () => {
-      component.rawCode.set('123456');
-      expect(component.formattedCode).toBe('123-456');
+    it('agrupa el código por la mitad con un guion', () => {
+      component.rawCode.set('12345678');
+      expect(component.formattedCode).toBe('1234-5678');
     });
 
     it('returns short codes without a dash', () => {
@@ -72,23 +72,23 @@ describe('ActivateTvComponent', () => {
   });
 
   describe('activate', () => {
-    it('sets error state when code has fewer than 6 digits', async () => {
+    it('sets error state when code has fewer than 8 digits', async () => {
       component.rawCode.set('123');
       await component.activate();
       expect(component.status()).toBe('error');
-      expect(component.errorMsg()).toContain('6 dígitos');
+      expect(component.errorMsg()).toContain('8 dígitos');
     });
 
     it('calls redeemCode and sets status to success on valid code', async () => {
-      component.rawCode.set('123456');
+      component.rawCode.set('12345678');
       redeemCodeMock.mockResolvedValue(undefined);
       await component.activate();
-      expect(redeemCodeMock).toHaveBeenCalledWith('123456');
+      expect(redeemCodeMock).toHaveBeenCalledWith('12345678');
       expect(component.status()).toBe('success');
     });
 
     it('sets error state when redeemCode rejects', async () => {
-      component.rawCode.set('123456');
+      component.rawCode.set('12345678');
       redeemCodeMock.mockRejectedValue(new Error('Código inválido'));
       await component.activate();
       expect(component.status()).toBe('error');

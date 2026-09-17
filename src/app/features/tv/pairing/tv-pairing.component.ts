@@ -21,7 +21,9 @@ export class TvPairingComponent implements OnInit, OnDestroy {
   readonly now = signal(Date.now());
   readonly formattedCode = computed(() => {
     const c = this.code();
-    return c ? `${c.slice(0, 3)}-${c.slice(3)}` : '';
+    if (!c) return '';
+    const half = Math.ceil(c.length / 2);
+    return `${c.slice(0, half)}-${c.slice(half)}`;
   });
   readonly expiresAt = signal(0);
   readonly secondsLeft = computed(() => {

@@ -4,12 +4,14 @@
 /* eslint-disable require-jsdoc, max-len, linebreak-style */
 
 import {onCall, HttpsError} from "firebase-functions/v2/https";
+import {onSchedule} from "firebase-functions/v2/scheduler";
 import {setGlobalOptions} from "firebase-functions/v2";
 import {defineSecret, defineString} from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import * as nodemailer from "nodemailer";
 import Stripe from "stripe";
+import {createHash} from "node:crypto";
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -50,6 +52,15 @@ interface PortalLinkRequest {
 
 interface PortalLinkResponse {
   url: string;
+}
+
+/**
+ * Seudonimiza un identificador personal (email) para poder correlacionar
+ * eventos en Cloud Logging sin volcar datos personales.
+ * Minimización de datos: RGPD art. 5.1.c.
+ */
+function pseudonymize(value: string): string {
+  return createHash("sha256").update(value.trim().toLowerCase()).digest("hex").slice(0, 16);
 }
 
 function escapeHtml(value: string): string {
@@ -204,7 +215,7 @@ async function checkRateLimit(email: string): Promise<void> {
   }).length;
 
   if (recentCount >= 3) {
-    logger.warn("Rate limit exceeded for email", {email});
+    logger.warn("Rate limit exceeded for contact form", {subject: pseudonymize(email)});
     throw new HttpsError(
       "resource-exhausted",
       "Has alcanzado el límite de envíos. Intenta más tarde."
@@ -321,7 +332,8 @@ export const sendContactEmail = onCall<ContactRequest, Promise<ContactResponse>>
   {cors: ALLOWED_ORIGINS, secrets: [GMAIL_APP_PASSWORD]},
   async (request) => {
     try {
-      logger.info("Iniciando proceso de contacto", {data: request.data});
+      // No se registra el payload: contiene nombre, email, teléfono y mensaje.
+      logger.info("Iniciando proceso de contacto");
 
       const contactData = validateContactData(request.data);
       await checkRateLimit(contactData.email);
@@ -446,6 +458,7 @@ export const deleteAccount = onCall({cors: ALLOWED_ORIGINS}, async (request) => 
   }
 
   const uid = request.auth.uid;
+  const email = request.auth.token.email?.trim().toLowerCase();
   logger.info("Solicitud de eliminación de cuenta", {uid});
 
   await Promise.all([
@@ -455,6 +468,10 @@ export const deleteAccount = onCall({cors: ALLOWED_ORIGINS}, async (request) => 
     recursiveDeleteDocument(`cancellation_feedback/${uid}`),
     deleteCollectionDocs("devices", "userId", uid),
     deleteCollectionDocs("device_codes", "userId", uid),
+    deleteCollectionDocs("device_sessions", "userId", uid),
+    // RGPD art. 17: los mensajes del formulario de contacto también son
+    // datos personales del usuario y deben suprimirse con la cuenta.
+    ...(email ? [deleteCollectionDocs("contactos", "email", email)] : []),
     deleteUserStorage(uid),
   ]);
 
@@ -463,3 +480,45 @@ export const deleteAccount = onCall({cors: ALLOWED_ORIGINS}, async (request) => 
   logger.info("Cuenta eliminada correctamente", {uid});
   return {success: true};
 });
+
+// Plazo de conservación de los turnos, en días. Debe coincidir con lo
+// declarado en la Política de Privacidad (RGPD art. 5.1.e).
+const TICKET_RETENTION_DAYS = 90;
+
+/**
+ * Elimina los turnos que superan el plazo de conservación.
+ * Los turnos contienen nombre y teléfono de clientes finales, así que no
+ * pueden conservarse indefinidamente.
+ */
+export const purgeExpiredTickets = onSchedule(
+  {schedule: "every day 04:00", timeZone: "Europe/Madrid", region: "europe-west1"},
+  async () => {
+    const cutoff = Date.now() - TICKET_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    let deleted = 0;
+
+    // Se procesa por lotes: una barbería con mucho histórico podría superar
+    // los límites de memoria de una sola consulta.
+    for (;;) {
+      const snapshot = await db
+        .collectionGroup("tickets")
+        .where("createdAtMs", "<", cutoff)
+        .limit(400)
+        .get();
+
+      if (snapshot.empty) {
+        break;
+      }
+
+      const batch = db.batch();
+      snapshot.docs.forEach((ticketDoc) => batch.delete(ticketDoc.ref));
+      await batch.commit();
+      deleted += snapshot.size;
+
+      if (snapshot.size < 400) {
+        break;
+      }
+    }
+
+    logger.info("Purga de turnos completada", {deleted, retentionDays: TICKET_RETENTION_DAYS});
+  }
+);

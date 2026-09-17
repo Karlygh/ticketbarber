@@ -1,0 +1,96 @@
+<app-header></app-header>
+
+<a class="back-btn" routerLink="/">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+       fill="none" stroke="currentColor" stroke-width="2.5"
+       stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+  Volver
+</a>
+
+<main class="page-shell">
+  <p class="eyebrow">Legal</p>
+  <h1>Aviso Legal</h1>
+
+  <div class="legal-card">
+    <h2>1. Datos identificativos del prestador</h2>
+    <p>
+      En cumplimiento del deber de informacion recogido en el articulo 10 de la Ley 34/2002,
+      de 11 de julio, de Servicios de la Sociedad de la Informacion y de Comercio Electronico
+      (LSSI-CE), se facilitan los siguientes datos:
+    </p>
+    <ul>
+      <!-- TODO LEGAL: sustituir por los datos reales del titular antes de publicar. -->
+      <li><strong>Titular:</strong> [NOMBRE Y APELLIDOS O DENOMINACION SOCIAL]</li>
+      <li><strong>NIF / CIF:</strong> [NIF O CIF]</li>
+      <li><strong>Domicilio:</strong> [DIRECCION COMPLETA], Cadiz, Espana</li>
+      <li><strong>Correo electronico:</strong> <a href="mailto:hola@ticketbarber.app">hola@ticketbarber.app</a></li>
+      <li><strong>Datos registrales:</strong> [REGISTRO MERCANTIL, TOMO, FOLIO Y HOJA — solo si es sociedad]</li>
+      <li><strong>Nombre de dominio:</strong> ticketbarber.app</li>
+    </ul>
+
+    <h2>2. Objeto</h2>
+    <p>
+      Ticketbarber es una aplicacion web que permite a barberias y peluquerias gestionar la cola
+      de clientes, mostrarla en una pantalla del local y administrar turnos, barberos y servicios.
+      El presente aviso regula el acceso y uso del sitio web y de la aplicacion.
+    </p>
+
+    <h2>3. Condiciones de uso</h2>
+    <p>
+      El acceso al sitio es gratuito, salvo el coste de la conexion. El uso de las funciones
+      profesionales requiere registro y una suscripcion activa, conforme a los
+      <a routerLink="/legal/terminos">Terminos y Condiciones</a>.
+    </p>
+    <p>
+      El usuario se compromete a hacer un uso licito del servicio, a no introducir datos de
+      terceros sin legitimacion para ello y a no realizar acciones que puedan danar, sobrecargar
+      o impedir el normal funcionamiento del sitio.
+    </p>
+
+    <h2>4. Propiedad intelectual e industrial</h2>
+    <p>
+      Los contenidos del sitio, incluyendo a titulo enunciativo el codigo fuente, el diseno, los
+      textos, los logotipos y las imagenes, son titularidad del prestador o de terceros que han
+      autorizado su uso, y estan protegidos por la normativa de propiedad intelectual e industrial.
+      Queda prohibida su reproduccion, distribucion o transformacion sin autorizacion expresa.
+    </p>
+
+    <h2>5. Exclusion de responsabilidad</h2>
+    <p>
+      El prestador no se responsabiliza del uso que el establecimiento haga de los datos de sus
+      propios clientes, ni de las interrupciones del servicio derivadas de causas ajenas a su
+      control, como fallos de la red o de los proveedores de infraestructura.
+    </p>
+
+    <h2>6. Enlaces a terceros</h2>
+    <p>
+      El sitio puede contener enlaces a servicios de terceros (Google, Stripe). El prestador no
+      asume responsabilidad sobre sus contenidos ni sobre sus politicas de privacidad.
+    </p>
+
+    <h2>7. Proteccion de datos</h2>
+    <p>
+      El tratamiento de datos personales se rige por la
+      <a routerLink="/legal/privacidad">Politica de Privacidad</a> y por la
+      <a routerLink="/legal/cookies">Politica de Cookies</a>.
+    </p>
+
+    <h2>8. Legislacion aplicable y jurisdiccion</h2>
+    <p>
+      Esta relacion se rige por la legislacion espanola. Para la resolucion de cualquier
+      controversia, las partes se someten a los juzgados y tribunales del domicilio del usuario
+      cuando este tenga la condicion de consumidor y, en los demas casos, a los de Cadiz.
+    </p>
+    <p>
+      La Comision Europea pone a disposicion de los consumidores una plataforma de resolucion de
+      litigios en linea, accesible en
+      <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.
+    </p>
+  </div>
+
+  <p class="updated-note">Ultima actualizacion: septiembre de 2026</p>
+</main>
+
+<app-footer [currentYear]="currentYear"></app-footer>

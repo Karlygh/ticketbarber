@@ -114,8 +114,27 @@
         }
       </div>
 
+      <!-- Consentimiento expreso (RGPD art. 6.1.a). Nunca premarcado. -->
+      <div class="form-field consent-field">
+        <label class="consent-label" for="privacyConsent">
+          <input
+            id="privacyConsent"
+            type="checkbox"
+            formControlName="privacyConsent"
+          />
+          <span>
+            He leído y acepto la
+            <a routerLink="/legal/privacidad" target="_blank" rel="noopener">Política de Privacidad</a>
+            y consiento el tratamiento de mis datos para responder a esta consulta.
+          </span>
+        </label>
+        @if (fieldError('privacyConsent'); as error) {
+          <small class="field-error">{{ error }}</small>
+        }
+      </div>
+
       <!-- Botón de envío -->
-      <button 
+      <button
         type="submit" 
         class="btn-submit"
         [disabled]="loading() || !form.valid"

@@ -26,7 +26,16 @@ export const proGuard: CanActivateFn = async (_, state) => {
   }
 
   // Esperar a que tanto la suscripción Stripe como el perfil estén listos
-  await waitForStoreReady(subscriptionStore);
+  const storeReady = await waitForStoreReady(subscriptionStore);
+
+  // Fail-closed: si no se ha podido determinar el estado de la suscripción no
+  // se concede acceso. Conceder por defecto convertiría una incidencia de
+  // Firestore en un bypass del control de acceso (ENS op.acc.4).
+  if (!storeReady) {
+    return router.createUrlTree(['/pricing'], {
+      queryParams: { reason: 'subscription-unavailable' }
+    });
+  }
 
   if (subscriptionStore.hasAccess()) {
     return true;
@@ -43,18 +52,22 @@ export const proGuard: CanActivateFn = async (_, state) => {
   });
 };
 
-function waitForStoreReady(store: SubscriptionStore): Promise<void> {
+/** Resuelve true si el estado de suscripción quedó determinado, false si expiró el plazo. */
+function waitForStoreReady(store: SubscriptionStore): Promise<boolean> {
   return new Promise((resolve) => {
     if (!store.loading() && store.profileReady()) {
-      resolve();
+      resolve(true);
       return;
     }
     // Poll ligero con timeout de 5s para que Firestore responda
     const start = Date.now();
     const interval = setInterval(() => {
-      if ((!store.loading() && store.profileReady()) || Date.now() - start > 5000) {
+      if (!store.loading() && store.profileReady()) {
         clearInterval(interval);
-        resolve();
+        resolve(true);
+      } else if (Date.now() - start > 5000) {
+        clearInterval(interval);
+        resolve(false);
       }
     }, 50);
   });
