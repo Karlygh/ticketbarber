@@ -17,6 +17,7 @@ import { ModernExperienceSectionComponent } from './components/modern-experience
 import { AuthStore } from '../../core/stores/auth.store';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { HeaderComponent } from '../../shared/components/header/header.component';
+import { PromoBannerComponent } from '../../shared/components/promo-banner/promo-banner.component';
 import {
   HOME_EXPERIENCE_COPY,
   HOME_EXPERIENCE_FEATURES,
@@ -33,7 +34,7 @@ import {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FooterComponent, HeaderComponent, ModernExperienceSectionComponent],
+  imports: [CommonModule, RouterLink, FooterComponent, HeaderComponent, PromoBannerComponent, ModernExperienceSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'

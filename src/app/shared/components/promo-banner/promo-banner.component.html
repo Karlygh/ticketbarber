@@ -1,0 +1,11 @@
+<a class="promo" [routerLink]="link" aria-label="Ver oferta de suscripción">
+  <div class="promo__track">
+    @for (copy of copies; track copy) {
+      <ul class="promo__group" [attr.aria-hidden]="copy === 1 ? 'true' : null">
+        @for (message of messages; track message) {
+          <li class="promo__item">{{ message }}</li>
+        }
+      </ul>
+    }
+  </div>
+</a>

@@ -8,19 +8,14 @@
 }
 
 .back-btn {
-  position: sticky;
-  top: 5.75rem;
-  left: 1.4rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-bottom: 1rem;
   font-size: 0.85rem;
   color: var(--text-muted);
   text-decoration: none;
   transition: color 0.15s;
-  z-index: 5;
-  margin: 1.25rem 0 0;
-  padding-left: clamp(1rem, 4vw, 2rem);
 }
 
 .back-btn:hover { color: var(--section-pricing); }
@@ -86,10 +81,4 @@ h1 {
   font-size: 0.78rem;
   color: var(--text-faint);
   text-align: right;
-}
-
-@media (max-width: 767px) {
-  .back-btn {
-    top: 5.2rem;
-  }
 }
