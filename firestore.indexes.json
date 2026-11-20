@@ -27,18 +27,27 @@
           "order": "DESCENDING"
         }
       ]
-    },
+    }
+  ],
+  "fieldOverrides": [
     {
-      "_comment": "Purga de retención de turnos (RGPD art. 5.1.e). Ámbito de grupo de colección: los tickets viven bajo shops/{shopId}/tickets.",
+      "_comment": "Purga de retención de turnos (RGPD art. 5.1.e). Los tickets viven bajo shops/{shopId}/tickets, así que la consulta de purga necesita ámbito de grupo de colección. Al ser un único campo se declara aquí y no en 'indexes'.",
       "collectionGroup": "tickets",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
+      "fieldPath": "createdAtMs",
+      "indexes": [
         {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "DESCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION_GROUP"
         }
       ]
     }
-  ],
-  "fieldOverrides": []
+  ]
 }

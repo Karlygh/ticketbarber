@@ -61,6 +61,7 @@ export class HomePageComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly faqs = HOME_FAQS;
 
   activeFaqIndex = 0;
+  activeToolIndex = 0;
   testimonialIndex = 0;
   previousTestimonialIndex = 0;
   isTestimonialAnimating = false;
@@ -161,6 +162,14 @@ export class HomePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFaqContentId(index: number): string {
     return `faq-content-${index}`;
+  }
+
+  selectTool(index: number): void {
+    this.activeToolIndex = index;
+  }
+
+  getToolPanelId(index: number): string {
+    return `tool-panel-${index}`;
   }
 
   openHomeVideo(): void {

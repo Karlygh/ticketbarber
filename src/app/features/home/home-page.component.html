@@ -147,28 +147,71 @@
       <h2>Herramientas que te hacen la vida mas facil</h2>
     </div>
 
-    <div class="tools-grid">
-      @for (tool of toolFeatures; track tool.title) {
-        <article class="tool-card stagger-item">
-          <div class="tool-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M5 19h14M7 16V8m5 8V5m5 11v-6"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
+    <div class="tools-layout">
+      <div class="tool-tabs" role="tablist" aria-orientation="vertical" aria-label="Herramientas de TicketBarber">
+        @for (tool of toolFeatures; track tool.id; let i = $index) {
+          <button
+            type="button"
+            role="tab"
+            class="tool-tab"
+            [class.tool-tab--active]="activeToolIndex === i"
+            [attr.id]="'tool-tab-' + i"
+            [attr.aria-selected]="activeToolIndex === i"
+            [attr.aria-controls]="getToolPanelId(i)"
+            (click)="selectTool(i)">
+            <span class="tool-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  [attr.d]="tool.icon"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="tool-tab__copy">
+              <strong>{{ tool.title }}</strong>
+              <span>{{ tool.description }}</span>
+            </span>
+          </button>
+        }
+      </div>
+
+      @if (toolFeatures[activeToolIndex]; as tool) {
+        <div
+          class="tool-panel"
+          role="tabpanel"
+          [attr.id]="getToolPanelId(activeToolIndex)"
+          [attr.aria-labelledby]="'tool-tab-' + activeToolIndex">
+          <div class="tool-panel__copy">
+            <p class="tool-panel__eyebrow">{{ tool.title }}</p>
+            <h3>{{ tool.benefit }}</h3>
+            <ul class="tool-points">
+              @for (point of tool.points; track point) {
+                <li>{{ point }}</li>
+              }
+            </ul>
           </div>
-          <h3>{{ tool.title }}</h3>
-          <p>{{ tool.description }}</p>
-        </article>
+
+          <div class="tool-mock" aria-hidden="true">
+            <div class="tool-mock__bar"><span></span><span></span><span></span></div>
+            <strong class="tool-mock__value">{{ tool.stat.value }}</strong>
+            <span class="tool-mock__label">{{ tool.stat.label }}</span>
+            <div class="tool-mock__lines"><span></span><span></span><span></span></div>
+          </div>
+        </div>
       }
     </div>
 
-    <div class="section-action">
+    <div class="tools-cta">
+      @if (authStore.isAuthenticated()) {
+        <a class="cta-primary" routerLink="/staff">Ir al panel</a>
+      } @else {
+        <a class="cta-primary" routerLink="/staff/start">Prueba 7 dias gratis</a>
+      }
       <a class="cta-secondary" routerLink="/pricing">Ver todas las funciones</a>
+      <span class="tools-cta__note">Sin tarjeta de credito • Cancelas cuando quieras</span>
     </div>
   </section>
 

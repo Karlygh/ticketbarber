@@ -103,7 +103,6 @@
   line-height: 1.7;
 }
 
-.tool-card h3,
 .step-card h3,
 .steps-cta h3,
 .media-copy h3 {
@@ -112,7 +111,6 @@
   line-height: 1.25;
 }
 
-.tool-card p,
 .step-card p,
 .faq-answer p,
 .media-copy p {
@@ -121,44 +119,172 @@
   line-height: 1.65;
 }
 
-.tools-grid {
+.tools-layout {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+  gap: 1.25rem;
+  align-items: stretch;
   margin-top: 2.6rem;
 }
 
-.tool-card {
-  padding: 1.7rem 1.3rem 1.55rem;
-  border-radius: 1.1rem;
-  border: 1px solid rgba(140, 164, 203, 0.18);
-  background:
-    linear-gradient(180deg, rgba(12, 24, 46, 0.8), rgba(7, 15, 28, 0.92));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 18px 38px rgba(0, 0, 0, 0.28);
-  text-align: center;
-  transition:
-    transform var(--motion-fast) ease,
-    border-color var(--motion-fast) ease,
-    box-shadow var(--motion-fast) ease,
-    background var(--motion-fast) ease;
+.tool-tabs {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
 }
 
-.tool-icon {
-  width: 3.2rem;
-  height: 3.2rem;
-  margin: 0 auto 1rem;
-  padding: 0.7rem;
-  border-radius: 50%;
-  background: rgba(11, 32, 64, 0.95);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.section-action {
+.tool-tab {
   display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(90, 124, 177, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tool-tab .tool-icon {
+  flex: 0 0 auto;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0.6rem;
+  border-radius: 50%;
+}
+
+.tool-tab__copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.tool-tab__copy strong {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.tool-tab__copy span {
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.tool-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 1.5rem;
+  align-items: center;
+  padding: clamp(1.4rem, 2.5vw, 2.1rem);
+  border-radius: 1.3rem;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+}
+
+.tool-panel__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool-panel h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.tool-points {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool-points li {
+  position: relative;
+  padding-left: 1.9rem;
+  line-height: 1.55;
+}
+
+.tool-points li::before {
+  content: '✓';
+  position: absolute;
+  top: 0.1rem;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tool-mock {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem 1.3rem;
+  border-radius: 1.1rem;
+  text-align: center;
+}
+
+.tool-mock__bar {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.7rem;
+}
+
+.tool-mock__bar span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.tool-mock__value {
+  font-size: clamp(2.4rem, 4.5vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.tool-mock__label {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.tool-mock__lines {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.tool-mock__lines span {
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.tool-mock__lines span:nth-child(2) {
+  width: 78%;
+}
+
+.tool-mock__lines span:nth-child(3) {
+  width: 55%;
+}
+
+.tools-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  margin-top: 1.65rem;
+  gap: 0.9rem 1rem;
+  margin-top: 2rem;
+}
+
+.tools-cta__note {
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 0.88rem;
 }
 
 .testimonial-shell {
@@ -534,8 +660,6 @@
   contain: layout paint;
 }
 
-.tool-card:hover,
-.tool-card:focus-within,
 .step-card:hover,
 .step-card:focus-within,
 .faq-item:hover,
@@ -570,20 +694,29 @@
 
 .tools .section-intro h2,
 .steps-copy h2,
-.tool-card h3,
+.tool-tab__copy strong,
+.tool-panel h3,
+.tool-mock__value,
 .step-card h3,
 .steps-cta h3 {
   color: #0b1f3a;
 }
 
-.tool-card p,
+.tool-tab__copy span,
+.tool-points li,
+.tool-mock__label,
+.tools-cta__note,
 .step-card p,
 .steps-cta p,
 .steps-cta__note {
   color: #52637b;
 }
 
-.tool-card,
+.tool-panel__eyebrow {
+  color: #2563eb;
+}
+
+.tool-tab,
 .step-card,
 .steps-cta {
   border-color: rgba(90, 124, 177, 0.22);
@@ -613,8 +746,58 @@
   color: #0b3b8f;
 }
 
-.tools .tool-card:hover,
-.tools .tool-card:focus-within,
+.tool-tab:hover,
+.tool-tab:focus-visible {
+  border-color: rgba(37, 99, 235, 0.38);
+}
+
+.tool-tab:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.tool-tab--active,
+.tool-tab--active:hover {
+  border-color: rgba(37, 99, 235, 0.6);
+  background: #eaf2ff;
+  box-shadow:
+    0 14px 30px rgba(37, 99, 235, 0.14),
+    inset 3px 0 0 #2563eb;
+}
+
+.tool-tab--active .tool-icon {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.tool-panel {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(191, 219, 254, 0.7), transparent 45%),
+    #fff;
+  box-shadow:
+    0 22px 46px rgba(44, 72, 116, 0.14),
+    inset 0 1px 0 #fff;
+}
+
+.tool-points li::before {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.tool-mock {
+  background: linear-gradient(180deg, #f5f9ff, #e8f1ff);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+}
+
+.tool-mock__bar span {
+  background: #bfd3f5;
+}
+
+.tool-mock__lines span {
+  background: #cfdff8;
+}
+
 .steps .step-card:hover,
 .steps .step-card:focus-within,
 .steps .steps-cta:hover,
@@ -663,8 +846,15 @@
 }
 
 @media (max-width: 1150px) {
-  .tools-grid,
   .steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tools-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -702,8 +892,6 @@
     right: 0;
   }
 
-  .tool-card:hover,
-  .tool-card:focus-within,
   .step-card:hover,
   .step-card:focus-within,
   .faq-item:hover,
@@ -714,7 +902,8 @@
   }
 
   .steps-grid,
-  .tools-grid {
+  .tool-tabs,
+  .tool-panel {
     grid-template-columns: 1fr;
   }
 }

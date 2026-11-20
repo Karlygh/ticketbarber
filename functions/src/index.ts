@@ -58,6 +58,8 @@ interface PortalLinkResponse {
  * Seudonimiza un identificador personal (email) para poder correlacionar
  * eventos en Cloud Logging sin volcar datos personales.
  * Minimización de datos: RGPD art. 5.1.c.
+ * @param {string} value Identificador personal a seudonimizar.
+ * @return {string} Hash SHA-256 truncado, no reversible.
  */
 function pseudonymize(value: string): string {
   return createHash("sha256").update(value.trim().toLowerCase()).digest("hex").slice(0, 16);
@@ -349,12 +351,14 @@ export const sendContactEmail = onCall<ContactRequest, Promise<ContactResponse>>
       });
 
       const adminEmail = requireConfiguredValue(ADMIN_EMAIL.value(), "ADMIN_EMAIL");
-      const gmailUser = requireConfiguredValue(GMAIL_USER.value(), "GMAIL_USER");
       const transporter = createMailer();
       const html = buildContactHtml(contactData, contactRef.id);
 
+      // El envío se autentica por SMTP con la cuenta de Gmail (GMAIL_USER),
+      // pero el remitente visible es el alias de atención al cliente
+      // (adminEmail) verificado en Gmail como "Enviar correo como".
       await transporter.sendMail({
-        from: `"Ticketbarber Contacto" <${gmailUser}>`,
+        from: `"Atención al Cliente TicketBarber" <${adminEmail}>`,
         to: adminEmail,
         replyTo: contactData.email,
         subject: `[Ticketbarber] ${contactData.subject}`,

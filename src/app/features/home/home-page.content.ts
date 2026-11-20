@@ -15,8 +15,13 @@ export interface QuickBenefit {
 }
 
 export interface ToolFeature {
+  id: string;
   title: string;
   description: string;
+  icon: string;
+  benefit: string;
+  points: string[];
+  stat: { value: string; label: string };
 }
 
 export interface Testimonial {
@@ -79,10 +84,84 @@ export const HOME_EXPERIENCE_KPIS: ModernExperienceKpi[] = [
 ];
 
 export const HOME_TOOL_FEATURES: ToolFeature[] = [
-  { title: 'Gestion de turnos', description: 'Organiza tu dia, evita aglomeraciones y tiempos muertos.' },
-  { title: 'Estadisticas y reportes', description: 'Conoce tus horas pico, servicios mas pedidos y rendimiento del equipo.' },
-  { title: 'Gestion de clientes', description: 'Historial de visitas, servicios realizados y preferencias.' },
-  { title: 'Multi-sucursal', description: 'Administra todas tus sucursales desde un solo lugar.' }
+  {
+    id: 'turnos',
+    title: 'Gestion de turnos',
+    description: 'Organiza tu dia, evita aglomeraciones y tiempos muertos.',
+    icon: 'M6 7h12M6 12h9M6 17h7M16 17l2 2 4-4',
+    benefit: 'Cero colas caoticas en tu local',
+    points: [
+      'El cliente saca su ticket y ve su posicion en tiempo real.',
+      'Menos gente de pie y menos tiempos muertos entre servicios.',
+      'Tu equipo sabe siempre quien es el siguiente.'
+    ],
+    stat: { value: '-35%', label: 'Menos tiempo de espera' }
+  },
+  {
+    id: 'tv',
+    title: 'Pantalla TV',
+    description: 'Muestra la cola y el turno actual en tu zona de espera.',
+    icon: 'M4 5h16v11H4zM9 20h6M12 16v4',
+    benefit: 'Clientes siempre informados',
+    points: [
+      'La cola y el turno llamado se ven en la TV de tu local.',
+      'Se vincula con un codigo, sin instalaciones complicadas.',
+      'Transmite orden y profesionalidad desde la entrada.'
+    ],
+    stat: { value: '98%', label: 'Clientes satisfechos' }
+  },
+  {
+    id: 'estadisticas',
+    title: 'Estadisticas y reportes',
+    description: 'Conoce tus horas pico, servicios mas pedidos y rendimiento del equipo.',
+    icon: 'M5 19h14M7 16V8m5 8V5m5 11v-6',
+    benefit: 'Decide con datos, no a ojo',
+    points: [
+      'Detecta tus horas pico y ajusta los horarios del equipo.',
+      'Descubre que servicios se piden mas.',
+      'Compara el rendimiento de cada barbero.'
+    ],
+    stat: { value: '23', label: 'Turnos completados en un dia' }
+  },
+  {
+    id: 'clientes',
+    title: 'Gestion de clientes',
+    description: 'Historial de visitas, servicios realizados y preferencias.',
+    icon: 'M16 19v-1a4 4 0 00-4-4H8a4 4 0 00-4 4v1M10 11a3 3 0 100-6 3 3 0 000 6zM20 19v-1a3 3 0 00-2-2.8M16 5.2a3 3 0 010 5.6',
+    benefit: 'Conoce a tus clientes y hazlos volver',
+    points: [
+      'Historial de visitas y servicios realizados.',
+      'Preferencias de cada cliente siempre a mano.',
+      'Un trato mas personal que se traduce en mejores resenas.'
+    ],
+    stat: { value: '4.9/5', label: 'Valoracion de usuarios' }
+  },
+  {
+    id: 'equipo',
+    title: 'Multi-barberos',
+    description: 'Todo tu equipo en un solo sistema con colas sincronizadas.',
+    icon: 'M12 12a3 3 0 100-6 3 3 0 000 6zM6 19a6 6 0 0112 0M4 8h2M18 8h2',
+    benefit: 'Todo tu equipo en sintonia',
+    points: [
+      'Elige cada dia que barberos estan activos.',
+      'Colas y tiempos sincronizados entre todos los puestos.',
+      'Reparto de clientes mas justo y sin confusiones.'
+    ],
+    stat: { value: '8 min', label: 'Tiempo medio de atencion' }
+  },
+  {
+    id: 'sucursales',
+    title: 'Multi-sucursal',
+    description: 'Administra todas tus sucursales desde un solo lugar.',
+    icon: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6',
+    benefit: 'Todas tus sedes, un solo panel',
+    points: [
+      'Administra cada sucursal desde el mismo lugar.',
+      'Funciona 100% en la nube: TV, tablet, movil o PC.',
+      'Listo en unos 5 minutos, sin instalar nada.'
+    ],
+    stat: { value: '1', label: 'Panel para todo tu negocio' }
+  }
 ];
 
 export const HOME_TESTIMONIALS: Testimonial[] = [
